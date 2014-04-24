@@ -1,0 +1,20 @@
+Flow SearchLocations {
+Node Start {
+	Transition { event="", guard="", action="", target=SearchLocations }
+	
+	}
+Node SearchLocations {
+	Transition { event="locationChanged", guard="", action="locationChanged", target=SearchLocations }
+	Transition { event="editLocation", guard="", action="editLocation", target=EditLocation }
+	Transition { event="exit", guard="", action="", target=End }
+	Transition { event="", guard="Save", action="refresh", target=SearchLocations }
+	Transition { event="", guard="else", action="", target=SearchLocations }
+	
+	}
+Node EditLocation {
+	
+	}
+Node End {
+	
+	}
+}

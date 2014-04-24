@@ -1,0 +1,44 @@
+Flow WorkflowClient {
+Node Start {
+	Transition { event="", guard="", action="", target=WorkflowClientTasks }
+	
+	}
+Node WorkflowClientTasks {
+	Transition { event="takeTask", guard="", action="takeTask", target=WorkflowClientTasks }
+	Transition { event="search", guard="", action="search", target=WorkflowClientTasks }
+	Transition { event="startTask", guard="", action="startTask", target=WorkflowClientTasks }
+	Transition { event="taskStateChanged", guard="", action="taskStateChanged", target=WorkflowClientTasks }
+	Transition { event="adhoc", guard="", action="adhoc", target=WorkflowClientTasks }
+	Transition { event="taskAssignmentChanged", guard="", action="taskAssignmentChanged", target=WorkflowClientTasks }
+	Transition { event="takeAndStartTask", guard="", action="takeAndStartTask", target=WorkflowClientTasks }
+	Transition { event="taskChanged", guard="", action="taskChanged", target=WorkflowClientTasks }
+	Transition { event="hibernatedChanged", guard="", action="hibernatedChanged", target=WorkflowClientTasks }
+	Transition { event="hibernateTask", guard="", action="hibernateTask", target=WorkflowClientTaskAction }
+	Transition { event="delegateTask", guard="", action="delegateTask", target=WorkflowClientTaskAction }
+	Transition { event="assignTask", guard="", action="assignTask", target=WorkflowClientTaskAction }
+	Transition { event="escalateTask", guard="", action="escalateTask", target=WorkflowClientTaskAction }
+	Transition { event="untakeTask", guard="", action="untakeTask", target=WorkflowClientTaskAction }
+	Transition { event="taskDetails", guard="", action="taskDetails", target=WorkflowClientTaskDetails }
+	Transition { event="exit", guard="", action="", target=End }
+	
+	}
+Node WorkflowClientTaskAction {
+	Transition { event="assignToChanged", guard="", action="assignToChanged", target=WorkflowClientTaskAction }
+	Transition { event="save", guard="", action="save", target=WorkflowClientTasks }
+	Transition { event="cancel", guard="", action="", target=WorkflowClientTasks }
+	
+	}
+Node WorkflowClientTaskDetails {
+	Transition { event="escalateTask", guard="", action="escalateTask", target=WorkflowClientTaskAction }
+	Transition { event="untakeTask", guard="", action="untakeTask", target=WorkflowClientTaskAction }
+	Transition { event="delegateTask", guard="", action="delegateTask", target=WorkflowClientTaskAction }
+	Transition { event="hibernateTask", guard="", action="hibernateTask", target=WorkflowClientTaskAction }
+	Transition { event="assignTask", guard="", action="assignTask", target=WorkflowClientTaskAction }
+	Transition { event="cancel", guard="", action="", target=WorkflowClientTasks }
+	Transition { event="adhoc", guard="", action="adhoc", target=WorkflowClientTasks }
+	
+	}
+Node End {
+	
+	}
+}

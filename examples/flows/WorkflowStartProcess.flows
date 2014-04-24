@@ -1,0 +1,9 @@
+Flow WorkflowStartProcess {
+Node Start {
+	Transition { event="", guard="", action="", target=End }
+	
+	}
+Node End {
+	
+	}
+}

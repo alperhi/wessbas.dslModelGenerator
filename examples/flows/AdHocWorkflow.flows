@@ -1,0 +1,23 @@
+Flow AdHocWorkflow {
+Node Start {
+	Transition { event="", guard="", action="", target=ChooseBusinessService }
+	
+	}
+Node ChooseBusinessService {
+	Transition { event="choose", guard="", action="choose", target=SetUpBusinessService }
+	Transition { event="stop", guard="", action="stop", target=End }
+	Transition { event="cancel", guard="", action="cancel", target=End }
+	
+	}
+Node SetUpBusinessService {
+	Transition { event="selectedTabChange", guard="", action="selectedTabChange", target=SetUpBusinessService }
+	Transition { event="update", guard="", action="update", target=SetUpBusinessService }
+	Transition { event="cancel", guard="", action="cancel", target=ChooseBusinessService }
+	Transition { event="startBs", guard="", action="startBs", target=End }
+	Transition { event="stop", guard="", action="stop", target=End }
+	
+	}
+Node End {
+	
+	}
+}

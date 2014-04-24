@@ -1,0 +1,13 @@
+Flow Payment {
+Node Start {
+	Transition { event="", guard="", action="", target=Payment }
+	
+	}
+Node Payment {
+	Transition { event="save", guard="", action="save", target=End }
+	
+	}
+Node End {
+	
+	}
+}
