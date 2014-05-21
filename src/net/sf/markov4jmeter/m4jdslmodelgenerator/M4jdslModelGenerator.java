@@ -12,7 +12,6 @@ import m4jdsl.ApplicationModel;
 import m4jdsl.BehaviorMix;
 import m4jdsl.BehaviorModel;
 import m4jdsl.M4jdslFactory;
-import m4jdsl.RelativeFrequency;
 import m4jdsl.WorkloadIntensity;
 import m4jdsl.WorkloadModel;
 import m4jdsl.impl.M4jdslPackageImpl;
@@ -45,15 +44,63 @@ public class M4jdslModelGenerator {
             final String flowsDirectoryPath,
             final String graphOutputPath) throws GeneratorException {
 
-        // build generators for all components;
+        // to be returned;
+        final WorkloadModel workloadModel =
+                this.m4jdslFactory.createWorkloadModel();
 
-//        final IdGenerator idGenerator = new IdGenerator();
+        final ServiceRepository serviceRepository =
+                new ServiceRepository(this.m4jdslFactory);
+
+        final HashMap<String, Double> behaviorMixEntries =
+                new HashMap<String, Double>();
+
+        behaviorMixEntries.put("Behavior Model 1", 1.0);
+
+        // set components;
+
+        this.installWorkloadIntensity(
+                workloadModel,
+                workloadIntensityProperties);
+
+        this.installApplicationLayer(
+                workloadModel,
+                serviceRepository,
+                flowsDirectoryPath,
+                graphOutputPath);
+
+        this.installBehaviorModels(
+                workloadModel,
+                serviceRepository);
+
+        this.installBehaviorMix(
+                workloadModel,
+                workloadModel.getBehaviorModels(),
+                behaviorMixEntries);
+
+        return workloadModel;
+    }
+
+    private WorkloadModel installWorkloadIntensity (
+            final WorkloadModel workloadModel,
+            final Properties workloadIntensityProperties) throws GeneratorException {
 
         final WorkloadIntensityGenerator workloadIntensityGenerator =
                 new WorkloadIntensityGenerator(this.m4jdslFactory);
 
-        final ServiceRepository serviceRepository =
-                new ServiceRepository(this.m4jdslFactory);
+        // might throw a GeneratorException;
+        final WorkloadIntensity workloadIntensity =
+                workloadIntensityGenerator.generateWorkloadIntensity(
+                        workloadIntensityProperties);
+
+        workloadModel.setWorkloadIntensity(workloadIntensity);
+        return workloadModel;
+    }
+
+    private WorkloadModel installApplicationLayer (
+            final WorkloadModel workloadModel,
+            final ServiceRepository serviceRepository,
+            final String flowsDirectoryPath,
+            final String graphOutputPath) throws GeneratorException {
 
         final ProtocolLayerEFSMGenerator protocolLayerEFSMGenerator =
                 new ProtocolLayerEFSMGenerator(
@@ -73,48 +120,53 @@ public class M4jdslModelGenerator {
         final ApplicationModelGenerator applicationModelGenerator =
                 new ApplicationModelGenerator(this.m4jdslFactory, sessionLayerEFSMGenerator);
 
+        // might throw a GeneratorException;
+        final ApplicationModel applicationModel =
+                applicationModelGenerator.generateApplicationModel();
+
+        workloadModel.setApplicationModel(applicationModel);
+        return workloadModel;
+    }
+
+    private WorkloadModel installBehaviorModels (
+            final WorkloadModel workloadModel,
+            final ServiceRepository serviceRepository)
+                    throws GeneratorException {
+
         final BehaviorModelsGenerator behaviorModelGenerator =
-                new BehaviorModelsGenerator(m4jdslFactory, serviceRepository, new IdGenerator("BM"));
+                new BehaviorModelsGenerator(
+                        this.m4jdslFactory,
+                        serviceRepository,
+                        new IdGenerator("BM"));
+
+        // might throw a GeneratorException;
+        final List<BehaviorModel> behaviorModels =
+                behaviorModelGenerator.generateBehaviorModels();
+
+        for (final BehaviorModel behaviorModel : behaviorModels) {
+
+            workloadModel.getBehaviorModels().add(behaviorModel);
+        }
+
+        return workloadModel;
+    }
+
+    private WorkloadModel installBehaviorMix (
+            final WorkloadModel workloadModel,
+            final List<BehaviorModel> behaviorModels,
+            final HashMap<String, Double> behaviorMixEntries)
+                    throws GeneratorException {
 
         final BehaviorMixGenerator behaviorMixGenerator =
                 new BehaviorMixGenerator(this.m4jdslFactory);
 
-        // create components;
-
-        final WorkloadModel workloadModel =
-                this.m4jdslFactory.createWorkloadModel();
-
-        final WorkloadIntensity workloadIntensity =
-                workloadIntensityGenerator.generateWorkloadIntensity(workloadIntensityProperties);  // ~ exception;
-
-        final ApplicationModel applicationModel =
-                applicationModelGenerator.generateApplicationModel();
-
-        final List<BehaviorModel> behaviorModels =
-                behaviorModelGenerator.generateBehaviorModels();
-
-        final HashMap<String, Double> behaviorMixEntries =
-                new HashMap<String, Double>();
-
-        behaviorMixEntries.put("name", 1.0);
-
+        // might throw a GeneratorException;
         final BehaviorMix behaviorMix =
-                behaviorMixGenerator.generateBehaviorMix(behaviorMixEntries, behaviorModels);
+                behaviorMixGenerator.generateBehaviorMix(
+                        behaviorMixEntries,
+                        behaviorModels);
 
-        // set components;
-
-        workloadModel.setWorkloadIntensity(workloadIntensity);
-        workloadModel.setApplicationModel(applicationModel);
-
-        // TODO: Behavior Models need to be set by Behavior Model Extractor;
         workloadModel.setBehaviorMix(behaviorMix);
-
-        for (final RelativeFrequency r : behaviorMix.getRelativeFrequencies()) {
-
-            final BehaviorModel behaviorModel = r.getBehaviorModel();
-            workloadModel.getBehaviorModels().add(behaviorModel);
-        }
-
         return workloadModel;
     }
 

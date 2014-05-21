@@ -2,10 +2,9 @@ package net.sf.markov4jmeter.m4jdslmodelgenerator.components.efsm;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Comparator;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -52,6 +51,9 @@ public class FlowSessionLayerEFSMGenerator extends
 
     private final static String DEBUG_INFO__INSTALLED_TRANSITION =
             "installed transition: \"%s\" --[%s][%s]--> \"%s\"";
+
+    private final static String DEBUG_ERROR__SERVICE_REPOSITORY_INCONSISTENT =
+            "service repository is inconsistent";
 
     private final static boolean DEBUG = false;
 
@@ -193,6 +195,7 @@ public class FlowSessionLayerEFSMGenerator extends
         }
     }
 
+    @SuppressWarnings("unused")
     private void installFlowStates (
             final SessionLayerEFSM sessionLayerEFSM,
             final HashMap<Service, ApplicationState> serviceAppStateHashMap,
@@ -206,9 +209,20 @@ public class FlowSessionLayerEFSMGenerator extends
         final List<ApplicationState> applicationStates =
                 sessionLayerEFSM.getApplicationStates();
 
-        final Set<Service> servicesSet = serviceAppStateHashMap.keySet();
+        final List<Service> services = this.serviceRepository.getServices();
 
-        for (final Service service : this.sortServices(servicesSet)) {
+        // just ensure that all collected services are in the repository;
+        if (FlowSessionLayerEFSMGenerator.DEBUG &&
+            !this.isServiceRepositoryConsistent(
+                    serviceAppStateHashMap.keySet(),
+                    services)) {
+
+            System.err.println(
+                    FlowSessionLayerEFSMGenerator.
+                    DEBUG_ERROR__SERVICE_REPOSITORY_INCONSISTENT);
+        }
+
+        for (final Service service : services) {
 
             final ApplicationState as = serviceAppStateHashMap.get(service);
 
@@ -226,6 +240,26 @@ public class FlowSessionLayerEFSMGenerator extends
                     as.getService().getName(),
                     as.getEId());
         }
+    }
+
+    private boolean isServiceRepositoryConsistent (
+            final Set<Service> servicesSet,
+            final List<Service> services) {
+
+        if (servicesSet.size() != services.size()) {
+
+            return false;
+        }
+
+        for (final Service service : servicesSet) {
+
+            if ( !services.contains(service) ) {
+
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private void collectApplicationStates (
@@ -343,31 +377,30 @@ public class FlowSessionLayerEFSMGenerator extends
             }
         }
 
-        // install transitions from all "Start" states to exit state;
+        // install transitions from all "End" states to exit state;
 
         final String targetServiceName =
                 FlowSessionLayerEFSMGenerator.EXIT_STATE_NAME;
 
         for (final Flow flow : flowRepository.getFlows()) {
 
-            final Node node = this.findNodeByName(
-                    flow,
-                    FlowSessionLayerEFSMGenerator.FLOW_END_NODE_NAME);
+            for (final Node node : flow.getNodes()) {
 
-            if (node != null) {
+                if ( node.getTransitions().isEmpty() ) {
 
-                sourceServiceName = this.getFullyQualifiedName(
-                        flow.getName(),
-                        node.getName(),
-                        "");  // event;
+                    sourceServiceName = this.getFullyQualifiedName(
+                            flow.getName(),
+                            node.getName(),
+                            "");  // event;
 
-                this.installApplicationTransition(
-                        sourceServiceName,
-                        targetServiceName,
-                        "",  // guard;
-                        "",  // action;
-                        serviceAppStateHashMap,
-                        sessionLayerEFSM.getExitState());
+                    this.installApplicationTransition(
+                            sourceServiceName,
+                            targetServiceName,
+                            "",  // guard;
+                            "",  // action;
+                            serviceAppStateHashMap,
+                            sessionLayerEFSM.getExitState());
+                }
             }
         }
 }
@@ -387,7 +420,6 @@ public class FlowSessionLayerEFSMGenerator extends
                 serviceAppStateHashMap,
                 serviceAppTransitionsHashMap);
     }
-
 
 
     private void collectApplicationTransitions (
@@ -460,6 +492,8 @@ public class FlowSessionLayerEFSMGenerator extends
 
                         if (targetNode == null) {
 
+                            // target node is unknown within flow;
+
                             final String message = String.format(
                                     FlowSessionLayerEFSMGenerator.
                                     ERROR_UNKNOWN_NODE,
@@ -476,6 +510,9 @@ public class FlowSessionLayerEFSMGenerator extends
 
                             if ( targetNodeTransitions.isEmpty() ) {
 
+                                // node has no transitions -> node itself is
+                                // target (not distinguished between events);
+
                                 final String targetServiceName =
                                         this.getFullyQualifiedName(
                                                 flowName,
@@ -491,7 +528,9 @@ public class FlowSessionLayerEFSMGenerator extends
 
                             } else {
 
-                                // add transitions to each event of the target node;
+                                // node has transitions -> add transitions to
+                                // each event of the target node;
+
                                 for (final Transition t : targetNodeTransitions) {
 
                                     final String targetServiceName =
@@ -512,6 +551,39 @@ public class FlowSessionLayerEFSMGenerator extends
                     }
                 }
             }
+        }
+    }
+
+    private <T> boolean containsListElement (final List<T> list, final T element) {
+
+        for (final T e : list) {
+
+            if ( element.equals(e) ) {
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static class NodeTransition {
+
+        private final String source;
+        private final String target;
+
+        public NodeTransition (final String source, final String target) {
+
+            this.source = source;
+            this.target = target;
+        }
+
+        @Override
+        public boolean equals (final Object obj) {
+
+            final NodeTransition e = (NodeTransition) obj;
+
+            return e.source.equals(this.source) && e.target.equals(this.target);
         }
     }
 
@@ -576,6 +648,9 @@ public class FlowSessionLayerEFSMGenerator extends
                 null);
     }
 
+    final List<NodeTransition> nodeTransitions =
+            new ArrayList<NodeTransition>();  // contains() uses equals() ?!
+
     private void installApplicationTransition (
             final String sourceServiceName,
             final String targetServiceName,
@@ -583,6 +658,17 @@ public class FlowSessionLayerEFSMGenerator extends
             final String action,
             final HashMap<Service, ApplicationState> serviceAppStateHashMap,
             final ApplicationExitState applicationExitState) {
+
+        NodeTransition t = new NodeTransition(
+                sourceServiceName,
+                targetServiceName);
+
+        if ( this.containsListElement(nodeTransitions, t) ) {
+
+            return;
+        }
+
+        nodeTransitions.add(t);
 
         final ApplicationState source = this.findApplicationStateByServiceName(
                 sourceServiceName,
@@ -687,23 +773,6 @@ public class FlowSessionLayerEFSMGenerator extends
                 this.protocolLayerEFSMGenerator.generateProtocolLayerEFSM();
 
         return protocolLayerEFSM;
-    }
-
-    private LinkedList<Service> sortServices (final Set<Service> servicesSet) {
-
-        final LinkedList<Service> servicesList =
-                new LinkedList<Service>(servicesSet);
-
-        java.util.Collections.sort(servicesList, new Comparator<Service>() {
-
-            @Override
-            public int compare (final Service s1, final Service s2) {
-
-                return s1.getName().compareTo(s2.getName());
-            }
-        });
-
-        return servicesList;
     }
 
     private void printDebugInfo (final String template, Object... args) {

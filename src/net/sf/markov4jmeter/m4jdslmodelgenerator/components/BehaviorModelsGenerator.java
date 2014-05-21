@@ -7,7 +7,6 @@ import m4jdsl.BehaviorModelExitState;
 import m4jdsl.BehaviorModelState;
 import m4jdsl.M4jdslFactory;
 import m4jdsl.MarkovState;
-import m4jdsl.NormallyDistributedThinkTime;
 import m4jdsl.Service;
 import m4jdsl.ThinkTime;
 import m4jdsl.Transition;
@@ -47,38 +46,63 @@ public class BehaviorModelsGenerator {
 
     public BehaviorModel generateBehaviorModel () throws GeneratorException {
 
+        // TODO: retrieve structure from Behavior Model Extractor;
+
+        final String initServiceName = FlowSessionLayerEFSMGenerator.INITIAL_STATE__SERVICE_NAME;
+
         final BehaviorModel behaviorModel = this.createEmptyBehaviorModel();
 
         final BehaviorModelExitState behaviorModelExitState =
                 behaviorModel.getExitState();
 
-        // TODO: retrieve structure from Behavior Models;
-        final String serviceName = FlowSessionLayerEFSMGenerator.INITIAL_STATE__SERVICE_NAME;
-        final Service service = this.serviceRepository.findServiceByName(serviceName);
+        boolean installedInitialState = false;
 
-        if (service == null) {
+        for (final Service service : this.serviceRepository.getServices()) {
 
-            throw new GeneratorException(
-                    "unknown service in Behavior Model detected: " + serviceName);
+            final MarkovState markovState = this.createMarkovState(service);
+
+            /* do NOT add transitions for -all- states, since constraint
+             * 'mustBeOutgoingTransitionsCorrespondingToSessionLayer' will be
+             * violated otherwise (not all states are connected with the exit
+             * state, only the 'End' states for the flows);
+             *
+            final NormallyDistributedThinkTime normallyDistributedThinkTime =
+                    m4jdslFactory.createNormallyDistributedThinkTime();
+
+            normallyDistributedThinkTime.setMean(0);
+            normallyDistributedThinkTime.setDeviation(0);
+
+            final Transition transition = this.createTransition(
+                    behaviorModelExitState, 1.0, normallyDistributedThinkTime);
+
+            markovState.getOutgoingTransitions().add(transition);
+            */
+            behaviorModel.getMarkovStates().add(markovState);
+
+            if ( service.getName().equals(initServiceName) ) {
+
+                behaviorModel.setInitialState(markovState);
+                installedInitialState = true;
+            }
         }
 
-        final MarkovState markovState = this.createMarkovState(service);
+        if ( !installedInitialState ) {
 
-        final NormallyDistributedThinkTime normallyDistributedThinkTime =
-                m4jdslFactory.createNormallyDistributedThinkTime();
+            throw new GeneratorException(
+                    "initial service could not be detected for Behavior Model: " + initServiceName);
+        }
 
-        normallyDistributedThinkTime.setMean(5);
-        normallyDistributedThinkTime.setDeviation(2);
+        String name = "Behavior Model 1";
+        String filename = "filename.csv";
 
-        final Transition transition = this.createTransition(
-                behaviorModelExitState, 1.0, normallyDistributedThinkTime);
+        if ( !filename.toLowerCase().endsWith(".csv") ) {
 
-        markovState.getOutgoingTransitions().add(transition);
+            filename += ".csv";
+        }
 
-        behaviorModel.getMarkovStates().add(markovState);
-        behaviorModel.setInitialState(markovState);
-        behaviorModel.setFilename("filename");
-        behaviorModel.setName("name");
+
+        behaviorModel.setFilename(filename);
+        behaviorModel.setName(name);
 
         return behaviorModel;
     }
@@ -87,7 +111,8 @@ public class BehaviorModelsGenerator {
 
         final MarkovState markovState = this.m4jdslFactory.createMarkovState();
 
-        markovState.setEId(this.idGenerator.newId());
+        //        markovState.setEId(this.idGenerator.newId());
+        markovState.setEId(this.idGenerator.getPrefix() + "_" + service.getName());  // use service name as ID for better readability;
         markovState.setService(service);
 
         return markovState;

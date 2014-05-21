@@ -1,0 +1,25 @@
+Flow EditReservation {
+Node Start {
+	Transition { event="", guard="", action="", target=ReservationLocation }
+	
+	}
+Node ReservationLocation {
+	Transition { event="search", guard="", action="search", target=ReservationLocation }
+	Transition { event="locationChanged", guard="", action="locationChanged", target=ReservationLocation }
+	Transition { event="selectCar", guard="", action="selectCar", target=ReservationCar }
+	Transition { event="exit", guard="", action="", target=End }
+	
+	}
+Node ReservationCar {
+	Transition { event="back", guard="", action="back", target=ReservationLocation }
+	Transition { event="save", guard="", action="saveReservation", target=ReservationSuccess }
+	
+	}
+Node ReservationSuccess {
+	Transition { event="close", guard="", action="", target=End }
+	
+	}
+Node End {
+	
+	}
+}

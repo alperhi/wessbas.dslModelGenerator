@@ -67,7 +67,8 @@ public abstract class AbstractSessionLayerEFSMGenerator {
         final ApplicationState applicationState =
                 this.m4jdslFactory.createApplicationState();
 
-        applicationState.setEId(this.idGenerator.newId());
+//        applicationState.setEId(this.idGenerator.newId());
+        applicationState.setEId(this.idGenerator.getPrefix() + "_" + service.getName());  // use service name as ID for better readability;
         applicationState.setService(service);
         applicationState.setProtocolDetails(protocolLayerEFSM);
 
