@@ -21,7 +21,7 @@ import net.sf.markov4jmeter.m4jdslmodelgenerator.components.BehaviorModelsGenera
 import net.sf.markov4jmeter.m4jdslmodelgenerator.components.WorkloadIntensityGenerator;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.components.efsm.AbstractSessionLayerEFSMGenerator;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.components.efsm.FlowSessionLayerEFSMGenerator;
-import net.sf.markov4jmeter.m4jdslmodelgenerator.components.efsm.ProtocolLayerEFSMGenerator;
+import net.sf.markov4jmeter.m4jdslmodelgenerator.components.efsm.JavaProtocolLayerEFSMGenerator;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.util.IdGenerator;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.util.XmiEcoreHandler;
 
@@ -29,7 +29,7 @@ public class M4jdslModelGenerator {
 
     private final static String PKEY_XMI_OUTPUT_FILE = "xmioutputfile";
 
-    final M4jdslFactory m4jdslFactory;
+    private final M4jdslFactory m4jdslFactory;
 
 
     public M4jdslModelGenerator () {
@@ -102,8 +102,8 @@ public class M4jdslModelGenerator {
             final String flowsDirectoryPath,
             final String graphOutputPath) throws GeneratorException {
 
-        final ProtocolLayerEFSMGenerator protocolLayerEFSMGenerator =
-                new ProtocolLayerEFSMGenerator(
+        final JavaProtocolLayerEFSMGenerator protocolLayerEFSMGenerator =
+                new JavaProtocolLayerEFSMGenerator(
                         this.m4jdslFactory,
                         new IdGenerator("PS"),
                         new IdGenerator("R"));
@@ -174,20 +174,23 @@ public class M4jdslModelGenerator {
 
         final String appName = M4jdslModelGenerator.class.getSimpleName();
 
-        System.out.println("Usage: " + appName + " <generator.properties> <flowsDirPath> <graphOutputFile.dot>");
+        System.out.println("Usage: " + appName + " <generator.properties> <flowsDirPath> <behaviorDirPath> <xmioutputfile> <graphOutputFile.dot>");
     }
 
     public static void main (final String[] argv) {
 
-        if (argv.length < 3) {
+        if (argv.length < 5) {
 
             M4jdslModelGenerator.printUsage();
 
         } else {
 
-            final String propertiesFilename = argv[0];
-            final String flowsDirectoryPath = argv[1];
-            final String graphFilePath      = argv[2];  // TODO: make this optional;
+            // TODO: make "graphFilePath" optional, use a command-line parser;
+            final String propertiesFilename    = argv[0];
+            final String flowsDirectoryPath    = argv[1];
+            final String behaviorDirectoryPath = argv[2];
+            final String xmioutputfile         = argv[3];
+            final String graphFilePath         = argv[4];
 
             final M4jdslModelGenerator m4jdslModelGenerator =
                     new M4jdslModelGenerator();
@@ -204,8 +207,10 @@ public class M4jdslModelGenerator {
                                 flowsDirectoryPath,
                                 graphFilePath);
 
-                final String outputFile = generatorProperties.
-                        getProperty(M4jdslModelGenerator.PKEY_XMI_OUTPUT_FILE);
+
+                //final String outputFile = generatorProperties.
+                //        getProperty(M4jdslModelGenerator.PKEY_XMI_OUTPUT_FILE);
+                final String outputFile = xmioutputfile;
 
                 if (outputFile == null) {
 

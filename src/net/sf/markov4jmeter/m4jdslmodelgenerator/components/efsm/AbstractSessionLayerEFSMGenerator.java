@@ -18,14 +18,14 @@ public abstract class AbstractSessionLayerEFSMGenerator {
     protected final M4jdslFactory m4jdslFactory;
 
     // TODO: protocolLayerEFSMGenerator is never used in this class;
-    protected final ProtocolLayerEFSMGenerator protocolLayerEFSMGenerator;
+    protected final JavaProtocolLayerEFSMGenerator protocolLayerEFSMGenerator;
     protected final IdGenerator idGenerator;
 
 
     public AbstractSessionLayerEFSMGenerator (
             final M4jdslFactory m4jdslFactory,
             final ServiceRepository serviceRepository,
-            final ProtocolLayerEFSMGenerator protocolLayerEFSMGenerator,
+            final JavaProtocolLayerEFSMGenerator protocolLayerEFSMGenerator,
             final IdGenerator idGenerator) {
 
         this.m4jdslFactory              = m4jdslFactory;
