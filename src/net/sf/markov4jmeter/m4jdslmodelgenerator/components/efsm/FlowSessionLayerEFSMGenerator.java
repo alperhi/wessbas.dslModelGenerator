@@ -26,56 +26,112 @@ import net.sf.markov4jmeter.m4jdslmodelgenerator.util.DotGraphGenerator;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.util.FlowDotGraphGenerator;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.util.IdGenerator;
 
+/**
+ * Class for building Session Layer EFSMs based on Flows.
+ *
+ * @author   Eike Schulz (esc@informatik.uni-kiel.de)
+ * @version  1.0
+ */
 public class FlowSessionLayerEFSMGenerator extends
         AbstractSessionLayerEFSMGenerator {
 
+    /** Name of each Flow's start node. */
     private final static String FLOW_START_NODE_NAME = "Start";
 
+    /** (Service-)name of the Application Layer's generic initial state. */
     public final static String INITIAL_STATE__SERVICE_NAME = "Init*";
+
+    /** (Service-)name of the Application Layer's generic exit state. */
     private final static String EXIT_STATE_NAME = "$";
 
-    private final static String FLOW_END_NODE_NAME   = "End";
-
+    /** Error message for the case that the parsing of Flows fails for any
+     *  reason. */
     private final static String ERROR_FLOWS_PARSING_FAILED =
-            "could not parse flows in directory \"%s\" properly (%s)";
+            "could not parse flows properly (%s)";
 
+    /** Error message for the case that a target node of a Flow transition does
+     *  not refer to node which is defined in the related Flow. */
     private final static String ERROR_UNKNOWN_NODE =
-            "transition target \"%s\" in node \"%s\" of flow \"%s\" is "
-            + "unknown in that flow";
+            "transition target \"%s\" in node \"%s\" of flow \"%s\" is not "
+            + "defined in that flow";
 
+    /** Warning message for the case that the graph output file could not be
+     *  written successfully. */
     private final static String WARNING_GRAPH_OUTPUT_FILE_COULD_NOT_BE_WRITTEN =
             "graph output file could not be written to \"%s\"";
 
+
+    /* ----------------------  debug messages/settings  --------------------- */
+
+    /** Debug information message for a state installation. */
     private final static String DEBUG_INFO__INSTALLED_STATE =
             "installed state: \"%s\" (id: \"%s\")";
 
+    /** Debug information message for a transition installation. */
     private final static String DEBUG_INFO__INSTALLED_TRANSITION =
             "installed transition: \"%s\" --[%s][%s]--> \"%s\"";
 
+    /** Debug error message for the case that the service repository does not
+     *  include an expected set of services. */
     private final static String DEBUG_ERROR__SERVICE_REPOSITORY_INCONSISTENT =
             "service repository is inconsistent";
 
+    /** <code>true</code> if and only if debugging shall be enabled. */
     private final static boolean DEBUG = true;
 
 
     /* *************************  global variables  ************************* */
 
 
+    /** Instance for generating DOT graph output. */
     private final FlowDotGraphGenerator dotGraphGenerator;
 
-    private final String flowsDirectoryPath;
+    private final File[] flowFiles;
+
+    /** Path of the DOT graph output file; might be <code>null</code>, if no
+     *  graph shall be generated. */
     private final String graphFilePath;
+
+    /** <code>true</code> if and only if sessions can be exited at any time,
+     *  which is generally given in Web applications; if this flag is set
+     *  <code>true</code>, transitions to the exit state will be installed for
+     *  all states of the Application Layer. */
+    private final boolean sessionsCanBeExitedAnytime;
 
 
     /* ***************************  constructors  *************************** */
 
 
+    /**
+     * Constructor for a Flow Session Layer EFSM Generator.
+     *
+     * @param m4jdslFactory
+     *     Instance for creating M4J-DSL model elements.
+     * @param serviceRepository
+     *     Instance for storing the <code>Service</code> instances which are
+     *     included in the Session Layer EFSM.
+     * @param protocolLayerEFSMGenerator
+     *     Instance for creating Protocol Layer EFSMs.
+     * @param idGenerator
+     *     Instance for creating unique Application State IDs.
+     * @param sessionsCanBeExitedAnytime
+     *     <code>true</code> if and only if sessions can be exited at any time,
+     *     which is generally given in Web applications; if this flag is set
+     *     <code>true</code>, transitions to the exit state will be installed
+     *     for all states of the Application Layer.
+     * @param flowFiles
+     *     Flow files to be read.
+     * @param graphFilePath
+     *     Path of the DOT graph output file; might be <code>null</code>, if no
+     *     graph shall be generated.
+     */
     public FlowSessionLayerEFSMGenerator (
             final M4jdslFactory m4jdslFactory,
             final ServiceRepository serviceRepository,
             final JavaProtocolLayerEFSMGenerator protocolLayerEFSMGenerator,
             final IdGenerator idGenerator,
-            final String flowsDirectoryPath,
+            final boolean sessionsCanBeExitedAnytime,
+            final File[] flowFiles,
             final String graphFilePath) {
 
         super(m4jdslFactory,
@@ -83,25 +139,49 @@ public class FlowSessionLayerEFSMGenerator extends
               protocolLayerEFSMGenerator,
               idGenerator);
 
-        this.flowsDirectoryPath = flowsDirectoryPath;
-        this.graphFilePath      = graphFilePath;
+        this.sessionsCanBeExitedAnytime = sessionsCanBeExitedAnytime;
 
-        this.dotGraphGenerator  =
+        this.flowFiles     = flowFiles;
+        this.graphFilePath = graphFilePath;
+
+        this.dotGraphGenerator =
                 (graphFilePath != null) ? new FlowDotGraphGenerator() : null;
     }
 
+    /**
+     * Constructor for a Flow Session Layer EFSM Generator.
+     *
+     * @param m4jdslFactory
+     *     Instance for creating M4J-DSL model elements.
+     * @param serviceRepository
+     *     Instance for storing the <code>Service</code> instances which are
+     *     included in the Session Layer EFSM.
+     * @param protocolLayerEFSMGenerator
+     *     Instance for creating Protocol Layer EFSMs.
+     * @param idGenerator
+     *     Instance for creating unique Application State IDs.
+     * @param sessionsCanBeExitedAnytime
+     *     <code>true</code> if and only if sessions can be exited at any time,
+     *     which is generally given in Web applications; if this flag is set
+     *     <code>true</code>, transitions to the exit state will be installed
+     *     for all states of the Application Layer.
+     * @param flowFiles
+     *     Flow files to be read.
+     */
     public FlowSessionLayerEFSMGenerator (
             final M4jdslFactory m4jdslFactory,
             final ServiceRepository serviceRepository,
             final JavaProtocolLayerEFSMGenerator protocolLayerEFSMGenerator,
             final IdGenerator idGenerator,
-            final String flowsDirectoryPath) {
+            final boolean sessionsCanBeExitedAnytime,
+            final File[] flowFiles) {
 
         this(m4jdslFactory,
              serviceRepository,
              protocolLayerEFSMGenerator,
              idGenerator,
-             flowsDirectoryPath,
+             sessionsCanBeExitedAnytime,
+             flowFiles,
              null);  // no graph file path;
     }
 
@@ -109,11 +189,15 @@ public class FlowSessionLayerEFSMGenerator extends
     /* **************************  public methods  ************************** */
 
 
+    /**
+     * {@inheritDoc}
+     * <p> This method creates an EFSM which builds on <b>b+m gear Flows</b>.
+     */
     @Override
     public SessionLayerEFSM generateSessionLayerEFSM ()
             throws GeneratorException {
 
-        // to be returned;
+        // EFSM to be returned;
         final SessionLayerEFSM sessionLayerEFSM =
                 this.createEmptySessionLayerEFSM(
                         FlowSessionLayerEFSMGenerator.EXIT_STATE_NAME);
@@ -152,9 +236,16 @@ public class FlowSessionLayerEFSMGenerator extends
     /* *********  private methods (Application States installation)  ******** */
 
 
+    /**
+     * Installs the generic initial and exit states.
+     *
+     * @param sessionLayerEFSM
+     * @param serviceAppStateHashMap
+     * @throws GeneratorException
+     */
     private void installGenericInitialAndExitStates (
             final SessionLayerEFSM sessionLayerEFSM,
-            final HashMap<Service, ApplicationState> serviceAppStateHashMap) {
+            final HashMap<Service, ApplicationState> serviceAppStateHashMap) throws GeneratorException {
 
         // exit state already exists in (default) Session Layer EFSM -> get ID;
         final String exitStateId = sessionLayerEFSM.getExitState().getEId();
@@ -162,10 +253,11 @@ public class FlowSessionLayerEFSMGenerator extends
         final Service initialService = this.createService(
                 FlowSessionLayerEFSMGenerator.INITIAL_STATE__SERVICE_NAME);
 
+        // might throw a GeneratorException;
         final ApplicationState applicationInitialState =
                 this.createApplicationState(
                         initialService,
-                        this.createDefaultProtocolLayerEFSM());  // FIXME: create generic Protocol Layer EFSM;
+                        this.createDefaultProtocolLayerEFSM());  // FIXME: create specific Protocol Layer EFSM;
 
         applicationInitialState.setEId(
                 FlowSessionLayerEFSMGenerator.INITIAL_STATE__SERVICE_NAME);
@@ -198,9 +290,10 @@ public class FlowSessionLayerEFSMGenerator extends
     private void installFlowStates (
             final SessionLayerEFSM sessionLayerEFSM,
             final HashMap<Service, ApplicationState> serviceAppStateHashMap,
-            final FlowRepository flowRepository) {
+            final FlowRepository flowRepository) throws GeneratorException {
 
         // collect all Application States indicated by nodes;
+        // might throw a GeneratorException;
         this.collectApplicationStates(
                 flowRepository,
                 serviceAppStateHashMap);
@@ -211,10 +304,10 @@ public class FlowSessionLayerEFSMGenerator extends
         final List<Service> services = this.serviceRepository.getServices();
 
         // just ensure that all collected services are in the repository;
-        if (FlowSessionLayerEFSMGenerator.DEBUG &&
-            !this.isServiceRepositoryConsistent(
-                    serviceAppStateHashMap.keySet(),
-                    services)) {
+        if ( FlowSessionLayerEFSMGenerator.DEBUG &&
+             !this.isServiceRepositoryConsistent(
+                     serviceAppStateHashMap.keySet(),
+                     services) ) {
 
             System.err.println(
                     FlowSessionLayerEFSMGenerator.
@@ -263,7 +356,7 @@ public class FlowSessionLayerEFSMGenerator extends
 
     private void collectApplicationStates (
             final FlowRepository flowRepository,
-            final HashMap<Service, ApplicationState> serviceAppStateHashMap) {
+            final HashMap<Service, ApplicationState> serviceAppStateHashMap) throws GeneratorException {
 
         for (final Flow flow : flowRepository.getFlows()) {
 
@@ -273,6 +366,7 @@ public class FlowSessionLayerEFSMGenerator extends
 
                 final String nodeName = node.getName();
 
+                // might throw a GeneratorException;
                 this.registerApplicationState(
                         flowName,
                         nodeName,
@@ -284,7 +378,7 @@ public class FlowSessionLayerEFSMGenerator extends
     private void registerApplicationState (
             final String flowName,
             final String nodeName,
-            final HashMap<Service, ApplicationState> serviceAppStateHashMap) {
+            final HashMap<Service, ApplicationState> serviceAppStateHashMap) throws GeneratorException {
 
         final String serviceName =
                 this.getFullyQualifiedName(flowName, nodeName);
@@ -293,6 +387,7 @@ public class FlowSessionLayerEFSMGenerator extends
 
         if ( !serviceAppStateHashMap.containsKey(service) ) {
 
+            // might throw a GeneratorException;
             final ProtocolLayerEFSM protocolLayerEFSM =
                     this.createDefaultProtocolLayerEFSM();  // FIXME: add generic Protocol Layer EFSM;
 
@@ -340,6 +435,17 @@ public class FlowSessionLayerEFSMGenerator extends
             }
         }
 
+        if (this.sessionsCanBeExitedAnytime) {
+
+            this.installApplicationTransition(
+                    sourceServiceName,
+                    FlowSessionLayerEFSMGenerator.EXIT_STATE_NAME,
+                    "",  // guard, always empty by default;
+                    "",  // action, always empty be default;
+                    serviceAppStateHashMap,
+                    sessionLayerEFSM.getExitState());
+        }
+
         // install transitions from all "End" states to exit state;
 
         final String targetServiceName =
@@ -349,8 +455,9 @@ public class FlowSessionLayerEFSMGenerator extends
 
             for (final Node node : flow.getNodes()) {
 
-                if ( node.getTransitions().isEmpty() &&
-                     !this.isFlowReference(flowRepository, node)) {
+                if ( this.sessionsCanBeExitedAnytime ||
+                     (node.getTransitions().isEmpty() &&
+                      !this.isFlowReference(flowRepository, node)) ) {
 
                     sourceServiceName = this.getFullyQualifiedName(
                             flow.getName(),
@@ -443,7 +550,7 @@ public class FlowSessionLayerEFSMGenerator extends
                         } else {
 
                             // no "Start" node in flow (should never happen);
-                            // TODO: give warning message anyway;
+                            // TODO: give warning message;
                         }
                     }
 
@@ -656,18 +763,16 @@ public class FlowSessionLayerEFSMGenerator extends
 
     private FlowRepository parseFlows () throws GeneratorException {
 
-        final File flowsDirectory = new File(this.flowsDirectoryPath);
         final FlowDSLParser parser = new FlowDSLParser();
 
         try {
 
-            return (FlowRepository) parser.parse(flowsDirectory);
+            return (FlowRepository) parser.parse(flowFiles);
 
         } catch (final Exception ex) {
 
             final String message = String.format(
                     FlowSessionLayerEFSMGenerator.ERROR_FLOWS_PARSING_FAILED,
-                    flowsDirectory.getAbsolutePath(),
                     ex.getMessage());
 
             throw new GeneratorException(message);
@@ -681,8 +786,9 @@ public class FlowSessionLayerEFSMGenerator extends
         return flowName + "." + nodeName;
     }
 
-    private ProtocolLayerEFSM createDefaultProtocolLayerEFSM () {
+    private ProtocolLayerEFSM createDefaultProtocolLayerEFSM () throws GeneratorException {
 
+        // might throw a GeneratorException;
         final ProtocolLayerEFSM protocolLayerEFSM =
                 this.protocolLayerEFSMGenerator.generateProtocolLayerEFSM();
 

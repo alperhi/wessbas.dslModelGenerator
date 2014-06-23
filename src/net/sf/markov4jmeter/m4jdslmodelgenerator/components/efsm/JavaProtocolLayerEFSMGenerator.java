@@ -6,10 +6,31 @@ import m4jdsl.ProtocolLayerEFSM;
 import m4jdsl.ProtocolState;
 import m4jdsl.ProtocolTransition;
 import m4jdsl.Request;
+import net.sf.markov4jmeter.m4jdslmodelgenerator.GeneratorException;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.util.IdGenerator;
 
-public class JavaProtocolLayerEFSMGenerator extends AbstractProtocolLayerEFSMGenerator {
+/**
+ * Class for building Protocol Layer EFSMs based on Java requests.
+ *
+ * @author   Eike Schulz (esc@informatik.uni-kiel.de)
+ * @version  1.0
+ */
+public class JavaProtocolLayerEFSMGenerator
+extends AbstractProtocolLayerEFSMGenerator {
 
+
+    /* ***************************  constructors  *************************** */
+
+    /**
+     * Constructor for a Protocol Layer EFSM with Java requests.
+     *
+     * @param m4jdslFactory
+     *     instance for creating M4J-DSL model elements.
+     * @param idGenerator
+     *     instance for creating unique Protocol State IDs.
+     * @param requestIdGenerator
+     *     instance for creating unique request IDs.
+     */
     public JavaProtocolLayerEFSMGenerator (
             final M4jdslFactory m4jdslFactory,
             final IdGenerator idGenerator,
@@ -18,16 +39,44 @@ public class JavaProtocolLayerEFSMGenerator extends AbstractProtocolLayerEFSMGen
         super(m4jdslFactory, idGenerator, requestIdGenerator);
     }
 
-    public ProtocolLayerEFSM generateProtocolLayerEFSM () {
 
-        final ProtocolLayerEFSM protocolLayerEFSM = this.createEmptyProtocolLayerEFSM();
-        final ProtocolExitState protocolExitState = protocolLayerEFSM.getExitState();
+    /* **************************  public methods  ************************** */
 
-        final Request request = this.createRequest(0);  // TODO: provide more information;
+
+    /**
+     * Creates a Protocol Layer EFSM.
+     *
+     * @return
+     *     the newly created Protocol Layer EFSM.
+     *
+     * @throws GeneratorException
+     *     if any error during the generation process occurs.
+     */
+    public ProtocolLayerEFSM generateProtocolLayerEFSM ()
+            throws GeneratorException {
+
+        final ProtocolLayerEFSM protocolLayerEFSM =
+                this.createEmptyProtocolLayerEFSM();
+
+        final ProtocolExitState protocolExitState =
+                protocolLayerEFSM.getExitState();
+
+        // TODO: more information required for building SUT-specific requests and transitions;
+
+        // might throw a GeneratorException;
+        final Request request = this.createRequest(
+                AbstractProtocolLayerEFSMGenerator.REQUEST_TYPE_JAVA);
+
         final ProtocolState protocolState = this.createProtocolState(request);
 
+        final String guard;  // no SUT-specific guard available yet ...
+        final String action;  // no SUT-specific action available yet ...
+
         final ProtocolTransition protocolTransition =
-                this.createProtocolTransition(protocolExitState, "<guard>", "<action>");
+                this.createProtocolTransition(
+                        protocolExitState,
+                        "<guard>",
+                        "<action>");
 
         protocolState.getOutgoingTransitions().add(protocolTransition);
 
@@ -35,14 +84,5 @@ public class JavaProtocolLayerEFSMGenerator extends AbstractProtocolLayerEFSMGen
         protocolLayerEFSM.setInitialState(protocolState);
 
         return protocolLayerEFSM;
-    }
-
-    private Request createRequest (int type) {
-
-        // TODO: build request Gear-specific, support further types;
-        final Request request = this.m4jdslFactory.createJavaRequest();
-
-        request.setEId(this.requestIdGenerator.newId());
-        return request;
     }
 }

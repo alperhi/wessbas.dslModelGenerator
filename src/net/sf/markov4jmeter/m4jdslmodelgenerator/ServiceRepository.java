@@ -7,12 +7,30 @@ import java.util.List;
 import m4jdsl.M4jdslFactory;
 import m4jdsl.Service;
 
+/**
+ * Repository class for handling all available services.
+ *
+ * @author   Eike Schulz (esc@informatik.uni-kiel.de)
+ * @version  1.0
+ */
 public class ServiceRepository {
 
+    /** Instance for creating M4J-DSL model elements. */
     private final M4jdslFactory m4jdslFactory;
+
+    /** List of all registered services. */
     private final List<Service> services;
 
 
+    /* ***************************  constructors  *************************** */
+
+
+    /**
+     * Constructor for a Service Repository.
+     *
+     * @param m4jdslFactory
+     *     instance for creating M4J-DSL model elements.
+     */
     public ServiceRepository (final M4jdslFactory m4jdslFactory) {
 
         this.m4jdslFactory = m4jdslFactory;
@@ -20,11 +38,29 @@ public class ServiceRepository {
     }
 
 
+    /* **************************  public methods  ************************** */
+
+
+    /**
+     * Returns all registered services.
+     *
+     * @return  a valid list of all registered services.
+     */
     public List<Service> getServices () {
 
         return this.sortServices(this.services);
     }
 
+    /**
+     * Registers a service by name.
+     *
+     * @param name
+     *     name of the service.
+     *
+     * @return
+     *     a newly created service, if the service did not exist before;
+     *     otherwise, the existing service will be returned.
+     */
     public Service registerServiceByName (final String name) {
 
         Service service = this.findServiceByName(name);
@@ -42,6 +78,16 @@ public class ServiceRepository {
         return service;
     }
 
+    /**
+     * Searches for a service of a given name.
+     *
+     * @param name
+     *     name of the service to be searched for.
+     *
+     * @return
+     *     a service of the given name if available;
+     *     otherwise, <code>null</code> will be returned.
+     */
     public Service findServiceByName (final String name) {
 
         for (final Service service : this.services) {
@@ -55,12 +101,20 @@ public class ServiceRepository {
         return null;  // no match;
     }
 
-    private LinkedList<Service> sortServices (final List<Service> servicesSet) {
 
-        final LinkedList<Service> servicesList =
-                new LinkedList<Service>(servicesSet);
+    /* **************************  private methods  ************************* */
 
-        java.util.Collections.sort(servicesList, new Comparator<Service>() {
+
+    /**
+     * Sorts the list of services by name.
+     *
+     * @param services  List of services to be sorted.
+     *
+     * @return  the sorted list of services.
+     */
+    private List<Service> sortServices (final List<Service> services) {
+
+        java.util.Collections.sort(services, new Comparator<Service>() {
 
             @Override
             public int compare (final Service s1, final Service s2) {
@@ -69,6 +123,6 @@ public class ServiceRepository {
             }
         });
 
-        return servicesList;
+        return services;
     }
 }

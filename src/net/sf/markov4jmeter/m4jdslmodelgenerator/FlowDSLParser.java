@@ -1,7 +1,6 @@
 package net.sf.markov4jmeter.m4jdslmodelgenerator;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
@@ -20,16 +19,13 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 
 /**
- * Parser class for reading Flow-DSL content <code>Reader</code> instances.
+ * Class for parsing Flow-DSL content.
  *
  * @author   Eike Schulz (esc@informatik.uni-kiel.de)
  * @version  1.0
  * @since    1.5
  */
 public class FlowDSLParser {
-
-    /** Suffix of Flow-DSL files. */
-    private final static String FILE_SUFFIX = ".flows";
 
     /** Error message for the case that any input could not be read from a
      *  <code>Reader</code> instance. */
@@ -41,18 +37,8 @@ public class FlowDSLParser {
     private final static String ERROR_READER_IS_NULL =
             "null has been passed as Reader instance";
 
-    /** Error message for the case that a passed <code>File</code> instance
-     *  is <code>null</code>. */
-    private final static String ERROR_DIRECTORY_FILE_IS_NULL =
-            "directory file is null";
 
-    /** Error message for the case that a passed <code>File</code> instance
-     *  which is expected to denote a directory does not fulfill it. */
-    private final static String ERROR_DIRECTORY_FILE_DENOTES_NO_DIRECTORY =
-            "file \"%s\" does not denote a directory";
-
-
-    /* *************************  Global variables  ************************* */
+    /* *************************  global variables  ************************* */
 
 
     /** (Dependency injected) parser. */
@@ -60,7 +46,7 @@ public class FlowDSLParser {
     private IParser parser;
 
 
-    /* ***************************  Constructors  *************************** */
+    /* ***************************  constructors  *************************** */
 
 
     /**
@@ -117,35 +103,25 @@ public class FlowDSLParser {
     }
 
     /**
-     * Parses all Flow-DSL files of a given directory and returns the root node
-     * of the result tree.
+     * Parses a set of Flow-DSL files and returns the root node of the result
+     * tree.
      *
-     * @param directory
-     *     a directory which contains Flow-DSL files, indicated by the suffix
-     *     "<code>.flows</code>".
-     *
+     * @param flowFiles
+     *     files to be parsed.
      * @return
      *     the root node of the result tree.
      *
      * @throws IOException
      *     if any I/O error occurs while parsing.
-     * @throws IllegalArgumentException
-     *     if <code>null</code> has been passed as a <code>File</code> instance,
-     *     or if the given file does not denote a directory.
      */
-    public EObject parse (final File directory)
-            throws IllegalArgumentException, IOException {
-
-        // might throw an IllegalArgument- or IOException;
-        final File[] flowFiles = this.readFilesFromDirectory(
-                directory,
-                FlowDSLParser.FILE_SUFFIX);
+    public EObject parse (final File[] flowFiles) throws IOException {
 
         // all content Strings will be concatenated to a single String;
-        // TODO: a disadvantage of this approach is that possible syntax errors
-        // detected by the parser cannot be mapped to an associated file;
-        // alternatively, a HashMap with Flow names as keys with related content
-        // as value could be used, for parsing each content individually;
+        // NOTE: a disadvantage of this approach is that possible syntax errors
+        // detected by the parser cannot be assigned to an associated file;
+        // alternatively, a HashMap with Flow names as keys and related content
+        // as values could be used, for parsing each content individually;
+        // TODO: solution for enhanced error information;
         final StringBuffer stringBuffer = new StringBuffer();
 
         String content;
@@ -161,7 +137,8 @@ public class FlowDSLParser {
         final StringReader stringReader =
                 new StringReader(stringBuffer.toString());
 
-        // might throw an IllegalArgument- or IOException;
+        // might throw an IllegalArgument- or IOException (since the reader is
+        // not null, an IllegalArgumentException should never be thrown here);
         return this.parse(stringReader);
     }
 
@@ -215,51 +192,5 @@ public class FlowDSLParser {
         }
 
         return stringBuffer.toString();
-    }
-
-    /**
-     * Collects all files with a specified suffix from a given directory.
-     *
-     * @param directory
-     *     directory which contains the files to be collected.
-     * @param suffix
-     *     suffix of the files to be collected.
-     *
-     * @return
-     *     the files whose suffix matches the specified one.
-     *
-     * @throws IOException
-     *     if any I/O error occurs.
-     * @throws IllegalArgumentException
-     *     if <code>null</code> has been passed as a <code>File</code> instance,
-     *     or if the given file does not denote a directory.
-     */
-    private File[] readFilesFromDirectory (
-            final File directory,
-            final String suffix) throws IllegalArgumentException, IOException {
-
-        if (directory == null) {
-
-            throw new IllegalArgumentException(
-                    FlowDSLParser.ERROR_DIRECTORY_FILE_IS_NULL);
-        }
-
-        if ( !directory.isDirectory() ) {
-
-            final String message = String.format(
-                    FlowDSLParser.ERROR_DIRECTORY_FILE_DENOTES_NO_DIRECTORY,
-                    directory.getAbsolutePath());
-
-            throw new IllegalArgumentException(message);
-        }
-
-        return directory.listFiles(new FileFilter() {
-
-            @Override
-            public boolean accept (final File file) {
-
-                return !file.isDirectory() && file.getName().endsWith(suffix);
-            }
-        });
     }
 }
