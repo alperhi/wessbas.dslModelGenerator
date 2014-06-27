@@ -1,7 +1,8 @@
 This project contains the source code for the M4J-DSL Model Generator, which
-builds models that comply to the M4J-DSL. Each model represents a Markov4JMeter
-workload model, including workload intensity, Application Layer, Behavior Models
-and Behavior Mix.
+builds models that comply to the M4J-DSL, based on Flow files and CSV-formatted
+user behavior information (probabilities and think times). Each resulting model
+represents a Markov4JMeter workload model, including workload intensity,
+Application Layer, Behavior Models and Behavior Mix.
 
 
 SYSTEM REQUIREMENTS
@@ -13,17 +14,22 @@ The project has been developed with the use of the following tools:
   - JDK 1.7
   - Xtext 2.5.4
 
-An Eclipse environment using this project should be configured accordingly. 
+An Eclipse environment for this project should be configured accordingly.
 
 
 PROJECT CONTENT
 ---------------
 
-Additionally to the standard folder structure of an Eclipse project, the
-following folders are included:
+Additionally to the standard structure of an Eclipse project, the following
+folders are included:
 
-  - folder "examples" contains some example data for flows, behavior information
-    and models. The following sub-folders are included:
+  - folder "configuration" contains the properties files, that are required for
+    running the generator. In particular, these files demonstrate how to
+    define workload intensity and Behavior Models respectively. 
+
+  - folder "examples" contains some example input Flow files and user behavior
+    information, as well as several models. The following sub-folders are
+    included:
 
       o "behavior"      -- example behavior information as it might be retrieved
                            from monitoring data, including probabilities and
@@ -41,28 +47,18 @@ following folders are included:
       o "flows.subset2" -- another closed subset of CarShare Flows.
 
       o "models"        -- some simple example workload models which comply to
-                           the M4J-DSL. These models just serve for testing
-                           purposes in terms of validation in the Eclipse Form
-                           Editor.
+                           the M4J-DSL. These models serve for testing purposes
+                           only.
 
   - folder "output" contains the output files of a test run, which generally
-    consist of a workload model (.XMI) and a graph visualization file (.DOT).
-
-The root directory contains two properties files for the M4J-DSL Model
-Generator:
-
-  - "workloadIntensity.properties" and
-  - "behaviorModels.properties".
-
-Both files demonstrate the definition of workload intensity and Behavior Models
-respectively. 
+    include a workload model (.XMI) and a graph visualization file (.DOT).
 
 
 USAGE
 -----
 
 Class "net.sf.markov4jmeter.m4jdslmodelgenerator.M4jdslModelGenerator" provides
-the main() method, which requires a certain set of parameters to be passed via
+the main() method, which requires a certain set of parameters, to be passed via
 command-line in a specific order. The following parameters need to be provided:
 
   <workloadIntensity.properties> -- path to the properties file with workload
@@ -79,25 +75,27 @@ command-line in a specific order. The following parameters need to be provided:
   <graphOutputFile>              -- path to the graph output file.
 
 An example parameter sequence (to be used in the Eclipse run configuration)
-might look as follows:
+might look as follows (in one row):
 
-  ./workloadIntensity.properties ./behaviorModels.properties
-    ./examples/flows.subset2/ ./output/workloadmodel.xmi ./output/graph.dot
+  ./configuration/workloadIntensity.properties
+    ./configuration/behaviorModels.properties
+      ./examples/flows.subset2/ ./output/workloadmodel.xmi ./output/graph.dot
 
-Starting the application with these parameters will produce regarding output
+Starting the application with these parameters will produce corresponding output
 in the "output" folder.
 
 
-DEVELOPMENT
------------
+DEVELOPMENT NOTES
+-----------------
 
 The source code is comprehensively commented, and most of it should be
-self-explaining. Two classes are not final yet, since details regarding to the
-generation of Markov4JMeter models based of b+m gear Flows need to be cleared:
+self-explaining; all required libraries are included. Two classes are still in
+progress, since they are b+m gear-specific and details regarding to the
+generation of Markov4JMeter models based on b+m gear Flows need to be cleared:
 
   - FlowSessionLayerEFSMGenerator:
     class for building Session Layer EFSMs based on Flows; the Session Layer
-    EFSM structure will probably be changed in future releases.
+    EFSM structure will be probably changed in future releases.
 
   - JavaProtocolLayerEFSMGenerator:
     class for building Protocol Layer EFSMs based on Java requests; the
@@ -105,4 +103,9 @@ generation of Markov4JMeter models based of b+m gear Flows need to be cleared:
     information regarding to states, transitions and request parameters.
 
 Both classes are marked with "warning" signs in the Eclipse Package Explorer,
-indicating their open issues.
+indicating their open issues. As a future work, the generalization of these
+classes should be envisioned for reducing their dependency from certain systems.
+
+An executable JAR archive can be easily generated by using the File->Export
+option in Eclipse. Note that the configuration files have to be provided
+separately with each of such JAR files.
