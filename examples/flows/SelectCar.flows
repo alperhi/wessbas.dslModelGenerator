@@ -1,0 +1,14 @@
+Flow SelectCar {
+Node Start {
+	Transition { event="", guard="", action="", target=SelectCar }
+	
+	}
+Node SelectCar {
+	Transition { event="carChanged", guard="", action="carChanged", target=SelectCar }
+	Transition { event="selectCar", guard="", action="selectCar", target=End }
+	
+	}
+Node End {
+	
+	}
+}

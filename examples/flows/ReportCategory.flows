@@ -1,0 +1,23 @@
+Flow ReportCategory {
+Node Start {
+	Transition { event="", guard="", action="", target=SearchReportCategory }
+	
+	}
+Node SearchReportCategory {
+	Transition { event="search", guard="", action="search", target=SearchReportCategory }
+	Transition { event="delete", guard="", action="delete", target=SearchReportCategory }
+	Transition { event="categoryChanged", guard="", action="categoryChanged", target=SearchReportCategory }
+	Transition { event="open", guard="", action="openItem", target=EditReportCategory }
+	Transition { event="new", guard="", action="newItem", target=EditReportCategory }
+	Transition { event="exit", guard="", action="", target=End }
+	
+	}
+Node EditReportCategory {
+	Transition { event="cancel", guard="", action="", target=SearchReportCategory }
+	Transition { event="save", guard="", action="save", target=SearchReportCategory }
+	
+	}
+Node End {
+	
+	}
+}

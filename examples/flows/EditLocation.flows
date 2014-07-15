@@ -1,0 +1,17 @@
+Flow EditLocation {
+Node Start {
+	Transition { event="", guard="", action="", target=EditLocation }
+	
+	}
+Node EditLocation {
+	Transition { event="exit", guard="", action="", target=End }
+	Transition { event="save", guard="", action="saveLocation", target=Save }
+	
+	}
+Node End {
+	
+	}
+Node Save {
+	
+	}
+}

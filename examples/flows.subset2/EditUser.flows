@@ -1,0 +1,21 @@
+Flow EditUser {
+Node Start {
+	Transition { event="", guard="", action="", target=EditUser }
+	
+	}
+Node EditUser {
+	Transition { event="deleteReservation", guard="", action="deleteReservation", target=EditUser }
+	Transition { event="reservationChanged", guard="", action="reservationChanged", target=EditUser }
+	Transition { event="editReservation", guard="", action="editReservation", target=EditReservationCall }
+	Transition { event="save", guard="", action="saveUser", target=End }
+	Transition { event="", guard="End", action="", target=EditUser }
+	Transition { event="", guard="else", action="", target=EditUser }
+	
+	}
+Node EditReservationCall {
+	
+	}
+Node End {
+	
+	}
+}

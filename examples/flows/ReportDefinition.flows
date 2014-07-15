@@ -1,0 +1,27 @@
+Flow ReportDefinition {
+Node Start {
+	Transition { event="", guard="", action="", target=SearchReportDefinition }
+	
+	}
+Node SearchReportDefinition {
+	Transition { event="delete", guard="", action="delete", target=SearchReportDefinition }
+	Transition { event="search", guard="", action="search", target=SearchReportDefinition }
+	Transition { event="report", guard="", action="report", target=SearchReportDefinition }
+	Transition { event="categoryChanged", guard="", action="categoryChanged", target=SearchReportDefinition }
+	Transition { event="templateChanged", guard="", action="templateChanged", target=SearchReportDefinition }
+	Transition { event="definitionChanged", guard="", action="definitionChanged", target=SearchReportDefinition }
+	Transition { event="new", guard="", action="newItem", target=EditReportDefinition }
+	Transition { event="open", guard="", action="openItem", target=EditReportDefinition }
+	Transition { event="exit", guard="", action="", target=End }
+	
+	}
+Node EditReportDefinition {
+	Transition { event="report", guard="", action="report", target=EditReportDefinition }
+	Transition { event="cancel", guard="", action="", target=SearchReportDefinition }
+	Transition { event="save", guard="", action="save", target=SearchReportDefinition }
+	
+	}
+Node End {
+	
+	}
+}

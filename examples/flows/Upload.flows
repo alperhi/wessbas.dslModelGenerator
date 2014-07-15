@@ -1,0 +1,14 @@
+Flow Upload {
+Node Start {
+	Transition { event="", guard="", action="", target=Upload }
+	
+	}
+Node Upload {
+	Transition { event="upload", guard="", action="upload", target=Upload }
+	Transition { event="close", guard="", action="", target=End }
+	
+	}
+Node End {
+	
+	}
+}
