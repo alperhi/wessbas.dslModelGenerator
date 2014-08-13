@@ -29,6 +29,8 @@ import net.sf.markov4jmeter.m4jdslmodelgenerator.components.efsm.JavaProtocolLay
 import net.sf.markov4jmeter.m4jdslmodelgenerator.util.IdGenerator;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.util.XmiEcoreHandler;
 
+import org.eclipse.xtext.xtext.ecoreInference.TransformationException;
+
 /**
  * This is the main class of the M4J-DSL Model Generator, which builds models
  * that comply to the M4J-DSL. Each model represents a Markov4JMeter workload
@@ -128,6 +130,11 @@ public class M4jdslModelGenerator {
      *     which is generally given in Web applications; if this flag is set
      *     <code>true</code>, transitions to the exit state will be installed
      *     for all states of the Application Layer.
+     * @param useFullyQualifiedNames
+     *     <code>true</code> if and only if fully qualified state names shall
+     *     be used; if this flag is <code>false</code>, plain Node names will be
+     *     used as state names, without any related Flow names being added as
+     *     prefixes.
      *
      * @return
      *     the newly created M4J-DSL model.
@@ -141,8 +148,8 @@ public class M4jdslModelGenerator {
             final Properties behaviorModelsProperties,
             final String flowsDirectoryPath,
             final String graphOutputPath,
-            final boolean sessionsCanBeExitedAnytime)
-                    throws GeneratorException {
+            final boolean sessionsCanBeExitedAnytime,
+            final boolean useFullyQualifiedNames) throws GeneratorException {
 
         // to be returned;
         final WorkloadModel workloadModel =
@@ -191,7 +198,8 @@ public class M4jdslModelGenerator {
                 serviceRepository,
                 flowsDirectoryPath,
                 graphOutputPath,
-                sessionsCanBeExitedAnytime);
+                sessionsCanBeExitedAnytime,
+                useFullyQualifiedNames);
 
         // might throw a GeneratorException;
         this.installBehaviorModels(
@@ -263,6 +271,11 @@ public class M4jdslModelGenerator {
      *     which is generally given in Web applications; if this flag is set
      *     <code>true</code>, transitions to the exit state will be installed
      *     for all states of the Application Layer.
+     * @param useFullyQualifiedNames
+     *     <code>true</code> if and only if fully qualified state names shall
+     *     be used; if this flag is <code>false</code>, plain Node names will be
+     *     used as state names, without any related Flow names being added as
+     *     prefixes.
      *
      * @return
      *     M4J-DSL model with the installed Application Layer.
@@ -275,7 +288,8 @@ public class M4jdslModelGenerator {
             final ServiceRepository serviceRepository,
             final String flowsDirectoryPath,
             final String graphOutputPath,
-            final boolean sessionsCanBeExitedAnytime) throws GeneratorException {
+            final boolean sessionsCanBeExitedAnytime,
+            final boolean useFullyQualifiedNames) throws GeneratorException {
 
         final JavaProtocolLayerEFSMGenerator protocolLayerEFSMGenerator =
                 new JavaProtocolLayerEFSMGenerator(
@@ -295,6 +309,7 @@ public class M4jdslModelGenerator {
                         protocolLayerEFSMGenerator,
                         new IdGenerator("ASId"),
                         sessionsCanBeExitedAnytime,
+                        useFullyQualifiedNames,
                         flowFiles,
                         graphOutputPath);
 
@@ -348,7 +363,9 @@ public class M4jdslModelGenerator {
                 behaviorModelGenerator.generateBehaviorModels(
                         names,
                         filenames,
-                        behaviorFiles);
+                        behaviorFiles,
+                        workloadModel.getApplicationModel().
+                        getSessionLayerEFSM().getInitialState().getService());
 
         for (final BehaviorModel behaviorModel : behaviorModels) {
 
@@ -652,78 +669,103 @@ public class M4jdslModelGenerator {
     /**
      * Application main method.
      *
-     * @param argv
-     *     sequence of command-line parameters, providing required information
-     *     in the following order:
-     *     <i>workloadIntensityPropertiesFile</i>,
-     *     <i>behaviorModelsPropertiesFile</i>,
-     *     <i>flowsDirectoryPath</i>,
-     *     <i>xmiOutputFilePath</i>,
-     *     <i>graphOutputFilePath</i>.
+     * @param argv  sequence of command-line parameters.
      */
     public static void main (final String[] argv) {
 
-        if (argv.length < 5) {
+        try {
+            // initialize arguments handler for requesting the command line
+            // values afterwards via get() methods; might throw a
+            // NullPointer-, IllegalArgument- or ParseException;
+            CommandLineArgumentsHandler.init(argv);
 
+            // might throw FileNotFound-, Security-, IO- or GeneratorException;
+            M4jdslModelGenerator.readArgumentsAndGenerate();
+
+        } catch (final Exception ex) {
+
+            System.err.println(ex.getMessage() + ".\n");
             M4jdslModelGenerator.printUsage();
-
-        } else {
-
-            // TODO: make "graphFilePath" optional, use a command-line parser;
-            // TODO: retrieve "sessionsCanBeExitedAnytime" value as a command-line parameter;
-            final String workloadIntensityPropertiesFile = argv[0];
-            final String behaviorModelsPropertiesFile    = argv[1];
-            final String flowsDirectoryPath              = argv[2];
-            final String xmiOutputFilePath               = argv[3];
-            final String graphOutputFilePath             = argv[4];
-            final boolean sessionsCanBeExitedAnytime     = true;
-
-            final M4jdslModelGenerator m4jdslModelGenerator =
-                    new M4jdslModelGenerator();
-
-            try {
-
-                // might throw a FileNotFound- or IOException;
-                final Properties workloadIntensityProperties =
-                        M4jdslModelGenerator.loadProperties(
-                                workloadIntensityPropertiesFile);
-
-                // might throw a FileNotFound- or IOException;
-                final Properties behaviorModelsProperties =
-                        M4jdslModelGenerator.loadProperties(
-                                behaviorModelsPropertiesFile);
-
-                final WorkloadModel workloadModel =
-                        m4jdslModelGenerator.generateWorkloadModel(
-                                workloadIntensityProperties,
-                                behaviorModelsProperties,
-                                flowsDirectoryPath,
-                                graphOutputFilePath,
-                                sessionsCanBeExitedAnytime);
-
-
-                //final String outputFile = generatorProperties.
-                //        getProperty(M4jdslModelGenerator.PKEY_XMI_OUTPUT_FILE);
-                final String outputFile = xmiOutputFilePath;
-
-                if (outputFile == null) {
-
-                    throw new IOException("XMI output file is undefined");
-                }
-
-                // might throw an IOException;
-                XmiEcoreHandler.getInstance().ecoreToXMI(
-                        workloadModel,
-                        xmiOutputFilePath);
-
-                System.out.println("Finished.");
-
-            } catch (final Exception ex) {
-
-                System.err.println(ex.getMessage() + ".\n");
-                M4jdslModelGenerator.printUsage();
-            }
         }
+    }
+
+    /**
+     * Starts the generation process with the arguments which have been passed
+     * to command line.
+     *
+     * @throws IOException
+     * @throws SecurityException
+     * @throws FileNotFoundException
+     * @throws GeneratorException
+     *
+     * @throws TransformationException
+     *     if any critical error in the transformation process occurs.
+     */
+    private static void readArgumentsAndGenerate ()
+            throws FileNotFoundException,
+                   SecurityException,
+                   IOException,
+                   GeneratorException {
+
+        final M4jdslModelGenerator m4jdslModelGenerator =
+                new M4jdslModelGenerator();
+
+        final String flowsDirectoryPath =
+                CommandLineArgumentsHandler.getFlowsDirectoryPath();
+
+        final String workloadIntensityPropertiesFile =
+                CommandLineArgumentsHandler.getWorkloadIntensityPropertiesFile();
+
+        final String xmiOutputFilePath =
+                CommandLineArgumentsHandler.getXmiOutputFilePath();
+
+        // FIXME: NullPointerException is thrown, if the file is null;
+        final String behaviorModelsPropertiesFile =
+                CommandLineArgumentsHandler.getBehaviorModelsPropertiesFile();
+
+        final String graphOutputFilePath =
+                CommandLineArgumentsHandler.getGraphOutputFilePath();
+
+        final boolean sessionsCanBeExitedAnytime =
+                CommandLineArgumentsHandler.getSessionsCanBeExitedAnytime();
+
+        final boolean useFullyQualifiedNames =
+                CommandLineArgumentsHandler.getUseFullyQualifiedNames();
+
+        // might throw a FileNotFound- or IOException;
+        final Properties workloadIntensityProperties =
+                M4jdslModelGenerator.loadProperties(
+                        workloadIntensityPropertiesFile);
+
+        // might throw a FileNotFound- or IOException;
+        final Properties behaviorModelsProperties =
+                M4jdslModelGenerator.loadProperties(
+                        behaviorModelsPropertiesFile);
+
+        final WorkloadModel workloadModel =
+                m4jdslModelGenerator.generateWorkloadModel(
+                        workloadIntensityProperties,
+                        behaviorModelsProperties,
+                        flowsDirectoryPath,
+                        graphOutputFilePath,
+                        sessionsCanBeExitedAnytime,
+                        useFullyQualifiedNames);
+
+        //final String outputFile = generatorProperties.
+        //        getProperty(M4jdslModelGenerator.PKEY_XMI_OUTPUT_FILE);
+        final String outputFile = xmiOutputFilePath;
+
+        if (outputFile == null) {
+
+            throw new IOException("XMI output file is undefined");
+        }
+
+        // might throw an IOException;
+        XmiEcoreHandler.getInstance().ecoreToXMI(
+                workloadModel,
+                xmiOutputFilePath);
+
+        System.out.println("Finished.");
     }
 
     /**

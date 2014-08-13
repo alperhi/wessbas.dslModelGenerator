@@ -1,0 +1,325 @@
+Flow GenericFlow {
+Node _init {
+    Transition { event="", guard="", action="", target=_init }
+    Transition { event="", guard="", action="", target=doSupplierSetAllURLs }
+    Transition { event="", guard="", action="", target=doAtomicityTests }
+    Transition { event="", guard="", action="", target=doCacheTest }
+    Transition { event="", guard="", action="", target=doLogin }
+    Transition { event="", guard="", action="", target=doVehicleQuotes }
+    Transition { event="", guard="", action="", target=doAddToShoppingCart }
+    Transition { event="", guard="", action="", target=doDeferedPurchase }
+    Transition { event="", guard="", action="", target=doHome }
+    Transition { event="", guard="", action="", target=doShoppingCart }
+    Transition { event="", guard="", action="", target=doClearCart }
+    Transition { event="", guard="", action="", target=doPurchase }
+    Transition { event="", guard="", action="", target=doInventory }
+    Transition { event="", guard="", action="", target=doSell }
+    Transition { event="", guard="", action="", target=doLogout }
+    Transition { event="", guard="", action="", target=doCancelOrder }
+    Transition { event="", guard="", action="", target=doRemoveFromShoppingCart }
+    }
+Node doSupplierSetAllURLs {
+    Transition { event="", guard="", action="", target=_init }
+    Transition { event="", guard="", action="", target=doSupplierSetAllURLs }
+    Transition { event="", guard="", action="", target=doAtomicityTests }
+    Transition { event="", guard="", action="", target=doCacheTest }
+    Transition { event="", guard="", action="", target=doLogin }
+    Transition { event="", guard="", action="", target=doVehicleQuotes }
+    Transition { event="", guard="", action="", target=doAddToShoppingCart }
+    Transition { event="", guard="", action="", target=doDeferedPurchase }
+    Transition { event="", guard="", action="", target=doHome }
+    Transition { event="", guard="", action="", target=doShoppingCart }
+    Transition { event="", guard="", action="", target=doClearCart }
+    Transition { event="", guard="", action="", target=doPurchase }
+    Transition { event="", guard="", action="", target=doInventory }
+    Transition { event="", guard="", action="", target=doSell }
+    Transition { event="", guard="", action="", target=doLogout }
+    Transition { event="", guard="", action="", target=doCancelOrder }
+    Transition { event="", guard="", action="", target=doRemoveFromShoppingCart }
+    }
+Node doAtomicityTests {
+    Transition { event="", guard="", action="", target=_init }
+    Transition { event="", guard="", action="", target=doSupplierSetAllURLs }
+    Transition { event="", guard="", action="", target=doAtomicityTests }
+    Transition { event="", guard="", action="", target=doCacheTest }
+    Transition { event="", guard="", action="", target=doLogin }
+    Transition { event="", guard="", action="", target=doVehicleQuotes }
+    Transition { event="", guard="", action="", target=doAddToShoppingCart }
+    Transition { event="", guard="", action="", target=doDeferedPurchase }
+    Transition { event="", guard="", action="", target=doHome }
+    Transition { event="", guard="", action="", target=doShoppingCart }
+    Transition { event="", guard="", action="", target=doClearCart }
+    Transition { event="", guard="", action="", target=doPurchase }
+    Transition { event="", guard="", action="", target=doInventory }
+    Transition { event="", guard="", action="", target=doSell }
+    Transition { event="", guard="", action="", target=doLogout }
+    Transition { event="", guard="", action="", target=doCancelOrder }
+    Transition { event="", guard="", action="", target=doRemoveFromShoppingCart }
+    }
+Node doCacheTest {
+    Transition { event="", guard="", action="", target=_init }
+    Transition { event="", guard="", action="", target=doSupplierSetAllURLs }
+    Transition { event="", guard="", action="", target=doAtomicityTests }
+    Transition { event="", guard="", action="", target=doCacheTest }
+    Transition { event="", guard="", action="", target=doLogin }
+    Transition { event="", guard="", action="", target=doVehicleQuotes }
+    Transition { event="", guard="", action="", target=doAddToShoppingCart }
+    Transition { event="", guard="", action="", target=doDeferedPurchase }
+    Transition { event="", guard="", action="", target=doHome }
+    Transition { event="", guard="", action="", target=doShoppingCart }
+    Transition { event="", guard="", action="", target=doClearCart }
+    Transition { event="", guard="", action="", target=doPurchase }
+    Transition { event="", guard="", action="", target=doInventory }
+    Transition { event="", guard="", action="", target=doSell }
+    Transition { event="", guard="", action="", target=doLogout }
+    Transition { event="", guard="", action="", target=doCancelOrder }
+    Transition { event="", guard="", action="", target=doRemoveFromShoppingCart }
+    }
+Node doLogin {
+    Transition { event="", guard="", action="", target=_init }
+    Transition { event="", guard="", action="", target=doSupplierSetAllURLs }
+    Transition { event="", guard="", action="", target=doAtomicityTests }
+    Transition { event="", guard="", action="", target=doCacheTest }
+    Transition { event="", guard="", action="", target=doLogin }
+    Transition { event="", guard="", action="", target=doVehicleQuotes }
+    Transition { event="", guard="", action="", target=doAddToShoppingCart }
+    Transition { event="", guard="", action="", target=doDeferedPurchase }
+    Transition { event="", guard="", action="", target=doHome }
+    Transition { event="", guard="", action="", target=doShoppingCart }
+    Transition { event="", guard="", action="", target=doClearCart }
+    Transition { event="", guard="", action="", target=doPurchase }
+    Transition { event="", guard="", action="", target=doInventory }
+    Transition { event="", guard="", action="", target=doSell }
+    Transition { event="", guard="", action="", target=doLogout }
+    Transition { event="", guard="", action="", target=doCancelOrder }
+    Transition { event="", guard="", action="", target=doRemoveFromShoppingCart }
+    }
+Node doVehicleQuotes {
+    Transition { event="", guard="", action="", target=_init }
+    Transition { event="", guard="", action="", target=doSupplierSetAllURLs }
+    Transition { event="", guard="", action="", target=doAtomicityTests }
+    Transition { event="", guard="", action="", target=doCacheTest }
+    Transition { event="", guard="", action="", target=doLogin }
+    Transition { event="", guard="", action="", target=doVehicleQuotes }
+    Transition { event="", guard="", action="", target=doAddToShoppingCart }
+    Transition { event="", guard="", action="", target=doDeferedPurchase }
+    Transition { event="", guard="", action="", target=doHome }
+    Transition { event="", guard="", action="", target=doShoppingCart }
+    Transition { event="", guard="", action="", target=doClearCart }
+    Transition { event="", guard="", action="", target=doPurchase }
+    Transition { event="", guard="", action="", target=doInventory }
+    Transition { event="", guard="", action="", target=doSell }
+    Transition { event="", guard="", action="", target=doLogout }
+    Transition { event="", guard="", action="", target=doCancelOrder }
+    Transition { event="", guard="", action="", target=doRemoveFromShoppingCart }
+    }
+Node doAddToShoppingCart {
+    Transition { event="", guard="", action="", target=_init }
+    Transition { event="", guard="", action="", target=doSupplierSetAllURLs }
+    Transition { event="", guard="", action="", target=doAtomicityTests }
+    Transition { event="", guard="", action="", target=doCacheTest }
+    Transition { event="", guard="", action="", target=doLogin }
+    Transition { event="", guard="", action="", target=doVehicleQuotes }
+    Transition { event="", guard="", action="", target=doAddToShoppingCart }
+    Transition { event="", guard="", action="", target=doDeferedPurchase }
+    Transition { event="", guard="", action="", target=doHome }
+    Transition { event="", guard="", action="", target=doShoppingCart }
+    Transition { event="", guard="", action="", target=doClearCart }
+    Transition { event="", guard="", action="", target=doPurchase }
+    Transition { event="", guard="", action="", target=doInventory }
+    Transition { event="", guard="", action="", target=doSell }
+    Transition { event="", guard="", action="", target=doLogout }
+    Transition { event="", guard="", action="", target=doCancelOrder }
+    Transition { event="", guard="", action="", target=doRemoveFromShoppingCart }
+    }
+Node doDeferedPurchase {
+    Transition { event="", guard="", action="", target=_init }
+    Transition { event="", guard="", action="", target=doSupplierSetAllURLs }
+    Transition { event="", guard="", action="", target=doAtomicityTests }
+    Transition { event="", guard="", action="", target=doCacheTest }
+    Transition { event="", guard="", action="", target=doLogin }
+    Transition { event="", guard="", action="", target=doVehicleQuotes }
+    Transition { event="", guard="", action="", target=doAddToShoppingCart }
+    Transition { event="", guard="", action="", target=doDeferedPurchase }
+    Transition { event="", guard="", action="", target=doHome }
+    Transition { event="", guard="", action="", target=doShoppingCart }
+    Transition { event="", guard="", action="", target=doClearCart }
+    Transition { event="", guard="", action="", target=doPurchase }
+    Transition { event="", guard="", action="", target=doInventory }
+    Transition { event="", guard="", action="", target=doSell }
+    Transition { event="", guard="", action="", target=doLogout }
+    Transition { event="", guard="", action="", target=doCancelOrder }
+    Transition { event="", guard="", action="", target=doRemoveFromShoppingCart }
+    }
+Node doHome {
+    Transition { event="", guard="", action="", target=_init }
+    Transition { event="", guard="", action="", target=doSupplierSetAllURLs }
+    Transition { event="", guard="", action="", target=doAtomicityTests }
+    Transition { event="", guard="", action="", target=doCacheTest }
+    Transition { event="", guard="", action="", target=doLogin }
+    Transition { event="", guard="", action="", target=doVehicleQuotes }
+    Transition { event="", guard="", action="", target=doAddToShoppingCart }
+    Transition { event="", guard="", action="", target=doDeferedPurchase }
+    Transition { event="", guard="", action="", target=doHome }
+    Transition { event="", guard="", action="", target=doShoppingCart }
+    Transition { event="", guard="", action="", target=doClearCart }
+    Transition { event="", guard="", action="", target=doPurchase }
+    Transition { event="", guard="", action="", target=doInventory }
+    Transition { event="", guard="", action="", target=doSell }
+    Transition { event="", guard="", action="", target=doLogout }
+    Transition { event="", guard="", action="", target=doCancelOrder }
+    Transition { event="", guard="", action="", target=doRemoveFromShoppingCart }
+    }
+Node doShoppingCart {
+    Transition { event="", guard="", action="", target=_init }
+    Transition { event="", guard="", action="", target=doSupplierSetAllURLs }
+    Transition { event="", guard="", action="", target=doAtomicityTests }
+    Transition { event="", guard="", action="", target=doCacheTest }
+    Transition { event="", guard="", action="", target=doLogin }
+    Transition { event="", guard="", action="", target=doVehicleQuotes }
+    Transition { event="", guard="", action="", target=doAddToShoppingCart }
+    Transition { event="", guard="", action="", target=doDeferedPurchase }
+    Transition { event="", guard="", action="", target=doHome }
+    Transition { event="", guard="", action="", target=doShoppingCart }
+    Transition { event="", guard="", action="", target=doClearCart }
+    Transition { event="", guard="", action="", target=doPurchase }
+    Transition { event="", guard="", action="", target=doInventory }
+    Transition { event="", guard="", action="", target=doSell }
+    Transition { event="", guard="", action="", target=doLogout }
+    Transition { event="", guard="", action="", target=doCancelOrder }
+    Transition { event="", guard="", action="", target=doRemoveFromShoppingCart }
+    }
+Node doClearCart {
+    Transition { event="", guard="", action="", target=_init }
+    Transition { event="", guard="", action="", target=doSupplierSetAllURLs }
+    Transition { event="", guard="", action="", target=doAtomicityTests }
+    Transition { event="", guard="", action="", target=doCacheTest }
+    Transition { event="", guard="", action="", target=doLogin }
+    Transition { event="", guard="", action="", target=doVehicleQuotes }
+    Transition { event="", guard="", action="", target=doAddToShoppingCart }
+    Transition { event="", guard="", action="", target=doDeferedPurchase }
+    Transition { event="", guard="", action="", target=doHome }
+    Transition { event="", guard="", action="", target=doShoppingCart }
+    Transition { event="", guard="", action="", target=doClearCart }
+    Transition { event="", guard="", action="", target=doPurchase }
+    Transition { event="", guard="", action="", target=doInventory }
+    Transition { event="", guard="", action="", target=doSell }
+    Transition { event="", guard="", action="", target=doLogout }
+    Transition { event="", guard="", action="", target=doCancelOrder }
+    Transition { event="", guard="", action="", target=doRemoveFromShoppingCart }
+    }
+Node doPurchase {
+    Transition { event="", guard="", action="", target=_init }
+    Transition { event="", guard="", action="", target=doSupplierSetAllURLs }
+    Transition { event="", guard="", action="", target=doAtomicityTests }
+    Transition { event="", guard="", action="", target=doCacheTest }
+    Transition { event="", guard="", action="", target=doLogin }
+    Transition { event="", guard="", action="", target=doVehicleQuotes }
+    Transition { event="", guard="", action="", target=doAddToShoppingCart }
+    Transition { event="", guard="", action="", target=doDeferedPurchase }
+    Transition { event="", guard="", action="", target=doHome }
+    Transition { event="", guard="", action="", target=doShoppingCart }
+    Transition { event="", guard="", action="", target=doClearCart }
+    Transition { event="", guard="", action="", target=doPurchase }
+    Transition { event="", guard="", action="", target=doInventory }
+    Transition { event="", guard="", action="", target=doSell }
+    Transition { event="", guard="", action="", target=doLogout }
+    Transition { event="", guard="", action="", target=doCancelOrder }
+    Transition { event="", guard="", action="", target=doRemoveFromShoppingCart }
+    }
+Node doInventory {
+    Transition { event="", guard="", action="", target=_init }
+    Transition { event="", guard="", action="", target=doSupplierSetAllURLs }
+    Transition { event="", guard="", action="", target=doAtomicityTests }
+    Transition { event="", guard="", action="", target=doCacheTest }
+    Transition { event="", guard="", action="", target=doLogin }
+    Transition { event="", guard="", action="", target=doVehicleQuotes }
+    Transition { event="", guard="", action="", target=doAddToShoppingCart }
+    Transition { event="", guard="", action="", target=doDeferedPurchase }
+    Transition { event="", guard="", action="", target=doHome }
+    Transition { event="", guard="", action="", target=doShoppingCart }
+    Transition { event="", guard="", action="", target=doClearCart }
+    Transition { event="", guard="", action="", target=doPurchase }
+    Transition { event="", guard="", action="", target=doInventory }
+    Transition { event="", guard="", action="", target=doSell }
+    Transition { event="", guard="", action="", target=doLogout }
+    Transition { event="", guard="", action="", target=doCancelOrder }
+    Transition { event="", guard="", action="", target=doRemoveFromShoppingCart }
+    }
+Node doSell {
+    Transition { event="", guard="", action="", target=_init }
+    Transition { event="", guard="", action="", target=doSupplierSetAllURLs }
+    Transition { event="", guard="", action="", target=doAtomicityTests }
+    Transition { event="", guard="", action="", target=doCacheTest }
+    Transition { event="", guard="", action="", target=doLogin }
+    Transition { event="", guard="", action="", target=doVehicleQuotes }
+    Transition { event="", guard="", action="", target=doAddToShoppingCart }
+    Transition { event="", guard="", action="", target=doDeferedPurchase }
+    Transition { event="", guard="", action="", target=doHome }
+    Transition { event="", guard="", action="", target=doShoppingCart }
+    Transition { event="", guard="", action="", target=doClearCart }
+    Transition { event="", guard="", action="", target=doPurchase }
+    Transition { event="", guard="", action="", target=doInventory }
+    Transition { event="", guard="", action="", target=doSell }
+    Transition { event="", guard="", action="", target=doLogout }
+    Transition { event="", guard="", action="", target=doCancelOrder }
+    Transition { event="", guard="", action="", target=doRemoveFromShoppingCart }
+    }
+Node doLogout {
+    Transition { event="", guard="", action="", target=_init }
+    Transition { event="", guard="", action="", target=doSupplierSetAllURLs }
+    Transition { event="", guard="", action="", target=doAtomicityTests }
+    Transition { event="", guard="", action="", target=doCacheTest }
+    Transition { event="", guard="", action="", target=doLogin }
+    Transition { event="", guard="", action="", target=doVehicleQuotes }
+    Transition { event="", guard="", action="", target=doAddToShoppingCart }
+    Transition { event="", guard="", action="", target=doDeferedPurchase }
+    Transition { event="", guard="", action="", target=doHome }
+    Transition { event="", guard="", action="", target=doShoppingCart }
+    Transition { event="", guard="", action="", target=doClearCart }
+    Transition { event="", guard="", action="", target=doPurchase }
+    Transition { event="", guard="", action="", target=doInventory }
+    Transition { event="", guard="", action="", target=doSell }
+    Transition { event="", guard="", action="", target=doLogout }
+    Transition { event="", guard="", action="", target=doCancelOrder }
+    Transition { event="", guard="", action="", target=doRemoveFromShoppingCart }
+    }
+Node doCancelOrder {
+    Transition { event="", guard="", action="", target=_init }
+    Transition { event="", guard="", action="", target=doSupplierSetAllURLs }
+    Transition { event="", guard="", action="", target=doAtomicityTests }
+    Transition { event="", guard="", action="", target=doCacheTest }
+    Transition { event="", guard="", action="", target=doLogin }
+    Transition { event="", guard="", action="", target=doVehicleQuotes }
+    Transition { event="", guard="", action="", target=doAddToShoppingCart }
+    Transition { event="", guard="", action="", target=doDeferedPurchase }
+    Transition { event="", guard="", action="", target=doHome }
+    Transition { event="", guard="", action="", target=doShoppingCart }
+    Transition { event="", guard="", action="", target=doClearCart }
+    Transition { event="", guard="", action="", target=doPurchase }
+    Transition { event="", guard="", action="", target=doInventory }
+    Transition { event="", guard="", action="", target=doSell }
+    Transition { event="", guard="", action="", target=doLogout }
+    Transition { event="", guard="", action="", target=doCancelOrder }
+    Transition { event="", guard="", action="", target=doRemoveFromShoppingCart }
+    }
+Node doRemoveFromShoppingCart {
+    Transition { event="", guard="", action="", target=_init }
+    Transition { event="", guard="", action="", target=doSupplierSetAllURLs }
+    Transition { event="", guard="", action="", target=doAtomicityTests }
+    Transition { event="", guard="", action="", target=doCacheTest }
+    Transition { event="", guard="", action="", target=doLogin }
+    Transition { event="", guard="", action="", target=doVehicleQuotes }
+    Transition { event="", guard="", action="", target=doAddToShoppingCart }
+    Transition { event="", guard="", action="", target=doDeferedPurchase }
+    Transition { event="", guard="", action="", target=doHome }
+    Transition { event="", guard="", action="", target=doShoppingCart }
+    Transition { event="", guard="", action="", target=doClearCart }
+    Transition { event="", guard="", action="", target=doPurchase }
+    Transition { event="", guard="", action="", target=doInventory }
+    Transition { event="", guard="", action="", target=doSell }
+    Transition { event="", guard="", action="", target=doLogout }
+    Transition { event="", guard="", action="", target=doCancelOrder }
+    Transition { event="", guard="", action="", target=doRemoveFromShoppingCart }
+    }
+}

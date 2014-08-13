@@ -67,7 +67,8 @@ public class ApplicationModelGenerator {
 
         // might throw a GeneratorException;
         final SessionLayerEFSM sessionLayerEFSM =
-                this.sessionLayerEFSMGenerator.generateSessionLayerEFSM();
+                this.sessionLayerEFSMGenerator.
+                generateSessionLayerEFSMAndWriteDotGraph();
 
         applicationModel.setSessionLayerEFSM(sessionLayerEFSM);
 
