@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="ASCII"?>
+<m4jdsl:WorkloadModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:m4jdsl="http://m4jdsl/1.0" xsi:schemaLocation="http://m4jdsl/1.0 m4jdsl.ecore">
+  <workloadIntensity xsi:type="m4jdsl:ConstantWorkloadIntensity" formula="1" numberOfSessions="1"/>
+  <applicationModel>
+    <sessionLayerEFSM initialState="ASId2__init">
+      <applicationStates eId="ASId2__init">
+        <service name="_init"/>
+        <protocolDetails initialState="PS2">
+          <protocolStates eId="PS2">
+            <request xsi:type="m4jdsl:JavaRequest" eId="R1"/>
+            <outgoingTransitions guard="&lt;guard>" targetState="PS1" action="&lt;action>"/>
+          </protocolStates>
+          <exitState eId="PS1"/>
+        </protocolDetails>
+        <outgoingTransitions targetState="$" action="" guard=""/>
+        <outgoingTransitions targetState="ASId2__init" action="" guard=""/>
+        <outgoingTransitions targetState="ASId3_doSupplierSetAllURLs" action="" guard=""/>
+        <outgoingTransitions targetState="ASId4_doAtomicityTests" action="" guard=""/>
+      </applicationStates>
+      <applicationStates eId="ASId4_doAtomicityTests">
+        <service name="doAtomicityTests"/>
+        <protocolDetails initialState="PS6">
+          <protocolStates eId="PS6">
+            <request xsi:type="m4jdsl:JavaRequest" eId="R3"/>
+            <outgoingTransitions guard="&lt;guard>" targetState="PS5" action="&lt;action>"/>
+          </protocolStates>
+          <exitState eId="PS5"/>
+        </protocolDetails>
+        <outgoingTransitions targetState="$" action="" guard=""/>
+        <outgoingTransitions targetState="ASId2__init" action="" guard=""/>
+        <outgoingTransitions targetState="ASId3_doSupplierSetAllURLs" action="" guard=""/>
+        <outgoingTransitions targetState="ASId4_doAtomicityTests" action="" guard=""/>
+      </applicationStates>
+      <applicationStates eId="ASId3_doSupplierSetAllURLs">
+        <service name="doSupplierSetAllURLs"/>
+        <protocolDetails initialState="PS4">
+          <protocolStates eId="PS4">
+            <request xsi:type="m4jdsl:JavaRequest" eId="R2"/>
+            <outgoingTransitions guard="&lt;guard>" targetState="PS3" action="&lt;action>"/>
+          </protocolStates>
+          <exitState eId="PS3"/>
+        </protocolDetails>
+        <outgoingTransitions targetState="$" action="" guard=""/>
+        <outgoingTransitions targetState="ASId2__init" action="" guard=""/>
+        <outgoingTransitions targetState="ASId3_doSupplierSetAllURLs" action="" guard=""/>
+        <outgoingTransitions targetState="ASId4_doAtomicityTests" action="" guard=""/>
+      </applicationStates>
+      <exitState eId="$"/>
+    </sessionLayerEFSM>
+  </applicationModel>
+  <behaviorMix>
+    <relativeFrequencies behaviorModel="//@behaviorModels.1" value="0.5"/>
+    <relativeFrequencies behaviorModel="//@behaviorModels.0" value="0.5"/>
+  </behaviorMix>
+  <behaviorModels name="Behavior Model 1" filename="output/filename1.csv" initialState="MSId2__init">
+    <markovStates eId="MSId2__init" service="//@applicationModel/@sessionLayerEFSM/@applicationStates.0/@service"/>
+    <markovStates eId="MSId3_doAtomicityTests" service="//@applicationModel/@sessionLayerEFSM/@applicationStates.1/@service"/>
+    <markovStates eId="MSId4_doSupplierSetAllURLs" service="//@applicationModel/@sessionLayerEFSM/@applicationStates.2/@service"/>
+    <exitState eId="MSId1"/>
+  </behaviorModels>
+  <behaviorModels name="Behavior Model 2" filename="output/filename2.csv" initialState="MSId6__init">
+    <markovStates eId="MSId6__init" service="//@applicationModel/@sessionLayerEFSM/@applicationStates.0/@service"/>
+    <markovStates eId="MSId7_doAtomicityTests" service="//@applicationModel/@sessionLayerEFSM/@applicationStates.1/@service"/>
+    <markovStates eId="MSId8_doSupplierSetAllURLs" service="//@applicationModel/@sessionLayerEFSM/@applicationStates.2/@service"/>
+    <exitState eId="MSId5"/>
+  </behaviorModels>
+</m4jdsl:WorkloadModel>

@@ -35,15 +35,15 @@ import org.apache.commons.cli.ParseException;
  *       <td> Output file for the M4J-DSL Model, e.g., "workloadmodel.xmi".
  *       </td>
  *
+ *   <tr><td><code> behavior </code></td>
+ *       <td><code> b        </code></td>
+ *       <td> Properties file which specifies the Behavior Mix and the user
+ *       behavior information to be included to the Behavior Models optionally,
+ *       e.g., "behaviorModels.properties". </td>
+ *
  *   <tr><td colspan="3" align="center">
  *       <i>Optional Arguments</i>
  *       </td></tr>
- *
- *   <tr><td><code> behavior </code></td>
- *       <td><code> b        </code></td>
- *       <td> (Optional) properties file which specifies the user behavior
- *       information to be included optionally, e.g.,
- *       "behaviorModels.properties". </td>
  *
  *   <tr><td><code> graph </code></td>
  *       <td><code> g     </code></td>
@@ -138,17 +138,17 @@ public class CommandLineArgumentsHandler {
                     "workloadmodel.xmi",                   // argName;
                     false);                                // !hasOptionalArg;
 
-    /** (Optional) properties file which specifies the user behavior information
-     *  to be included optionally. */
+    /** Properties file which specifies the Behavior Mix and the user behavior
+     *  information to be included to the Behavior Models optionally. */
     private final static Option BEHAVIOR_MODELS_PROPERTIES_FILE =
             CmdlOptionFactory.createOption(
                     "b",                                   // opt;
                     "behavior",                            // longOpt;
                     "(Optional) properties file which "    // description;
                     + "specifies the user behavior information to be included optionally.",
-                    false,                                 // !isRequired;
-                    "behaviorModels.properties",                                    // argName;
-                    false);                                // !isRequired;
+                    true,                                 // !isRequired;
+                    "behaviorModels.properties",           // argName;
+                    false);                                // !hasOptionalArg;
 
     /** (Optional) output file for the DOT graph that represents the Session
      *  Layer EFSM. */
@@ -197,26 +197,31 @@ public class CommandLineArgumentsHandler {
     /* *********************  global (non-final) fields  ******************** */
 
 
-    /** Input file path which has been read from command-line. */
+    /** Path to the directory of input Flows that indicate the Session Layer
+     *  EFSM structure. */
     private static String flowsDirectoryPath;
 
-    /** Test Plan properties file path which has been read from command-line. */
+    /** Properties file which provides the workload intensity information. */
     private static String workloadIntensityPropertiesFile;
 
-    /** Output file path which has been read from command-line. */
+    /** Output file for the M4J-DSL Model. */
     private static String xmiOutputFilePath;
 
-    /** (Optional) line-break type which has been read from command-line. */
+    /** Properties file which specifies the Behavior Mix and the user behavior
+     *  information to be included to the Behavior Models optionally. */
     private static String behaviorModelsPropertiesFile;
 
-    /** (Optional) output path which has been read from command-line. */
+    /** (Optional) output file for the DOT graph that represents the Session
+     *  Layer EFSM. */
     private static String graphOutputFilePath;
 
-    /** (Optional) generator properties file path which has been read from
-     *  command-line. */
+    /** (Optional) flag that indicates whether sessions can by exited at any
+     *  time, e.g., by closing a browser window in session-based Web
+     *  applications. */
     private static boolean sessionsCanBeExitedAnytime;
 
-    /** Flag indicating whether a test run shall be started immediately. */
+    /** (Optional) flag that indicates whether fully qualified names shall be
+     *  used for services/states. */
     private static boolean useFullyQualifiedNames;
 
     /** Command-line options to be parsed. */
@@ -256,12 +261,12 @@ public class CommandLineArgumentsHandler {
 
     /* **************************  public methods  ************************** */
 
-    // TODO: revise remaining comments!
 
     /**
-     * Returns the input file path which has been read from command-line.
+     * Returns the path to the directory of input Flows that indicate the
+     * Session Layer EFSM structure.
      *
-     * @return  a valid <code>String</code> which represents a file path.
+     * @return  a valid <code>String</code> which denotes a file path.
      */
     public static String getFlowsDirectoryPath () {
 
@@ -269,9 +274,10 @@ public class CommandLineArgumentsHandler {
     }
 
     /**
-     * Returns the output file path which has been read from command-line.
+     * Returns the properties file which provides the workload intensity
+     * information.
      *
-     * @return  a valid <code>String</code> which represents a file path.
+     * @return  a valid <code>String</code> which denotes a file path.
      */
     public static String getWorkloadIntensityPropertiesFile () {
 
@@ -279,12 +285,9 @@ public class CommandLineArgumentsHandler {
     }
 
     /**
-     * Returns the Test Plan properties file path which has been read from
-     * command-line.
+     * Returns the Output file for the M4J-DSL Model.
      *
-     * @return
-     *     a valid <code>String</code> which represents a file path, or
-     *     <code>null</code> if no file path has been read.
+     * @return  a valid <code>String</code> which denotes a file path.
      */
     public static String getXmiOutputFilePath () {
 
@@ -292,10 +295,10 @@ public class CommandLineArgumentsHandler {
     }
 
     /**
-     * Returns the (optional) line-break value which has been read from
-     * command-line.
+     * Returns the properties file which specifies the Behavior Mix and the user
+     * behavior information to be included to the Behavior Models optionally.
      *
-     * @return  an integer value which represents the line-break type.
+     * @return  a valid <code>String</code> which denotes a file path.
      */
     public static String getBehaviorModelsPropertiesFile () {
 
@@ -303,11 +306,12 @@ public class CommandLineArgumentsHandler {
     }
 
     /**
-     * Returns the (optional) output path which has been read from command-line.
+     * Returns the (optional) output file for the DOT graph that represents the
+     * Session Layer EFSM.
      *
      * @return
-     *     a <code>String</code> which denotes the location of an (existing)
-     *     directory.
+     *     a valid <code>String</code> which denotes a file path, or
+     *     <code>null</code> if no file path has been specified.
      */
     public static String getGraphOutputFilePath () {
 
@@ -315,12 +319,13 @@ public class CommandLineArgumentsHandler {
     }
 
     /**
-     * Returns the (optional) generator properties file path which has been read
-     * from command-line.
+     * Returns the (optional) flag that indicates whether sessions can by exited
+     * at any time, e.g., by closing a browser window in session-based Web
+     * applications.
      *
      * @return
-     *     a valid <code>String</code> which represents a file path, or
-     *     <code>null</code> if no file path has been read.
+     *     the flag that has been read from command-line, or <code>true</code>
+     *     by default.
      */
     public static boolean getSessionsCanBeExitedAnytime () {
 
@@ -328,11 +333,12 @@ public class CommandLineArgumentsHandler {
     }
 
     /**
-     * Returns the filter flags which have been read from command-line.
+     * Returns the (optional) flag that indicates whether fully qualified names
+     * shall be used for services/states.
      *
      * @return
-     *     a valid <code>String</code>, or <code>null</code> if no filter flags
-     *     have been read.
+     *     the flag that has been read from command-line, or <code>true</code>
+     *     by default.
      */
     public static boolean getUseFullyQualifiedNames () {
 

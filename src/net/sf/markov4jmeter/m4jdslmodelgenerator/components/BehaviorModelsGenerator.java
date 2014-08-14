@@ -201,7 +201,10 @@ public class BehaviorModelsGenerator {
         // registered in the service repository; now, add the transitions
         // between the states, with the use of the repository;
 
-        this.installMarkovTransitions(behaviorModel, behaviorFile);
+        if (behaviorFile != null) {
+
+            this.installMarkovTransitions(behaviorModel, behaviorFile);
+        }
 
         return behaviorModel;
     }

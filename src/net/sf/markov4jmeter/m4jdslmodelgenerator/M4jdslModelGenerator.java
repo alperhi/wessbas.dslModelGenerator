@@ -551,7 +551,7 @@ public class M4jdslModelGenerator {
 
             final String[] parameters = parameterSequence.split("\\s*;\\s*");
 
-            if (parameters.length < 4) {
+            if (parameters.length < 3) {
 
                 final String message = String.format(
                         M4jdslModelGenerator.
@@ -590,10 +590,12 @@ public class M4jdslModelGenerator {
     private BehaviorModelParameters extractBehaviorModelParameters (
             final String[] parameters) throws GeneratorException {
 
-        final String name             = parameters[0];
-        final String filename         = parameters[1];
-        final String frequencyStr     = parameters[2];
-        final String behaviorFilePath = parameters[3];
+        final String name         = parameters[0];
+        final String filename     = parameters[1];
+        final String frequencyStr = parameters[2];
+
+        final String behaviorFilePath =
+                (parameters.length >= 4) ? parameters[3] : null;
 
         final double frequency;
 
@@ -613,7 +615,8 @@ public class M4jdslModelGenerator {
         }
 
         // might throw NullPointerException (should never happen here);
-        final File behaviorFile = new File(behaviorFilePath);
+        final File behaviorFile =
+                (behaviorFilePath != null) ? new File(behaviorFilePath) : null;
 
         return new BehaviorModelParameters(
                 name,
@@ -719,7 +722,6 @@ public class M4jdslModelGenerator {
         final String xmiOutputFilePath =
                 CommandLineArgumentsHandler.getXmiOutputFilePath();
 
-        // FIXME: NullPointerException is thrown, if the file is null;
         final String behaviorModelsPropertiesFile =
                 CommandLineArgumentsHandler.getBehaviorModelsPropertiesFile();
 
@@ -739,8 +741,9 @@ public class M4jdslModelGenerator {
 
         // might throw a FileNotFound- or IOException;
         final Properties behaviorModelsProperties =
-                M4jdslModelGenerator.loadProperties(
-                        behaviorModelsPropertiesFile);
+                (behaviorModelsPropertiesFile != null) ?
+                        M4jdslModelGenerator.loadProperties(
+                                behaviorModelsPropertiesFile) : null;
 
         final WorkloadModel workloadModel =
                 m4jdslModelGenerator.generateWorkloadModel(
