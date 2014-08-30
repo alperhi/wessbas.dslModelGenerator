@@ -142,7 +142,7 @@ public class FlowSessionLayerEFSMGenerator extends
     public FlowSessionLayerEFSMGenerator (
             final M4jdslFactory m4jdslFactory,
             final ServiceRepository serviceRepository,
-            final JavaProtocolLayerEFSMGenerator protocolLayerEFSMGenerator,
+            final AbstractProtocolLayerEFSMGenerator protocolLayerEFSMGenerator,
             final IdGenerator idGenerator,
             final boolean sessionsCanBeExitedAnytime,
             final boolean useFullyQualifiedNames,
@@ -456,14 +456,16 @@ public class FlowSessionLayerEFSMGenerator extends
             final SessionLayerEFSM sessionLayerEFSM,
             final HashMap<Service, ApplicationState> serviceAppStateHashMap) throws GeneratorException {
 
-        final Service initialService = this.createService(
-                FlowSessionLayerEFSMGenerator.INITIAL_STATE__SERVICE_NAME);
+        final String serviceName =
+                FlowSessionLayerEFSMGenerator.INITIAL_STATE__SERVICE_NAME;
+
+        final Service initialService = this.createService(serviceName);
 
         // might throw a GeneratorException;
         final ApplicationState applicationInitialState =
                 this.createApplicationState(
                         initialService,
-                        this.createDefaultProtocolLayerEFSM());  // FIXME: create specific Protocol Layer EFSM;
+                        this.createDefaultProtocolLayerEFSM(serviceName));  // FIXME: create specific Protocol Layer EFSM;
 
         applicationInitialState.setEId(
                 FlowSessionLayerEFSMGenerator.INITIAL_STATE__SERVICE_NAME);
@@ -601,7 +603,7 @@ public class FlowSessionLayerEFSMGenerator extends
 
             // might throw a GeneratorException;
             final ProtocolLayerEFSM protocolLayerEFSM =
-                    this.createDefaultProtocolLayerEFSM();  // FIXME: add generic Protocol Layer EFSM;
+                    this.createDefaultProtocolLayerEFSM(serviceName);  // FIXME: add generic Protocol Layer EFSM;
 
             // create new Application State for service;
             final ApplicationState applicationState =
@@ -1049,11 +1051,12 @@ public class FlowSessionLayerEFSMGenerator extends
                 nodeName;
     }
 
-    private ProtocolLayerEFSM createDefaultProtocolLayerEFSM () throws GeneratorException {
+    private ProtocolLayerEFSM createDefaultProtocolLayerEFSM (
+            final String serviceName) throws GeneratorException {
 
         // might throw a GeneratorException;
         final ProtocolLayerEFSM protocolLayerEFSM =
-                this.protocolLayerEFSMGenerator.generateProtocolLayerEFSM();
+                this.protocolLayerEFSMGenerator.generateProtocolLayerEFSM(serviceName);
 
         return protocolLayerEFSM;
     }

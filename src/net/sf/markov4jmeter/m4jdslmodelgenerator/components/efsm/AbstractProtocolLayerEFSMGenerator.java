@@ -19,7 +19,7 @@ import net.sf.markov4jmeter.m4jdslmodelgenerator.util.IdGenerator;
  * @author   Eike Schulz (esc@informatik.uni-kiel.de)
  * @version  1.0
  */
-public class AbstractProtocolLayerEFSMGenerator {
+public abstract class AbstractProtocolLayerEFSMGenerator {
 
 
     /* *****************************  constants  **************************** */
@@ -96,6 +96,25 @@ public class AbstractProtocolLayerEFSMGenerator {
         this.idGenerator        = idGenerator;
         this.requestIdGenerator = requestIdGenerator;
     }
+
+
+    /* **************************  public methods  ************************** */
+
+
+    /**
+     * Creates a Protocol Layer EFSM.
+     *
+     * @param serviceName
+     *     name of the associated service; this information might be required
+     *     for being sent with a request.
+     * @return
+     *     the newly created Protocol Layer EFSM.
+     *
+     * @throws GeneratorException
+     *     if any error during the generation process occurs.
+     */
+    public abstract ProtocolLayerEFSM generateProtocolLayerEFSM (
+            final String serviceName) throws GeneratorException;
 
 
     /* *************************  protected methods  ************************ */

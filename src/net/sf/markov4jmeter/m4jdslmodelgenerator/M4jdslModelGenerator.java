@@ -23,9 +23,10 @@ import net.sf.markov4jmeter.m4jdslmodelgenerator.components.ApplicationModelGene
 import net.sf.markov4jmeter.m4jdslmodelgenerator.components.BehaviorMixGenerator;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.components.BehaviorModelsGenerator;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.components.WorkloadIntensityGenerator;
+import net.sf.markov4jmeter.m4jdslmodelgenerator.components.efsm.AbstractProtocolLayerEFSMGenerator;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.components.efsm.AbstractSessionLayerEFSMGenerator;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.components.efsm.FlowSessionLayerEFSMGenerator;
-import net.sf.markov4jmeter.m4jdslmodelgenerator.components.efsm.JavaProtocolLayerEFSMGenerator;
+import net.sf.markov4jmeter.m4jdslmodelgenerator.components.efsm.HTTPProtocolLayerEFSMGenerator;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.util.IdGenerator;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.util.XmiEcoreHandler;
 
@@ -290,9 +291,15 @@ public class M4jdslModelGenerator {
             final String graphOutputPath,
             final boolean sessionsCanBeExitedAnytime,
             final boolean useFullyQualifiedNames) throws GeneratorException {
-
-        final JavaProtocolLayerEFSMGenerator protocolLayerEFSMGenerator =
+/*
+        final AbstractProtocolLayerEFSMGenerator protocolLayerEFSMGenerator =
                 new JavaProtocolLayerEFSMGenerator(
+                        this.m4jdslFactory,
+                        new IdGenerator("PS"),
+                        new IdGenerator("R"));
+*/
+        final AbstractProtocolLayerEFSMGenerator protocolLayerEFSMGenerator =
+                new HTTPProtocolLayerEFSMGenerator(
                         this.m4jdslFactory,
                         new IdGenerator("PS"),
                         new IdGenerator("R"));

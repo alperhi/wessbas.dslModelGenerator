@@ -48,6 +48,11 @@ public class BehaviorModelsGenerator {
     private final static String WARNING_UNKNOWN_TARGETSTATE =
             "unknown target state \"%s\" detected, will be ignored";
 
+    /** Informational message for the case that no behavior information is
+     *  available for a certain state. */
+    private final static String INFO_NO_BEHAVIOR_INFORMATION_FOR_STATE =
+            "no behavior information for state \"%s\" available, will skip";
+
     /** Warning message for the case that a behavior information file could
      *  not be loaded for a Behavior Model. */
     private final static String WARNING_BEHAVIOR_FILE_LOADING_FAILED =
@@ -284,7 +289,7 @@ public class BehaviorModelsGenerator {
 
         } else {
 
-            this.warn(
+            this.info(
                     BehaviorModelsGenerator.
                     WARNING_BEHAVIOR_FILE_LOADING_FAILED,
                     behaviorFile,
@@ -334,6 +339,21 @@ public class BehaviorModelsGenerator {
     }
 
     /**
+     * Prints an informational message on the standard output stream.
+     *
+     * @param template
+     *     template of the message to be written.
+     * @param args
+     *     arguments to be inserted into the template.
+     */
+    private void info (final String template, final Object... args) {
+
+        final String message = String.format(template, args);
+
+        System.out.println("INFO: " + message);
+    }
+
+    /**
      * Installs the outgoing transitions of a Markov State, according to the
      * given behavior information.
      *
@@ -354,8 +374,10 @@ public class BehaviorModelsGenerator {
             final BehaviorModelExitState behaviorModelExitState,
             final String[][] behaviorInformation) {
 
+        final String sourceServiceName = markovState.getService().getName();
+
         final String[] row = this.findRowByStateName(
-                markovState.getService().getName(),
+                sourceServiceName,
                 behaviorInformation);
 
         if (row != null) {  // behavior information available?
@@ -363,9 +385,9 @@ public class BehaviorModelsGenerator {
             final String[] headerRow = behaviorInformation[0];
 
             // ignore first (header) column  -->  start with index 1;
-            for (int i = 1, n = headerRow.length; i < n; i++) {
+            for (int j = 1, n = headerRow.length; j < n; j++) {
 
-                final String targetServiceName = headerRow[i];
+                final String targetServiceName = headerRow[j];
 
                 final BehaviorModelState targetState;
                 final double probability;
@@ -391,7 +413,7 @@ public class BehaviorModelsGenerator {
                     }
                 }
 
-                final String entry = row[i];
+                final String entry = row[j];
 
                 probability = this.extractProbability(entry);
 
@@ -408,7 +430,15 @@ public class BehaviorModelsGenerator {
                     markovState.getOutgoingTransitions().add(transition);
                 }
             }
+
+        } else {
+
+            this.info(
+                    BehaviorModelsGenerator.
+                    INFO_NO_BEHAVIOR_INFORMATION_FOR_STATE,
+                    sourceServiceName);
         }
+
     }
 
     /**
@@ -430,7 +460,9 @@ public class BehaviorModelsGenerator {
 
         for (final MarkovState markovState : markovStates) {
 
-            if ( serviceName.equals(markovState.getService().getName()) ) {
+            final String stateName = markovState.getService().getName();
+
+            if ( serviceName.equals(stateName) ) {
 
                 return markovState;
             }
@@ -522,13 +554,23 @@ public class BehaviorModelsGenerator {
 
         for (final String[] row : behaviorInformation) {
 
-            if ( stateName.equals(row[0]) ) {
+            if ( stateName.equals( this.removeAsteriskSuffix(row[0]) ) ) {
 
                 return row;
             }
         }
 
         return null;  // no matching row for state name;
+    }
+
+    private String removeAsteriskSuffix (final String stateName) {
+
+        if ( stateName.endsWith("*") ) {
+
+            return stateName.substring(0, stateName.length() - 1);
+        }
+
+        return stateName;
     }
 
     /**

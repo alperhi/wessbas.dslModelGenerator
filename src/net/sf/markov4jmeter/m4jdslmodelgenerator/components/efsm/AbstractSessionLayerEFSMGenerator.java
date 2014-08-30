@@ -46,7 +46,7 @@ public abstract class AbstractSessionLayerEFSMGenerator {
 
     /** Instance for creating Protocol Layer EFSMs. */
     // TODO: protocolLayerEFSMGenerator is never used in this class (yet);
-    protected final JavaProtocolLayerEFSMGenerator protocolLayerEFSMGenerator;
+    protected final AbstractProtocolLayerEFSMGenerator protocolLayerEFSMGenerator;
 
     /** Instance for creating unique Application State IDs. */
     protected final IdGenerator idGenerator;
@@ -81,7 +81,7 @@ public abstract class AbstractSessionLayerEFSMGenerator {
     public AbstractSessionLayerEFSMGenerator (
             final M4jdslFactory m4jdslFactory,
             final ServiceRepository serviceRepository,
-            final JavaProtocolLayerEFSMGenerator protocolLayerEFSMGenerator,
+            final AbstractProtocolLayerEFSMGenerator protocolLayerEFSMGenerator,
             final IdGenerator idGenerator,
             final String graphFilePath,
             final DotGraphGenerator dotGraphGenerator) {

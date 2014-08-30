@@ -9,15 +9,8 @@ import m4jdsl.Request;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.GeneratorException;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.util.IdGenerator;
 
-/**
- * Class for building Protocol Layer EFSMs based on Java requests.
- *
- * @author   Eike Schulz (esc@informatik.uni-kiel.de)
- * @version  1.0
- */
-public class JavaProtocolLayerEFSMGenerator
+public class HTTPProtocolLayerEFSMGenerator
 extends AbstractProtocolLayerEFSMGenerator {
-
 
     /* ***************************  constructors  *************************** */
 
@@ -31,7 +24,7 @@ extends AbstractProtocolLayerEFSMGenerator {
      * @param requestIdGenerator
      *     instance for creating unique request IDs.
      */
-    public JavaProtocolLayerEFSMGenerator (
+    public HTTPProtocolLayerEFSMGenerator (
             final M4jdslFactory m4jdslFactory,
             final IdGenerator idGenerator,
             final IdGenerator requestIdGenerator) {
@@ -43,6 +36,15 @@ extends AbstractProtocolLayerEFSMGenerator {
     /* **************************  public methods  ************************** */
 
 
+    /**
+     * Creates a Protocol Layer EFSM.
+     *
+     * @return
+     *     the newly created Protocol Layer EFSM.
+     *
+     * @throws GeneratorException
+     *     if any error during the generation process occurs.
+     */
     @Override
     public ProtocolLayerEFSM generateProtocolLayerEFSM (
             final String serviceName) throws GeneratorException {
@@ -56,8 +58,23 @@ extends AbstractProtocolLayerEFSMGenerator {
         // TODO: more information required for building SUT-specific requests and transitions;
 
         // might throw a GeneratorException;
+
+        // http://localhost:8080/action-servlet/ActionServlet?action=sellInventory
         final Request request = this.createRequest(
-                AbstractProtocolLayerEFSMGenerator.REQUEST_TYPE_JAVA);
+                AbstractProtocolLayerEFSMGenerator.REQUEST_TYPE_HTTP,
+                new String[][]{  // properties;
+                        {"HTTPSampler.domain", "localhost"},
+                        {"HTTPSampler.port",   "8080"},
+                        {"HTTPSampler.path",   "action-servlet/ActionServlet"},
+                        {"HTTPSampler.method", "GET"},
+                },
+                new String[][]{  // parameters;
+                        {"action", serviceName}
+                });
+
+        String eId = request.getEId();
+        eId = eId + " (" + serviceName + ")";
+        request.setEId(eId);
 
         final ProtocolState protocolState = this.createProtocolState(request);
 
@@ -67,8 +84,8 @@ extends AbstractProtocolLayerEFSMGenerator {
         final ProtocolTransition protocolTransition =
                 this.createProtocolTransition(
                         protocolExitState,
-                        "<guard>",
-                        "<action>");
+                        "",
+                        "");
 
         protocolState.getOutgoingTransitions().add(protocolTransition);
 
