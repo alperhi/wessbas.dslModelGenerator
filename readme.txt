@@ -25,11 +25,12 @@ folders are included:
 
   - folder "configuration" contains the properties files, that are required for
     running the generator. In particular, these files demonstrate how to
-    define workload intensity and Behavior Models respectively. 
+    define workload intensity and Behavior Mix respectively. 
 
   - folder "examples" contains some example input Flow files and user behavior
-    information, as well as several models. The following sub-folders are
-    included:
+    information for Carshare transformations, as well as several models. In
+    particular, the following sub-folders are located in the "input" folder of
+    for the Carshare transformation folder:
 
       o "behavior"      -- example behavior information as it might be retrieved
                            from monitoring data, including probabilities and
@@ -78,11 +79,13 @@ An example parameter sequence (to be used in the Eclipse run configuration)
 might look as follows (in one row):
 
   ./configuration/workloadIntensity.properties
-    ./configuration/behaviorModels.properties
-      ./examples/flows.subset2/ ./output/workloadmodel.xmi ./output/graph.dot
+    ./configuration/behaviorMix.properties
+      ./examples/transformation/carshare-gear/input/flows.subset2/
+        ./examples/transformation/carshare-gear/output/workloadmodel.xmi
+          ./examples/transformation/carshare-gear/output/graph.dot
 
 Starting the application with these parameters will produce corresponding output
-in the "output" folder.
+in the ".\examples\transformation\carshare-gear\output\" folder.
 
 
 DEVELOPMENT NOTES
@@ -91,7 +94,7 @@ DEVELOPMENT NOTES
 The source code is comprehensively commented, and most of it should be
 self-explaining; all required libraries are included. Two classes are still in
 progress, since they are b+m gear-specific and details regarding to the
-generation of Markov4JMeter models based on b+m gear Flows need to be cleared:
+generation of Markov4JMeter models based on b+m gear Flows need to be clarified:
 
   - FlowSessionLayerEFSMGenerator:
     class for building Session Layer EFSMs based on Flows; the Session Layer
