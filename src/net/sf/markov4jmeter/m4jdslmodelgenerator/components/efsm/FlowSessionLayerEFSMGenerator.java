@@ -1,12 +1,18 @@
 package net.sf.markov4jmeter.m4jdslmodelgenerator.components.efsm;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import synoptic.invariants.BinaryInvariant;
+import synoptic.invariants.ITemporalInvariant;
+import synoptic.invariants.TemporalInvariantSet;
+import synoptic.main.AbstractMain;
+import synoptic.main.SynopticMain;
 import m4jdsl.ApplicationExitState;
 import m4jdsl.ApplicationState;
 import m4jdsl.ApplicationTransition;
@@ -63,7 +69,7 @@ public class FlowSessionLayerEFSMGenerator extends
     private final static String WARNING_NO_INITIAL_STATE =
             "could not detect any initial state; "
             + "will choose first available state \"%s\"";
-
+    
 
     /* ----------------------  debug messages/settings  --------------------- */
 
@@ -106,6 +112,11 @@ public class FlowSessionLayerEFSMGenerator extends
      *  as state names, without any related Flow names being added as prefixes.
      */
     private final boolean useFullyQualifiedNames;
+    
+    /**
+     * Invariants from Synoptic.
+     */
+    private TemporalInvariantSet invariants = null; 
 
 
     /* ***************************  constructors  *************************** */
@@ -216,6 +227,9 @@ public class FlowSessionLayerEFSMGenerator extends
     @Override
     public SessionLayerEFSM generateSessionLayerEFSM ()
             throws GeneratorException {
+    	
+    	// get invariant from synoptic
+    	this.getTemporalInvariants();
 
         // EFSM to be returned;
         final SessionLayerEFSM sessionLayerEFSM =
@@ -227,7 +241,8 @@ public class FlowSessionLayerEFSMGenerator extends
 
         // might throw a GeneratorException;
         final FlowRepository flowRepository = this.parseFlows();
-
+        
+       
         final Service initialService = this.determineInitialService(
                 flowRepository,
                 sessionLayerEFSM,
@@ -266,9 +281,77 @@ public class FlowSessionLayerEFSMGenerator extends
 
         return sessionLayerEFSM;
     }
-
+    
 
     /* *********  private methods (Application States installation)  ******** */
+    
+	private void getTemporalInvariants() {    	
+    	String[] args = new String[11];  
+        args[0] = "-r";
+        args[1] = "[$1]+;[0-9]*;(?<TYPE>[\\w_+-]*);(?<ip>[\\w+-]*).[\\w;.-]*";
+        args[2] = "-m";
+        args[3] = "\\k<ip>";
+        args[4] = "-i";
+        args[5] = "-o";
+        args[6] = ""; //"C:/Users/voegele/Applications/eclipse-jee-kepler-SR2-win32-x86_64/eclipse/workspace/Synoptic/output/output";
+        args[7] = "-d";
+        args[8] = ""; // "C:/Program Files (x86)/Graphviz2.38/bin/gvedit.exe";
+        args[9] = "--dumpInvariants=true";
+        args[10] = "examples/specj/input/logFiles/SPECjlog.log";
+
+        SynopticMain.getInstance();
+		try {
+			SynopticMain.main(args);
+			this.invariants = AbstractMain.getInvariants();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+    
+	private String getGuard(final Transition transition) {
+		List<String> guards = new ArrayList<String>();
+		for (ITemporalInvariant invariant : this.invariants.getSet()) {
+			if (invariant instanceof BinaryInvariant) {
+				BinaryInvariant binaryInvariant = (BinaryInvariant) invariant;							
+				// invariant AlwaysFollowedBy can not be used
+				if (binaryInvariant.getLongName().equals("AlwaysPrecedes")) {
+					if (transition.getTarget().getValue().equals(binaryInvariant.getSecond().toString())) {
+						String guard = "${" + binaryInvariant.getFirst().toString()  + "}";
+    					if (!guards.contains(guard)) {
+    						guards.add(guard);
+    					} 
+					}    					
+    			} else if (binaryInvariant.getLongName().equals("NeverFollowedBy")) {
+    				if (transition.getTarget().getValue().equals(binaryInvariant.getSecond().toString())) {
+    				    String guard = "!${" + binaryInvariant.getFirst().toString()  + "}";
+    					if (!guards.contains(guard)) {
+    						guards.add(guard);
+    					} 
+    			    }	
+			   }
+		   }
+		}
+		
+		if (guards.size() == 0) {
+			return "";
+		} else if (guards.size() == 1) {
+			return guards.get(0);
+		} else {
+			String returnString = "";
+			for (int i = 0; i< guards.size(); i++) {			
+				returnString += guards.get(i);
+				if (i != guards.size() -1) {
+					returnString += " && ";
+				}				
+			}	
+			return returnString;
+		}
+	}      
+	
+	private String getAction(final Transition transition) {
+		return transition.getTarget().getValue() + "=true";
+	}
 
     private boolean isGenericInitialService (final Service initialService) {
 
@@ -500,7 +583,6 @@ public class FlowSessionLayerEFSMGenerator extends
                 DotGraphGenerator.STATE_SHAPE_DOUBLE_CIRCLE);
     }
 
-    @SuppressWarnings("unused")  // ignore dead code, if DEBUG is set to false;
     private void installFlowStates (
             final SessionLayerEFSM sessionLayerEFSM,
             final HashMap<Service, ApplicationState> serviceAppStateHashMap,
@@ -784,8 +866,8 @@ public class FlowSessionLayerEFSMGenerator extends
                     for (final Transition transition : transitions) {
 
                         final String event  = transition.getEvent().getValue();
-                        final String guard  = transition.getGuard().getValue();
-                        final String action = transition.getAction().getValue();
+                        final String guard  = getGuard(transition);
+                        final String action = getAction(transition);
                         final String target = transition.getTarget().getValue();
 
                         final Node targetNode =
@@ -847,7 +929,6 @@ public class FlowSessionLayerEFSMGenerator extends
     }
 
     private String getTransitionAction (final String action) {
-
         return !"".equals(action) ? ("${action}=\"" + action + "\"") : "";
     }
 
