@@ -8,8 +8,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import synoptic.invariants.AlwaysPrecedesInvariant;
 import synoptic.invariants.BinaryInvariant;
+import synoptic.invariants.CntAlwaysEqualsGreaterInvariant;
 import synoptic.invariants.ITemporalInvariant;
+import synoptic.invariants.NeverFollowedInvariant;
 import synoptic.invariants.TemporalInvariantSet;
 import synoptic.main.AbstractMain;
 import synoptic.main.SynopticMain;
@@ -286,18 +289,18 @@ public class FlowSessionLayerEFSMGenerator extends
     /* *********  private methods (Application States installation)  ******** */
     
 	private void getTemporalInvariants() {    	
-    	String[] args = new String[7];  
+    	String[] args = new String[11];  
         args[0] = "-r";
         args[1] = "[$1]+;[0-9]*;(?<TYPE>[\\w_+-]*);(?<ip>[\\w+-]*).[\\w;.-]*";
         args[2] = "-m";
         args[3] = "\\k<ip>";
         args[4] = "-i";
-//        args[5] = "-o";
-//        args[6] = ""; //"C:/Users/voegele/Applications/eclipse-jee-kepler-SR2-win32-x86_64/eclipse/workspace/Synoptic/output/output";
-//        args[5] = "-d";
-//        args[6] = ""; // "C:/Program Files (x86)/Graphviz2.38/bin/gvedit.exe";
-        args[5] = "--dumpInvariants=true";
-        args[6] = "examples/specj/input/logFiles/SPECjlog.log";
+        args[5] = "-o";
+        args[6] = "C:/Users/voegele/Applications/eclipse-jee-kepler-SR2-win32-x86_64/eclipse/workspace/Synoptic/output/output";
+        args[7] = "-d";
+        args[8] = "C:/Program Files (x86)/Graphviz2.38/bin/gvedit.exe";
+        args[9] = "--dumpInvariants=true";
+        args[10] = "examples/specj/input/logFiles/SPECjlog.log";
 
         SynopticMain.getInstance();
 		try {
@@ -313,24 +316,33 @@ public class FlowSessionLayerEFSMGenerator extends
 		List<String> guards = new ArrayList<String>();
 		for (ITemporalInvariant invariant : this.invariants.getSet()) {
 			if (invariant instanceof BinaryInvariant) {
-				BinaryInvariant binaryInvariant = (BinaryInvariant) invariant;							
+				BinaryInvariant binaryInvariant = (BinaryInvariant) invariant;			
+				String first = binaryInvariant.getFirst().toString();
+				String second = binaryInvariant.getSecond().toString();
 				// invariant AlwaysFollowedBy can not be used
-				if (binaryInvariant.getLongName().equals("AlwaysPrecedes")) {
-					if (transition.getTarget().getValue().equals(binaryInvariant.getSecond().toString())) {
-						String guard = "${" + binaryInvariant.getFirst().toString()  + "}";
+				if (binaryInvariant instanceof AlwaysPrecedesInvariant) {
+					if (transition.getTarget().getValue().equals(second)) {
+						String guard = "${" + first  + "}";
     					if (!guards.contains(guard)) {
     						guards.add(guard);
     					} 
 					}    					
-    			} else if (binaryInvariant.getLongName().equals("NeverFollowedBy")) {
-    				if (transition.getTarget().getValue().equals(binaryInvariant.getSecond().toString())) {
-    				    String guard = "!${" + binaryInvariant.getFirst().toString()  + "}";
+    			} else if (binaryInvariant instanceof NeverFollowedInvariant) {
+    				if (transition.getTarget().getValue().equals(second)) {
+    				    String guard = "!${" + first  + "}";
     					if (!guards.contains(guard)) {
     						guards.add(guard);
     					} 
     			    }	
-			   }
-		   }
+			   } else if (binaryInvariant instanceof CntAlwaysEqualsGreaterInvariant) {
+	   				if (transition.getTarget().getValue().equals(second)) {
+					    String guard = first + second + ">0";
+						if (!guards.contains(guard)) {
+							guards.add(guard);
+						} 
+				    }	
+		       }
+		    }
 		}
 		
 		if (guards.size() == 0) {
@@ -350,7 +362,40 @@ public class FlowSessionLayerEFSMGenerator extends
 	}      
 	
 	private String getAction(final Transition transition) {
-		return transition.getTarget().getValue() + "=true";
+		List<String> actions = new ArrayList<String>();
+		actions.add(transition.getTarget().getValue() + "=true");
+		for (ITemporalInvariant invariant : this.invariants.getSet()) {
+			BinaryInvariant binaryInvariant = (BinaryInvariant) invariant;	
+			String first = binaryInvariant.getFirst().toString();
+			String second = binaryInvariant.getSecond().toString();
+			if (binaryInvariant instanceof CntAlwaysEqualsGreaterInvariant) {
+				if (transition.getTarget().getValue().equals(first)) {
+					String action = first + second + "++";
+					if (!actions.contains(action)) {
+						actions.add(action);
+					} 
+				} else if (transition.getTarget().getValue().equals(second)) {
+					String action = first + second + "--";
+					if (!actions.contains(action)) {
+						actions.add(action);
+					} 
+				}
+			}			
+		}		
+		if (actions.size() == 0) {
+			return "";
+		} else if (actions.size() == 1) {
+			return actions.get(0);
+		} else {
+			String returnString = "";
+			for (int i = 0; i< actions.size(); i++) {			
+				returnString += actions.get(i);
+				if (i != actions.size() -1) {
+					returnString += " && ";
+				}				
+			}	
+			return returnString;
+		}
 	}
 
     private boolean isGenericInitialService (final Service initialService) {
