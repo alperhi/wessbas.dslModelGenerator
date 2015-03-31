@@ -289,18 +289,18 @@ public class FlowSessionLayerEFSMGenerator extends
     /* *********  private methods (Application States installation)  ******** */
     
 	private void getTemporalInvariants() {    	
-    	String[] args = new String[11];  
+    	String[] args = new String[7];  
         args[0] = "-r";
         args[1] = "[$1]+;[0-9]*;(?<TYPE>[\\w_+-]*);(?<ip>[\\w+-]*).[\\w;.-]*";
         args[2] = "-m";
         args[3] = "\\k<ip>";
         args[4] = "-i";
-        args[5] = "-o";
-        args[6] = "C:/Users/voegele/Applications/eclipse-jee-kepler-SR2-win32-x86_64/eclipse/workspace/Synoptic/output/output";
-        args[7] = "-d";
-        args[8] = "C:/Program Files (x86)/Graphviz2.38/bin/gvedit.exe";
-        args[9] = "--dumpInvariants=true";
-        args[10] = "examples/specj/input/logFiles/SPECjlog.log";
+       // args[5] = "-o";
+       // args[6] = ""; // "C:/Users/voegele/Applications/eclipse-jee-kepler-SR2-win32-x86_64/eclipse/workspace/Synoptic/output/output";
+       // args[7] = "-d";
+       // args[8] = ""; //"C:/Program Files (x86)/Graphviz2.38/bin/gvedit.exe";
+        args[5] = "--dumpInvariants=true";
+        args[6] = "examples/specj/input/logFiles/SPECjlog.log";
 
         SynopticMain.getInstance();
 		try {
