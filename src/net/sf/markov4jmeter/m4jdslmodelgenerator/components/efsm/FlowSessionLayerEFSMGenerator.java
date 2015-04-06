@@ -1,24 +1,18 @@
 package net.sf.markov4jmeter.m4jdslmodelgenerator.components.efsm;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import synoptic.invariants.AlwaysPrecedesInvariant;
-import synoptic.invariants.BinaryInvariant;
-import synoptic.invariants.CntAlwaysEqualsGreaterInvariant;
-import synoptic.invariants.ITemporalInvariant;
-import synoptic.invariants.NeverFollowedInvariant;
-import synoptic.invariants.TemporalInvariantSet;
-import synoptic.main.AbstractMain;
-import synoptic.main.SynopticMain;
+import m4jdsl.Action;
 import m4jdsl.ApplicationExitState;
 import m4jdsl.ApplicationState;
 import m4jdsl.ApplicationTransition;
+import m4jdsl.Guard;
+import m4jdsl.GuardActionParameterList;
 import m4jdsl.M4jdslFactory;
 import m4jdsl.ProtocolLayerEFSM;
 import m4jdsl.Service;
@@ -116,12 +110,6 @@ public class FlowSessionLayerEFSMGenerator extends
      */
     private final boolean useFullyQualifiedNames;
     
-    /**
-     * Invariants from Synoptic.
-     */
-    private TemporalInvariantSet invariants = null; 
-
-
     /* ***************************  constructors  *************************** */
 
 
@@ -174,7 +162,7 @@ public class FlowSessionLayerEFSMGenerator extends
         this.useFullyQualifiedNames     = useFullyQualifiedNames;
         this.flowFiles = flowFiles;
     }
-
+ 
     /**
      * Constructor for a Flow Session Layer EFSM Generator.
      *
@@ -230,21 +218,22 @@ public class FlowSessionLayerEFSMGenerator extends
     @Override
     public SessionLayerEFSM generateSessionLayerEFSM ()
             throws GeneratorException {
-    	
-    	// get invariant from synoptic
-    	this.getTemporalInvariants();
 
         // EFSM to be returned;
         final SessionLayerEFSM sessionLayerEFSM =
                 this.createEmptySessionLayerEFSM(
                         FlowSessionLayerEFSMGenerator.EXIT_STATE_NAME);
-
+        
+        final GuardActionParameterList guardActionParameterList = 
+        		createGuardActionParamterList();
+        
+        sessionLayerEFSM.setGuardActionParameterList(guardActionParameterList);
+        
         final HashMap<Service, ApplicationState> serviceAppStateHashMap =
                 new HashMap<Service, ApplicationState>();
 
         // might throw a GeneratorException;
-        final FlowRepository flowRepository = this.parseFlows();
-        
+        final FlowRepository flowRepository = this.parseFlows();        
        
         final Service initialService = this.determineInitialService(
                 flowRepository,
@@ -288,118 +277,7 @@ public class FlowSessionLayerEFSMGenerator extends
 
     /* *********  private methods (Application States installation)  ******** */
     
-	private void getTemporalInvariants() {    	
-    	String[] args = new String[7];  
-        args[0] = "-r";
-        args[1] = "[$1]+;[0-9]*;(?<TYPE>[\\w_+-]*);(?<ip>[\\w+-]*).[\\w;.-]*";
-        args[2] = "-m";
-        args[3] = "\\k<ip>";
-        args[4] = "-i";
-       // args[5] = "-o";
-       // args[6] = ""; // "C:/Users/voegele/Applications/eclipse-jee-kepler-SR2-win32-x86_64/eclipse/workspace/Synoptic/output/output";
-       // args[7] = "-d";
-       // args[8] = ""; //"C:/Program Files (x86)/Graphviz2.38/bin/gvedit.exe";
-        args[5] = "--dumpInvariants=true";
-        args[6] = "examples/specj/input/logFiles/SPECjlog.log";
-
-        SynopticMain.getInstance();
-		try {
-			SynopticMain.main(args);
-			this.invariants = AbstractMain.getInvariants();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-    
-	private String getGuard(final Transition transition) {
-		List<String> guards = new ArrayList<String>();
-		for (ITemporalInvariant invariant : this.invariants.getSet()) {
-			if (invariant instanceof BinaryInvariant) {
-				BinaryInvariant binaryInvariant = (BinaryInvariant) invariant;			
-				String first = binaryInvariant.getFirst().toString();
-				String second = binaryInvariant.getSecond().toString();
-				// invariant AlwaysFollowedBy can not be used
-				if (binaryInvariant instanceof AlwaysPrecedesInvariant) {
-					if (transition.getTarget().getValue().equals(second)) {
-						String guard = "${" + first  + "}";
-    					if (!guards.contains(guard)) {
-    						guards.add(guard);
-    					} 
-					}    					
-    			} else if (binaryInvariant instanceof NeverFollowedInvariant) {
-    				if (transition.getTarget().getValue().equals(second)) {
-    				    String guard = "!${" + first  + "}";
-    					if (!guards.contains(guard)) {
-    						guards.add(guard);
-    					} 
-    			    }	
-			   } else if (binaryInvariant instanceof CntAlwaysEqualsGreaterInvariant) {
-	   				if (transition.getTarget().getValue().equals(second)) {
-					    String guard = first + second + ">0";
-						if (!guards.contains(guard)) {
-							guards.add(guard);
-						} 
-				    }	
-		       }
-		    }
-		}
-		
-		if (guards.size() == 0) {
-			return "";
-		} else if (guards.size() == 1) {
-			return guards.get(0);
-		} else {
-			String returnString = "";
-			for (int i = 0; i< guards.size(); i++) {			
-				returnString += guards.get(i);
-				if (i != guards.size() -1) {
-					returnString += " && ";
-				}				
-			}	
-			return returnString;
-		}
-	}      
-	
-	private String getAction(final Transition transition) {
-		List<String> actions = new ArrayList<String>();
-		actions.add(transition.getTarget().getValue() + "=true");
-		for (ITemporalInvariant invariant : this.invariants.getSet()) {
-			BinaryInvariant binaryInvariant = (BinaryInvariant) invariant;	
-			String first = binaryInvariant.getFirst().toString();
-			String second = binaryInvariant.getSecond().toString();
-			if (binaryInvariant instanceof CntAlwaysEqualsGreaterInvariant) {
-				if (transition.getTarget().getValue().equals(first)) {
-					String action = first + second + "++";
-					if (!actions.contains(action)) {
-						actions.add(action);
-					} 
-				} else if (transition.getTarget().getValue().equals(second)) {
-					String action = first + second + "--";
-					if (!actions.contains(action)) {
-						actions.add(action);
-					} 
-				}
-			}			
-		}		
-		if (actions.size() == 0) {
-			return "";
-		} else if (actions.size() == 1) {
-			return actions.get(0);
-		} else {
-			String returnString = "";
-			for (int i = 0; i< actions.size(); i++) {			
-				returnString += actions.get(i);
-				if (i != actions.size() -1) {
-					returnString += " && ";
-				}				
-			}	
-			return returnString;
-		}
-	}
-
-    private boolean isGenericInitialService (final Service initialService) {
-
+	private boolean isGenericInitialService (final Service initialService) {
         return FlowSessionLayerEFSMGenerator.INITIAL_STATE__SERVICE_NAME.equals(
                 initialService.getName());
     }
@@ -770,8 +648,8 @@ public class FlowSessionLayerEFSMGenerator extends
                 this.installApplicationTransition(
                         sourceServiceName,
                         targetServiceName,
-                        "",  // guard, always empty by default;
-                        "",  // action, always empty be default;
+                        null,  // guard, always empty by default;
+                        null,  // action, always empty be default;
                         serviceAppStateHashMap);
             }
         }
@@ -781,8 +659,8 @@ public class FlowSessionLayerEFSMGenerator extends
             this.installApplicationTransition(
                     sourceServiceName,
                     FlowSessionLayerEFSMGenerator.EXIT_STATE_NAME,
-                    "",  // guard, always empty by default;
-                    "",  // action, always empty be default;
+                    null,  // guard, always empty by default;
+                    null,  // action, always empty be default;
                     serviceAppStateHashMap,
                     sessionLayerEFSM.getExitState());
         }
@@ -818,8 +696,8 @@ public class FlowSessionLayerEFSMGenerator extends
                     this.installApplicationTransition(
                             sourceServiceName,
                             targetServiceName,
-                            "",  // guard, always empty by default;
-                            "",  // action, always empty be default;
+                            null,  // guard, always empty by default;
+                            null,  // action, always empty be default;
                             serviceAppStateHashMap,
                             sessionLayerEFSM.getExitState());
                 }
@@ -850,7 +728,7 @@ public class FlowSessionLayerEFSMGenerator extends
         this.collectApplicationTransitions(
                 flowRepository,
                 serviceAppStateHashMap,
-                serviceAppTransitionsHashMap);
+                serviceAppTransitionsHashMap, sessionLayerEFSM);
     }
 
 
@@ -858,10 +736,11 @@ public class FlowSessionLayerEFSMGenerator extends
             final FlowRepository flowRepository,
             final HashMap<Service, ApplicationState> serviceAppStateHashMap,
             final HashMap<ApplicationState, HashSet<ApplicationTransition>>
-            serviceAppTransitionsHashMap) {
+            serviceAppTransitionsHashMap, 
+            final SessionLayerEFSM sessionLayerEFSM) {
 
         for (final Flow flow : flowRepository.getFlows()) {
-
+        	
             final String flowName = flow.getName();
 
             for (final Node node : flow.getNodes()) {
@@ -896,8 +775,8 @@ public class FlowSessionLayerEFSMGenerator extends
                             this.installApplicationTransition(
                                     sourceServiceName,
                                     targetServiceName,
-                                    "",  // guard, always empty by default;
-                                    "",  // action, always empty be default;
+                                    null,  // guard, always empty by default;
+                                    null,  // action, always empty be default;
                                     serviceAppStateHashMap);
                         } else {
 
@@ -910,9 +789,9 @@ public class FlowSessionLayerEFSMGenerator extends
 
                     for (final Transition transition : transitions) {
 
-                        final String event  = transition.getEvent().getValue();
-                        final String guard  = getGuard(transition);
-                        final String action = getAction(transition);
+                       // final String event  = transition.getEvent().getValue();                        
+                       // final List<Guard> guards  = getGuard(transition, sessionLayerEFSM);
+                       // final List<Action> actions = getAction(transition, sessionLayerEFSM);                                
                         final String target = transition.getTarget().getValue();
 
                         final Node targetNode =
@@ -941,40 +820,14 @@ public class FlowSessionLayerEFSMGenerator extends
                             this.installApplicationTransition(
                                     sourceServiceName,
                                     targetServiceName,
-                                    this.getTransitionGuard(event, guard),
-                                    this.getTransitionAction(action),
+                                    null,
+                                    null,
                                     serviceAppStateHashMap);
                         }
                     }
                 }
             }
         }
-    }
-
-    private String getTransitionGuard (final String event, final String guard) {
-
-        String str = "";
-
-        if ( !"".equals(event) ) {
-
-            str += ("${event}=\"" + event + "\"");
-        }
-
-        if ( !"".equals(guard) ) {
-
-            if ( !"".equals(str) ) {
-
-                str += " && ";
-            }
-
-            str += ("${guard}=\"" + guard + "\"");
-        }
-
-        return str;
-    }
-
-    private String getTransitionAction (final String action) {
-        return !"".equals(action) ? ("${action}=\"" + action + "\"") : "";
     }
 
     private Flow findTargetFlow (
@@ -1033,15 +886,15 @@ public class FlowSessionLayerEFSMGenerator extends
     private void installApplicationTransition (
             final String sourceServiceName,
             final String targetServiceName,
-            final String guard,
-            final String action,
+            final List<Guard> guards,
+            final List<Action> actions,
             final HashMap<Service, ApplicationState> serviceAppStateHashMap) {
 
         this.installApplicationTransition(
                 sourceServiceName,
                 targetServiceName,
-                guard,
-                action,
+                guards,
+                actions,
                 serviceAppStateHashMap,
                 null);
     }
@@ -1049,8 +902,8 @@ public class FlowSessionLayerEFSMGenerator extends
     private void installApplicationTransition (
             final String sourceServiceName,
             final String targetServiceName,
-            final String guard,
-            final String action,
+            final List<Guard> guards,
+            final List<Action> actions,
             final HashMap<Service, ApplicationState> serviceAppStateHashMap,
             final ApplicationExitState applicationExitState) {
 
@@ -1075,25 +928,35 @@ public class FlowSessionLayerEFSMGenerator extends
         final ApplicationTransition transition =
                 this.m4jdslFactory.createApplicationTransition();
 
-        transition.setAction(action);
-        transition.setGuard(guard);
+        if (actions != null) {
+        	for (Action action : actions) {
+        		transition.getAction().add(action);
+        	}        	 
+        }
+        
+        if (guards != null) {
+        	for (Guard guard : guards) {
+        		transition.getGuard().add(guard);
+        	}  
+        }
+        
         transition.setTargetState(target);
 
         source.getOutgoingTransitions().add(transition);
 
         this.printDebugInfo(
                 FlowSessionLayerEFSMGenerator.DEBUG_INFO__INSTALLED_TRANSITION,
+                "",
+                "",
                 sourceServiceName,
-                guard,
-                action,
                 targetServiceName);
 
         this.addDotTransition(
                 sourceServiceName,
                 targetServiceName,
                 DotGraphGenerator.TRANSITION_STYLE_SOLID,
-                guard,
-                action);
+                "",
+                "");
     }
 
     /**

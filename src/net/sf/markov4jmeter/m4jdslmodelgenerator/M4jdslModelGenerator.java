@@ -12,10 +12,19 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
+import m4jdsl.Action;
 import m4jdsl.ApplicationModel;
+import m4jdsl.ApplicationState;
+import m4jdsl.ApplicationTransition;
 import m4jdsl.BehaviorMix;
 import m4jdsl.BehaviorModel;
+import m4jdsl.Guard;
+import m4jdsl.GuardActionParameter;
+import m4jdsl.GuardActionParameterType;
 import m4jdsl.M4jdslFactory;
+import m4jdsl.MarkovState;
+import m4jdsl.Service;
+import m4jdsl.SessionLayerEFSM;
 import m4jdsl.WorkloadIntensity;
 import m4jdsl.WorkloadModel;
 import m4jdsl.impl.M4jdslPackageImpl;
@@ -31,6 +40,14 @@ import net.sf.markov4jmeter.m4jdslmodelgenerator.util.IdGenerator;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.util.XmiEcoreHandler;
 
 import org.eclipse.xtext.xtext.ecoreInference.TransformationException;
+
+import synoptic.invariants.AlwaysPrecedesInvariant;
+import synoptic.invariants.BinaryInvariant;
+import synoptic.invariants.CntAlwaysEqualsGreaterInvariant;
+import synoptic.invariants.ITemporalInvariant;
+import synoptic.invariants.TemporalInvariantSet;
+import synoptic.main.AbstractMain;
+import synoptic.main.SynopticMain;
 
 /**
  * This is the main class of the M4J-DSL Model Generator, which builds models
@@ -95,7 +112,11 @@ public class M4jdslModelGenerator {
 
     /** Instance for creating M4J-DSL model elements. */
     private final M4jdslFactory m4jdslFactory;
-
+    
+    /**
+     * Invariants from Synoptic.
+     */
+    private TemporalInvariantSet invariants = null; 
 
     /* ***************************  constructors  *************************** */
 
@@ -192,7 +213,7 @@ public class M4jdslModelGenerator {
         this.installWorkloadIntensity(
                 workloadModel,
                 workloadIntensityProperties);
-
+        
         // might throw a GeneratorException;
         this.installApplicationLayer(
                 workloadModel,
@@ -201,7 +222,7 @@ public class M4jdslModelGenerator {
                 graphOutputPath,
                 sessionsCanBeExitedAnytime,
                 useFullyQualifiedNames);
-
+        
         // might throw a GeneratorException;
         this.installBehaviorModels(
                 workloadModel,
@@ -209,12 +230,18 @@ public class M4jdslModelGenerator {
                 names.toArray(new String[]{}),
                 filenames.toArray(new String[]{}),
                 behaviorFiles.toArray(new File[]{}));
-
+        
         // might throw a GeneratorException;
         this.installBehaviorMix(
                 workloadModel,
                 workloadModel.getBehaviorModels(),
-                behaviorMixEntries);
+                behaviorMixEntries);         
+ 
+        this.removeUnusedApplicationTransitions(workloadModel);
+        
+        this.getTemporalInvariants();
+        
+        this.installGuardsAndActions(workloadModel);
 
         return workloadModel;
     }
@@ -331,6 +358,7 @@ public class M4jdslModelGenerator {
         return workloadModel;
     }
 
+       
     /**
      * Installs the Behavior Models in a given M4J-DSL model.
      *
@@ -381,6 +409,7 @@ public class M4jdslModelGenerator {
 
         return workloadModel;
     }
+    
 
     /**
      * Installs the Behavior Mix in a given M4J-DSL model.
@@ -417,7 +446,20 @@ public class M4jdslModelGenerator {
         workloadModel.setBehaviorMix(behaviorMix);
         return workloadModel;
     }
-
+    
+    private void installGuardsAndActions(final WorkloadModel workloadModel) {
+    	SessionLayerEFSM sessionLayerEFSM = workloadModel.getApplicationModel().getSessionLayerEFSM();
+        for (ApplicationState applicationState : sessionLayerEFSM.getApplicationStates()) {
+        	if (applicationState.getOutgoingTransitions().size() > 2) {
+              	for (ApplicationTransition applicationTransition : applicationState.getOutgoingTransitions()) {
+              		if (applicationTransition.getTargetState() instanceof ApplicationState) {
+                		this.getGuard(applicationTransition, sessionLayerEFSM);
+                		this.getAction(applicationTransition, sessionLayerEFSM);	
+              		}
+            	}
+        	}  
+        }
+    }
 
     /* --------------------------  helping methods  ------------------------- */
 
@@ -631,8 +673,234 @@ public class M4jdslModelGenerator {
                 frequency,
                 behaviorFile);
     }
+        
+    /**
+     * As not all transitions are allowed in the behaviorModels and the application model is created before the behavior models,
+     * we have to remove application transitions which are not possible. 
+     * 
+     * @param workloadModel
+     */
+    private void removeUnusedApplicationTransitions(final WorkloadModel workloadModel) {
+    	SessionLayerEFSM sessionLayerEFSM = workloadModel.getApplicationModel().getSessionLayerEFSM();
+    	List<ApplicationTransition> removeList = new ArrayList<ApplicationTransition>();
+    	for (ApplicationState applicationState : sessionLayerEFSM.getApplicationStates()) {
+    		for (ApplicationTransition applicationTransition : applicationState.getOutgoingTransitions()) {
+    			Service fromApplicationStateService = applicationState.getService();
+    			Service targetApplicationStateService = null;
+    			if (applicationTransition.getTargetState() instanceof ApplicationState) {
+    				targetApplicationStateService =  ((ApplicationState) applicationTransition.getTargetState()).getService();
+    				if (!applicationTransitionInBehaviorModel(fromApplicationStateService, targetApplicationStateService, workloadModel)) {
+        				removeList.add(applicationTransition);
+        			}  
+    			}    			  			
+    		}
+    		applicationState.getOutgoingTransitions().removeAll(removeList);
+    		removeList.clear();
+    	}    	
+    }
+    
+    /**
+     * Checks if an applicationTransition is in one of the behaviorModels.
+     * 
+     * @param fromApplicationStateService
+     * @param targetApplicationStateService
+     * @param workloadModel
+     * @return boolean
+     */
+    private boolean applicationTransitionInBehaviorModel(final Service fromApplicationStateService, final Service targetApplicationStateService, final WorkloadModel workloadModel) {
+    	boolean found = false;
+		for (BehaviorModel behaviorModel : workloadModel.getBehaviorModels()) {
+			for (MarkovState markovState : behaviorModel.getMarkovStates()) {
+				for (m4jdsl.Transition transition : markovState.getOutgoingTransitions()) {
+					Service fromMarkovStateService = markovState.getService();
+					Service targetMarkovStateService = ((MarkovState) transition.getTargetState()).getService();
+	    			if (fromApplicationStateService.equals(fromMarkovStateService) && targetApplicationStateService.equals(targetMarkovStateService)) {
+	    				found = true;
+	    				break;
+	    			}    		    		
+				}
+			}
+		}
+    	return found;
+    }
+    
+    /**
+	 * getTemporalInvariants form synoptic.
+	 */
+	private void getTemporalInvariants() {    	
+    	String[] args = new String[7];  
+        args[0] = "-r";
+        args[1] = "[$1]+;[0-9]*;(?<TYPE>[\\w_+-]*);(?<ip>[\\w+-]*).[\\w;.-]*";
+        args[2] = "-m";
+        args[3] = "\\k<ip>";
+        args[4] = "-i";
+//        args[5] = "-o";
+//        args[6] = "C:/Users/voegele/Applications/eclipse-jee-kepler-SR2-win32-x86_64/eclipse/workspace/Synoptic/output/output";
+//        args[7] = "-d";
+//        args[8] = "C:/Program Files (x86)/Graphviz2.38/bin/gvedit.exe";
+        args[5] = "--dumpInvariants=true";
+        args[6] = "examples/specj/input/logFiles/SPECjlog.log";
 
+        SynopticMain.getInstance();
+		try {
+			SynopticMain.main(args);
+			this.invariants = AbstractMain.getInvariants();
+			this.filterInvariants();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void filterInvariants() {
+		List<ITemporalInvariant> removeList = new ArrayList<ITemporalInvariant>();
+		for (ITemporalInvariant invariant : this.invariants.getSet()) {
+			if (invariant instanceof AlwaysPrecedesInvariant) {
+				AlwaysPrecedesInvariant alwaysPrecedesInvariant = (AlwaysPrecedesInvariant) invariant;			
+				String first = alwaysPrecedesInvariant.getFirst().toString();
+				String second = alwaysPrecedesInvariant.getSecond().toString();			
+				for (ITemporalInvariant invariantCompare : this.invariants.getSet()) {
+					if (invariantCompare instanceof CntAlwaysEqualsGreaterInvariant) {
+						CntAlwaysEqualsGreaterInvariant  cntAlwaysEqualsGreaterInvariant = (CntAlwaysEqualsGreaterInvariant) invariantCompare;			
+						String firstCompare = cntAlwaysEqualsGreaterInvariant.getFirst().toString();
+						String secondCompare = cntAlwaysEqualsGreaterInvariant.getSecond().toString();
+						if (first.equals(firstCompare) && second.equals(secondCompare)) {
+							removeList.add(invariant);
+							break;
+						}								
+					}
+				}								
+			}
+		}
+		this.invariants.getSet().removeAll(removeList);	
+	}
+    
+	/**
+	 * @param transition
+	 * @return
+	 */
+	private void getGuard(final ApplicationTransition transition, final SessionLayerEFSM sessionLayerEFSM) {
+		List<Guard> guards = new ArrayList<Guard>();
+		for (ITemporalInvariant invariant : this.invariants.getSet()) {
+			if (invariant instanceof BinaryInvariant) {
+				BinaryInvariant binaryInvariant = (BinaryInvariant) invariant;			
+				String first = binaryInvariant.getFirst().toString();
+				String second = binaryInvariant.getSecond().toString();
+				String targetState = ((ApplicationState) transition.getTargetState()).getService().getName();
+				Guard guard = null;
+				GuardActionParameter guardActionParameter = null;
+				// invariant AlwaysFollowedBy can not be used
+				if (binaryInvariant instanceof AlwaysPrecedesInvariant) {
+					if (targetState.equals(second)) {
+						guardActionParameter = createGuardActionParameter(first, GuardActionParameterType.BOOLEAN, sessionLayerEFSM);
+						guard = createGuard(guardActionParameter, "${" + first  + "}");
+					}    					
+//    			} else if (binaryInvariant instanceof NeverFollowedInvariant) {
+//    				if (transition.getTarget().getValue().equals(second)) {
+//    					guardActionParameter = createGuardActionParameter(first, GuardActionParameterType.BOOLEAN, sessionLayerEFSM);
+//						guard = createGuard(guardActionParameter, "!${" + first  + "}");    				  
+//    			    }	
+			   } else if (binaryInvariant instanceof CntAlwaysEqualsGreaterInvariant) {
+	   				if (targetState.equals(second)) {
+    					guardActionParameter = createGuardActionParameter(first+second, GuardActionParameterType.INTEGER, sessionLayerEFSM);
+						guard = createGuard(guardActionParameter, first+second + " > 0"); 
+				    }	
+		       }
 
+				if (guard != null) {
+					guards.add(guard);
+			   }			   
+		    }
+		}	
+		transition.getGuard().addAll(guards);
+	}      
+	
+	/**
+	 * @param transition
+	 * @return
+	 */
+	private void getAction(final ApplicationTransition transition, final SessionLayerEFSM sessionLayerEFSM) {
+		List<Action> actions = new ArrayList<Action>();
+		String targetState = ((ApplicationState) transition.getTargetState()).getService().getName();
+		GuardActionParameter guardActionParameter = createGuardActionParameter(targetState
+				, GuardActionParameterType.BOOLEAN, sessionLayerEFSM);
+		Action action = createAction(guardActionParameter, targetState + "=true");
+		actions.add(action);
+		for (ITemporalInvariant invariant : this.invariants.getSet()) {
+			BinaryInvariant binaryInvariant = (BinaryInvariant) invariant;	
+			String first = binaryInvariant.getFirst().toString();
+			String second = binaryInvariant.getSecond().toString();
+			if (binaryInvariant instanceof CntAlwaysEqualsGreaterInvariant) {
+				if (targetState.equals(first)) {					
+					guardActionParameter = createGuardActionParameter(first + second, GuardActionParameterType.INTEGER, sessionLayerEFSM);
+					action = createAction(guardActionParameter, first + second + "++");
+				} else if (targetState.equals(second)) {
+					guardActionParameter = createGuardActionParameter(first + second, GuardActionParameterType.INTEGER, sessionLayerEFSM);
+					action = createAction(guardActionParameter, first + second + "--");
+				}
+				if (action != null) {
+					actions.add(action);
+				}				
+			}				
+		}
+		transition.getAction().addAll(actions);
+	}
+
+    /**
+     * Create new GuardActionParameter.
+     * 
+     * @param guardActionName
+     * @param guardActionParameterType
+     * @return new GuardActionParameter
+     */
+    protected GuardActionParameter createGuardActionParameter (final String guardActionName,
+    		final GuardActionParameterType guardActionParameterType,
+    		final SessionLayerEFSM sessionLayerEFSM) {
+    	
+    	for (GuardActionParameter guardActionParameter : sessionLayerEFSM.getGuardActionParameterList().getGuardActionParameters()) {
+    		if (guardActionParameter.getGuardActionParameterName().equals(guardActionName)) {
+    			return guardActionParameter;
+    		}
+    	} 
+    	
+	 	final GuardActionParameter guardActionParameter = this.m4jdslFactory.createGuardActionParameter();
+    	guardActionParameter.setGuardActionParameterName(guardActionName);
+    	guardActionParameter.setParameterType(guardActionParameterType);
+    	sessionLayerEFSM.getGuardActionParameterList().getGuardActionParameters().add(guardActionParameter);
+    	
+    	return guardActionParameter;  	   	
+    	
+    }
+    
+    /**
+     * Create new guard.
+     * 
+     * @param guardActionParameter
+     * @param condition
+     * @return  new Guard
+     */
+    protected Guard createGuard (final GuardActionParameter guardActionParameter,
+    		final String condition) {
+    	final Guard guard = this.m4jdslFactory.createGuard();
+    	guard.setCondition(condition);
+    	guard.setGuardParameter(guardActionParameter);
+    	return guard;
+    }
+        
+    /**
+     * Create new Action.
+     * 
+     * @param guardActionParameter
+     * @param condition
+     * @return new Action
+     */
+    protected Action createAction (final GuardActionParameter guardActionParameter,
+    		final String condition) {
+    	final Action action = this.m4jdslFactory.createAction();
+    	action.setCondition(condition);
+    	action.setActionParameter(guardActionParameter);
+    	return action;    	
+    }
+    
     /* *************************  internal classes  ************************* */
 
 

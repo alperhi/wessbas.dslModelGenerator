@@ -2,9 +2,14 @@ package net.sf.markov4jmeter.m4jdslmodelgenerator.components.efsm;
 
 import java.io.IOException;
 
+import org.eclipse.emf.common.util.EList;
+
+import m4jdsl.Action;
 import m4jdsl.ApplicationExitState;
 import m4jdsl.ApplicationState;
 import m4jdsl.ApplicationTransition;
+import m4jdsl.Guard;
+import m4jdsl.GuardActionParameterList;
 import m4jdsl.M4jdslFactory;
 import m4jdsl.ProtocolLayerEFSM;
 import m4jdsl.Service;
@@ -152,7 +157,7 @@ public abstract class AbstractSessionLayerEFSMGenerator {
 
         return service;
     }
-
+    
     /**
      * Creates an empty Session Layer EFSM, which is an instance that only
      * includes an exit state.
@@ -175,7 +180,7 @@ public abstract class AbstractSessionLayerEFSMGenerator {
 
         return sessionLayerEFSM;
     }
-
+       
     /**
      * Creates an Application State.
      *
@@ -222,6 +227,17 @@ public abstract class AbstractSessionLayerEFSMGenerator {
     }
 
     /**
+     * Creates a new GuardActionParameterList
+     * 
+     * @return GuardActionParameterList
+     */
+    protected GuardActionParameterList createGuardActionParamterList() {
+    	final GuardActionParameterList guardActionParameterList = 
+    			this.m4jdslFactory.createGuardActionParameterList();
+    	return guardActionParameterList;
+    }
+    
+    /**
      * Creates an Application Transition, including guard and action.
      *
      * @param targetState  target state of the transition.
@@ -232,15 +248,15 @@ public abstract class AbstractSessionLayerEFSMGenerator {
      */
     protected ApplicationTransition createApplicationTransition (
             final SessionLayerEFSMState targetState,
-            final String guard,
-            final String action) {
+            final EList<Guard> guards,
+            final EList<Action> actions) {
 
         final ApplicationTransition applicationTransition =
                 this.m4jdslFactory.createApplicationTransition();
 
         applicationTransition.setTargetState(targetState);
-        applicationTransition.setGuard(guard);
-        applicationTransition.setAction(action);
+        applicationTransition.getGuard().addAll(guards);
+        applicationTransition.getAction().addAll(actions);
 
         return applicationTransition;
     }
