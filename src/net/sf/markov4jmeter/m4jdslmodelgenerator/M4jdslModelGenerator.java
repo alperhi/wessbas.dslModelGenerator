@@ -116,7 +116,7 @@ public class M4jdslModelGenerator {
     /**
      * Invariants from Synoptic.
      */
-    private TemporalInvariantSet invariants = null; 
+    private TemporalInvariantSet invariants; 
 
     /* ***************************  constructors  *************************** */
 
@@ -193,7 +193,6 @@ public class M4jdslModelGenerator {
         final ArrayList<File>   behaviorFiles = new ArrayList<File>();
 
         for (BehaviorModelParameters p : behaviorModelParametersList) {
-
             names.add(p.name);
             filenames.add(p.filename);
             frequencies.add(p.frequency);
@@ -203,7 +202,6 @@ public class M4jdslModelGenerator {
         final Iterator<Double> frequencyIterator = frequencies.iterator();
 
         for (final String name : names) {
-
             behaviorMixEntries.put(name, frequencyIterator.next());
         }
 
@@ -403,7 +401,6 @@ public class M4jdslModelGenerator {
                         getSessionLayerEFSM().getInitialState().getService());
 
         for (final BehaviorModel behaviorModel : behaviorModels) {
-
             workloadModel.getBehaviorModels().add(behaviorModel);
         }
 
@@ -447,6 +444,11 @@ public class M4jdslModelGenerator {
         return workloadModel;
     }
     
+    /**
+     * Add guards and actions to workloadModel.
+     * 
+     * @param workloadModel
+     */
     private void installGuardsAndActions(final WorkloadModel workloadModel) {
     	SessionLayerEFSM sessionLayerEFSM = workloadModel.getApplicationModel().getSessionLayerEFSM();
         for (ApplicationState applicationState : sessionLayerEFSM.getApplicationStates()) {
@@ -729,10 +731,10 @@ public class M4jdslModelGenerator {
     }
     
     /**
-	 * getTemporalInvariants form synoptic.
+	 * getTemporalInvariants from synoptic package.
 	 */
 	private void getTemporalInvariants() {    	
-    	String[] args = new String[7];  
+    	String[] args = new String[6];  
         args[0] = "-r";
         args[1] = "[$1]+;[0-9]*;(?<TYPE>[\\w_+-]*);(?<ip>[\\w+-]*).[\\w;.-]*";
         args[2] = "-m";
@@ -742,8 +744,8 @@ public class M4jdslModelGenerator {
 //        args[6] = "C:/Users/voegele/Applications/eclipse-jee-kepler-SR2-win32-x86_64/eclipse/workspace/Synoptic/output/output";
 //        args[7] = "-d";
 //        args[8] = "C:/Program Files (x86)/Graphviz2.38/bin/gvedit.exe";
-        args[5] = "--dumpInvariants=true";
-        args[6] = "examples/specj/input/logFiles/SPECjlog.log";
+//        args[5] = "--dumpInvariants=true";
+        args[5] = "examples/specj/input/logFiles/SPECjlog.log";
 
         SynopticMain.getInstance();
 		try {
@@ -755,6 +757,10 @@ public class M4jdslModelGenerator {
 		}
 	}
 	
+	/**
+	 * Invariants which are AlwaysPrecedesInvariant and CntAlwaysEqualsGreaterInvariant are redundant. Only keep 
+	 * CntAlwaysEqualsGreaterInvariant.
+	 */
 	private void filterInvariants() {
 		List<ITemporalInvariant> removeList = new ArrayList<ITemporalInvariant>();
 		for (ITemporalInvariant invariant : this.invariants.getSet()) {
@@ -779,6 +785,8 @@ public class M4jdslModelGenerator {
 	}
     
 	/**
+	 * Set guards to the applicationTransition.
+	 * 
 	 * @param transition
 	 * @return
 	 */
@@ -810,23 +818,24 @@ public class M4jdslModelGenerator {
 						guard = createGuard(guardActionParameter, first+second + " > 0"); 
 				    }	
 		       }
-
-				if (guard != null) {
+			   if (guard != null) {
 					guards.add(guard);
 			   }			   
 		    }
 		}	
 		transition.getGuard().addAll(guards);
 	}      
-	
+
 	/**
+	 * Sets Actions to the applicationTransition.
+	 * 
 	 * @param transition
-	 * @return
+	 * @param sessionLayerEFSM
 	 */
 	private void getAction(final ApplicationTransition transition,
 			final SessionLayerEFSM sessionLayerEFSM) {
 		List<Action> actions = new ArrayList<Action>();
-		Service target = ((ApplicationState) transition.getTargetState()).getService();
+		String targetName = ((ApplicationState) transition.getTargetState()).getService().getName();
 		GuardActionParameter guardActionParameter = null;
 		Action action = null;
 		for (ITemporalInvariant invariant : this.invariants.getSet()) {
@@ -834,17 +843,17 @@ public class M4jdslModelGenerator {
 			String first = binaryInvariant.getFirst().toString();
 			String second = binaryInvariant.getSecond().toString();
 			if (binaryInvariant instanceof CntAlwaysEqualsGreaterInvariant) {
-				if (target.toString().equals(first)) {					
+				if (targetName.equals(first)) {					
 					guardActionParameter = createGuardActionParameter(first + second, GuardActionParameterType.INTEGER, sessionLayerEFSM, first, second);
 					action = createAction(guardActionParameter, first + second + "++");
 					actions.add(action);
-				} else if (target.toString().equals(second)) {
+				} else if (targetName.equals(second)) {
 					guardActionParameter = createGuardActionParameter(first + second, GuardActionParameterType.INTEGER, sessionLayerEFSM, first, second);
 					action = createAction(guardActionParameter, first + second + "--");
 					actions.add(action);
-				}		
+				}	
 			} else if (binaryInvariant instanceof AlwaysPrecedesInvariant) {
-				if (target.toString().equals(first)) {
+				if (targetName.equals(first)) {
 					guardActionParameter = createGuardActionParameter(first
 							, GuardActionParameterType.BOOLEAN, sessionLayerEFSM, first, null);
 					action = createAction(guardActionParameter, first + "=true");
