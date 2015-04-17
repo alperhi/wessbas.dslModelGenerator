@@ -15,7 +15,6 @@ import m4jdsl.ThinkTime;
 import m4jdsl.Transition;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.GeneratorException;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.ServiceRepository;
-import net.sf.markov4jmeter.m4jdslmodelgenerator.components.efsm.FlowSessionLayerEFSMGenerator;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.util.CSVHandler;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.util.IdGenerator;
 
@@ -48,6 +47,11 @@ public class BehaviorModelsGenerator {
      *  detected for a transition in a Behavior Model. */
     private final static String WARNING_UNKNOWN_TARGETSTATE =
             "unknown target state \"%s\" detected, will be ignored";
+
+    /** Informational message for the case that no behavior information is
+     *  available for a certain state. */
+    private final static String INFO_NO_BEHAVIOR_INFORMATION_FOR_STATE =
+            "no behavior information for state \"%s\" available, will skip";
 
     /** Warning message for the case that a behavior information file could
      *  not be loaded for a Behavior Model. */
@@ -128,6 +132,8 @@ public class BehaviorModelsGenerator {
      * @param behaviorFiles
      *     CSV files which provide the behavior information as matrices, to be
      *     included into the Behavior Models.
+     * @param initialService
+     *     initial service of all Behavior Models.
      *
      * @return
      *     the newly created Behavior Models.
@@ -138,7 +144,8 @@ public class BehaviorModelsGenerator {
     public LinkedList<BehaviorModel> generateBehaviorModels (
             final String[] names,
             final String[] filenames,
-            final File[] behaviorFiles) throws GeneratorException {
+            final File[] behaviorFiles,
+            final Service initialService) throws GeneratorException {
 
         final LinkedList<BehaviorModel> behaviorModels =
                 new LinkedList<BehaviorModel>();
@@ -152,7 +159,8 @@ public class BehaviorModelsGenerator {
             final BehaviorModel behaviorModel = this.generateBehaviorModel(
                     name,
                     filename,
-                    behaviorFile);
+                    behaviorFile,
+                    initialService);
 
             behaviorModels.add(behaviorModel);
         }
@@ -174,6 +182,8 @@ public class BehaviorModelsGenerator {
      * @param behaviorFile
      *     CSV file which provides the behavior information as matrix, to be
      *     included into the Behavior Model.
+     * @param initialService
+     *     initial service of all Behavior Models.
      *
      * @return
      *     the newly created Behavior Model.
@@ -184,13 +194,40 @@ public class BehaviorModelsGenerator {
     private BehaviorModel generateBehaviorModel (
             final String name,
             final String filename,
-            final File   behaviorFile) throws GeneratorException {
-
-        final String initServiceName =
-                FlowSessionLayerEFSMGenerator.INITIAL_STATE__SERVICE_NAME;
+            final File   behaviorFile,
+            final Service initialService) throws GeneratorException {
 
         final BehaviorModel behaviorModel =
                 this.createBehaviorModel(name, filename);
+
+        this.installMarkovStates(behaviorModel, initialService);
+
+        // all Markov States have been created, and -all- services have been
+        // registered in the service repository; now, add the transitions
+        // between the states, with the use of the repository;
+
+        if (behaviorFile != null) {
+
+            this.installMarkovTransitions(behaviorModel, behaviorFile);
+        }
+
+        return behaviorModel;
+    }
+
+    /**
+     * Installs all Markov states of a Behavior Model.
+     *
+     * @param behaviorModel
+     *     Behavior Model to be equipped with Markov states.
+     * @param initialService
+     *     service which is associated with the initial Markov state.
+     *
+     * @throws GeneratorException
+     *     if any error occurs during the generation process.
+     */
+    private void installMarkovStates (
+            final BehaviorModel behaviorModel,
+            final Service initialService) throws GeneratorException {
 
         boolean installedInitialState = false;
 
@@ -199,10 +236,9 @@ public class BehaviorModelsGenerator {
             final MarkovState markovState = this.createMarkovState(service);
 
             // add the newly created Markov State to the Behavior Model;
-
             behaviorModel.getMarkovStates().add(markovState);
 
-            if ( service.getName().equals(initServiceName) ) {
+            if (service == initialService) {
 
                 behaviorModel.setInitialState(markovState);
                 installedInitialState = true;
@@ -213,15 +249,25 @@ public class BehaviorModelsGenerator {
 
             final String message = String.format(
                     BehaviorModelsGenerator.ERROR_UNDEFINED_INITIAL_SERVICE,
-                    initServiceName,
-                    name);
+                    initialService.getName(),
+                    behaviorModel.getName());
 
             throw new GeneratorException(message);
         }
+    }
 
-        // all Markov States have been created, and -all- services have been
-        // registered in the service repository; now, add the transitions
-        // between the states, with the use of the repository;
+    /**
+     * Installs the transitions between the Markov states.
+     *
+     * @param behaviorModel
+     *     Behavior Model to be equipped with transitions.
+     * @param behaviorFile
+     *     File with user behavior information to be included optionally;
+     *     might be <code>null</code>, if no information shall be included.
+     */
+    private void installMarkovTransitions (
+            final BehaviorModel behaviorModel,
+            final File behaviorFile) {
 
         // behaviorInformation is initialized with null, in case reading fails;
         final String[][] behaviorInformation =
@@ -243,14 +289,12 @@ public class BehaviorModelsGenerator {
 
         } else {
 
-            this.warn(
+            this.info(
                     BehaviorModelsGenerator.
                     WARNING_BEHAVIOR_FILE_LOADING_FAILED,
                     behaviorFile,
-                    name);
+                    behaviorModel.getName());
         }
-
-        return behaviorModel;
     }
 
     /**
@@ -295,6 +339,21 @@ public class BehaviorModelsGenerator {
     }
 
     /**
+     * Prints an informational message on the standard output stream.
+     *
+     * @param template
+     *     template of the message to be written.
+     * @param args
+     *     arguments to be inserted into the template.
+     */
+    private void info (final String template, final Object... args) {
+
+        final String message = String.format(template, args);
+
+        System.out.println("INFO: " + message);
+    }
+
+    /**
      * Installs the outgoing transitions of a Markov State, according to the
      * given behavior information.
      *
@@ -315,8 +374,10 @@ public class BehaviorModelsGenerator {
             final BehaviorModelExitState behaviorModelExitState,
             final String[][] behaviorInformation) {
 
+        final String sourceServiceName = markovState.getService().getName();
+
         final String[] row = this.findRowByStateName(
-                markovState.getService().getName(),
+                sourceServiceName,
                 behaviorInformation);
 
         if (row != null) {  // behavior information available?
@@ -324,9 +385,9 @@ public class BehaviorModelsGenerator {
             final String[] headerRow = behaviorInformation[0];
 
             // ignore first (header) column  -->  start with index 1;
-            for (int i = 1, n = headerRow.length; i < n; i++) {
+            for (int j = 1, n = headerRow.length; j < n; j++) {
 
-                final String targetServiceName = headerRow[i];
+                final String targetServiceName = headerRow[j];
 
                 final BehaviorModelState targetState;
                 final double probability;
@@ -352,7 +413,7 @@ public class BehaviorModelsGenerator {
                     }
                 }
 
-                final String entry = row[i];
+                final String entry = row[j];
 
                 probability = this.extractProbability(entry);
 
@@ -369,7 +430,15 @@ public class BehaviorModelsGenerator {
                     markovState.getOutgoingTransitions().add(transition);
                 }
             }
+
+        } else {
+
+            this.info(
+                    BehaviorModelsGenerator.
+                    INFO_NO_BEHAVIOR_INFORMATION_FOR_STATE,
+                    sourceServiceName);
         }
+
     }
 
     /**
@@ -391,7 +460,9 @@ public class BehaviorModelsGenerator {
 
         for (final MarkovState markovState : markovStates) {
 
-            if ( serviceName.equals(markovState.getService().getName()) ) {
+            final String stateName = markovState.getService().getName();
+
+            if ( serviceName.equals(stateName) ) {
 
                 return markovState;
             }
@@ -483,13 +554,23 @@ public class BehaviorModelsGenerator {
 
         for (final String[] row : behaviorInformation) {
 
-            if ( stateName.equals(row[0]) ) {
+            if ( stateName.equals( this.removeAsteriskSuffix(row[0]) ) ) {
 
                 return row;
             }
         }
 
         return null;  // no matching row for state name;
+    }
+
+    private String removeAsteriskSuffix (final String stateName) {
+
+        if ( stateName.endsWith("*") ) {
+
+            return stateName.substring(0, stateName.length() - 1);
+        }
+
+        return stateName;
     }
 
     /**

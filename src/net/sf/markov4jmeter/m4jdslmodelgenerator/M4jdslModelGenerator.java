@@ -12,10 +12,19 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
+import m4jdsl.Action;
 import m4jdsl.ApplicationModel;
+import m4jdsl.ApplicationState;
+import m4jdsl.ApplicationTransition;
 import m4jdsl.BehaviorMix;
 import m4jdsl.BehaviorModel;
+import m4jdsl.Guard;
+import m4jdsl.GuardActionParameter;
+import m4jdsl.GuardActionParameterType;
 import m4jdsl.M4jdslFactory;
+import m4jdsl.MarkovState;
+import m4jdsl.Service;
+import m4jdsl.SessionLayerEFSM;
 import m4jdsl.WorkloadIntensity;
 import m4jdsl.WorkloadModel;
 import m4jdsl.impl.M4jdslPackageImpl;
@@ -23,11 +32,22 @@ import net.sf.markov4jmeter.m4jdslmodelgenerator.components.ApplicationModelGene
 import net.sf.markov4jmeter.m4jdslmodelgenerator.components.BehaviorMixGenerator;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.components.BehaviorModelsGenerator;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.components.WorkloadIntensityGenerator;
+import net.sf.markov4jmeter.m4jdslmodelgenerator.components.efsm.AbstractProtocolLayerEFSMGenerator;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.components.efsm.AbstractSessionLayerEFSMGenerator;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.components.efsm.FlowSessionLayerEFSMGenerator;
-import net.sf.markov4jmeter.m4jdslmodelgenerator.components.efsm.JavaProtocolLayerEFSMGenerator;
+import net.sf.markov4jmeter.m4jdslmodelgenerator.components.efsm.HTTPProtocolLayerEFSMGenerator;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.util.IdGenerator;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.util.XmiEcoreHandler;
+
+import org.eclipse.xtext.xtext.ecoreInference.TransformationException;
+
+import synoptic.invariants.AlwaysPrecedesInvariant;
+import synoptic.invariants.BinaryInvariant;
+import synoptic.invariants.CntAlwaysEqualsGreaterInvariant;
+import synoptic.invariants.ITemporalInvariant;
+import synoptic.invariants.TemporalInvariantSet;
+import synoptic.main.AbstractMain;
+import synoptic.main.SynopticMain;
 
 /**
  * This is the main class of the M4J-DSL Model Generator, which builds models
@@ -92,7 +112,11 @@ public class M4jdslModelGenerator {
 
     /** Instance for creating M4J-DSL model elements. */
     private final M4jdslFactory m4jdslFactory;
-
+    
+    /**
+     * Invariants from Synoptic.
+     */
+    private TemporalInvariantSet invariants; 
 
     /* ***************************  constructors  *************************** */
 
@@ -128,6 +152,11 @@ public class M4jdslModelGenerator {
      *     which is generally given in Web applications; if this flag is set
      *     <code>true</code>, transitions to the exit state will be installed
      *     for all states of the Application Layer.
+     * @param useFullyQualifiedNames
+     *     <code>true</code> if and only if fully qualified state names shall
+     *     be used; if this flag is <code>false</code>, plain Node names will be
+     *     used as state names, without any related Flow names being added as
+     *     prefixes.
      *
      * @return
      *     the newly created M4J-DSL model.
@@ -141,8 +170,8 @@ public class M4jdslModelGenerator {
             final Properties behaviorModelsProperties,
             final String flowsDirectoryPath,
             final String graphOutputPath,
-            final boolean sessionsCanBeExitedAnytime)
-                    throws GeneratorException {
+            final boolean sessionsCanBeExitedAnytime,
+            final boolean useFullyQualifiedNames) throws GeneratorException {
 
         // to be returned;
         final WorkloadModel workloadModel =
@@ -164,7 +193,6 @@ public class M4jdslModelGenerator {
         final ArrayList<File>   behaviorFiles = new ArrayList<File>();
 
         for (BehaviorModelParameters p : behaviorModelParametersList) {
-
             names.add(p.name);
             filenames.add(p.filename);
             frequencies.add(p.frequency);
@@ -174,7 +202,6 @@ public class M4jdslModelGenerator {
         final Iterator<Double> frequencyIterator = frequencies.iterator();
 
         for (final String name : names) {
-
             behaviorMixEntries.put(name, frequencyIterator.next());
         }
 
@@ -184,15 +211,16 @@ public class M4jdslModelGenerator {
         this.installWorkloadIntensity(
                 workloadModel,
                 workloadIntensityProperties);
-
+        
         // might throw a GeneratorException;
         this.installApplicationLayer(
                 workloadModel,
                 serviceRepository,
                 flowsDirectoryPath,
                 graphOutputPath,
-                sessionsCanBeExitedAnytime);
-
+                sessionsCanBeExitedAnytime,
+                useFullyQualifiedNames);
+        
         // might throw a GeneratorException;
         this.installBehaviorModels(
                 workloadModel,
@@ -200,12 +228,18 @@ public class M4jdslModelGenerator {
                 names.toArray(new String[]{}),
                 filenames.toArray(new String[]{}),
                 behaviorFiles.toArray(new File[]{}));
-
+        
         // might throw a GeneratorException;
         this.installBehaviorMix(
                 workloadModel,
                 workloadModel.getBehaviorModels(),
-                behaviorMixEntries);
+                behaviorMixEntries);         
+ 
+        this.removeUnusedApplicationTransitions(workloadModel);
+        
+        this.getTemporalInvariants();
+        
+        this.installGuardsAndActions(workloadModel);
 
         return workloadModel;
     }
@@ -263,6 +297,11 @@ public class M4jdslModelGenerator {
      *     which is generally given in Web applications; if this flag is set
      *     <code>true</code>, transitions to the exit state will be installed
      *     for all states of the Application Layer.
+     * @param useFullyQualifiedNames
+     *     <code>true</code> if and only if fully qualified state names shall
+     *     be used; if this flag is <code>false</code>, plain Node names will be
+     *     used as state names, without any related Flow names being added as
+     *     prefixes.
      *
      * @return
      *     M4J-DSL model with the installed Application Layer.
@@ -275,10 +314,17 @@ public class M4jdslModelGenerator {
             final ServiceRepository serviceRepository,
             final String flowsDirectoryPath,
             final String graphOutputPath,
-            final boolean sessionsCanBeExitedAnytime) throws GeneratorException {
-
-        final JavaProtocolLayerEFSMGenerator protocolLayerEFSMGenerator =
+            final boolean sessionsCanBeExitedAnytime,
+            final boolean useFullyQualifiedNames) throws GeneratorException {
+/*
+        final AbstractProtocolLayerEFSMGenerator protocolLayerEFSMGenerator =
                 new JavaProtocolLayerEFSMGenerator(
+                        this.m4jdslFactory,
+                        new IdGenerator("PS"),
+                        new IdGenerator("R"));
+*/
+        final AbstractProtocolLayerEFSMGenerator protocolLayerEFSMGenerator =
+                new HTTPProtocolLayerEFSMGenerator(
                         this.m4jdslFactory,
                         new IdGenerator("PS"),
                         new IdGenerator("R"));
@@ -295,6 +341,7 @@ public class M4jdslModelGenerator {
                         protocolLayerEFSMGenerator,
                         new IdGenerator("ASId"),
                         sessionsCanBeExitedAnytime,
+                        useFullyQualifiedNames,
                         flowFiles,
                         graphOutputPath);
 
@@ -309,6 +356,7 @@ public class M4jdslModelGenerator {
         return workloadModel;
     }
 
+       
     /**
      * Installs the Behavior Models in a given M4J-DSL model.
      *
@@ -348,15 +396,17 @@ public class M4jdslModelGenerator {
                 behaviorModelGenerator.generateBehaviorModels(
                         names,
                         filenames,
-                        behaviorFiles);
+                        behaviorFiles,
+                        workloadModel.getApplicationModel().
+                        getSessionLayerEFSM().getInitialState().getService());
 
         for (final BehaviorModel behaviorModel : behaviorModels) {
-
             workloadModel.getBehaviorModels().add(behaviorModel);
         }
 
         return workloadModel;
     }
+    
 
     /**
      * Installs the Behavior Mix in a given M4J-DSL model.
@@ -393,7 +443,26 @@ public class M4jdslModelGenerator {
         workloadModel.setBehaviorMix(behaviorMix);
         return workloadModel;
     }
-
+    
+    /**
+     * Add guards and actions to workloadModel.
+     * 
+     * @param workloadModel
+     */
+    private void installGuardsAndActions(final WorkloadModel workloadModel) {
+    	SessionLayerEFSM sessionLayerEFSM = workloadModel.getApplicationModel().getSessionLayerEFSM();
+        for (ApplicationState applicationState : sessionLayerEFSM.getApplicationStates()) {
+        	// > 2 as one transition is the exit state
+        	if (applicationState.getOutgoingTransitions().size() > 2) {
+              	for (ApplicationTransition applicationTransition : applicationState.getOutgoingTransitions()) {
+              		if (applicationTransition.getTargetState() instanceof ApplicationState) {
+                		this.getGuard(applicationTransition, sessionLayerEFSM);
+                		this.getAction(applicationTransition, sessionLayerEFSM);	
+              		}
+            	}
+        	}  
+        }
+    }
 
     /* --------------------------  helping methods  ------------------------- */
 
@@ -534,7 +603,7 @@ public class M4jdslModelGenerator {
 
             final String[] parameters = parameterSequence.split("\\s*;\\s*");
 
-            if (parameters.length < 4) {
+            if (parameters.length < 3) {
 
                 final String message = String.format(
                         M4jdslModelGenerator.
@@ -573,10 +642,12 @@ public class M4jdslModelGenerator {
     private BehaviorModelParameters extractBehaviorModelParameters (
             final String[] parameters) throws GeneratorException {
 
-        final String name             = parameters[0];
-        final String filename         = parameters[1];
-        final String frequencyStr     = parameters[2];
-        final String behaviorFilePath = parameters[3];
+        final String name         = parameters[0];
+        final String filename     = parameters[1];
+        final String frequencyStr = parameters[2];
+
+        final String behaviorFilePath =
+                (parameters.length >= 4) ? parameters[3] : null;
 
         final double frequency;
 
@@ -596,7 +667,8 @@ public class M4jdslModelGenerator {
         }
 
         // might throw NullPointerException (should never happen here);
-        final File behaviorFile = new File(behaviorFilePath);
+        final File behaviorFile =
+                (behaviorFilePath != null) ? new File(behaviorFilePath) : null;
 
         return new BehaviorModelParameters(
                 name,
@@ -604,8 +676,258 @@ public class M4jdslModelGenerator {
                 frequency,
                 behaviorFile);
     }
+        
+    /**
+     * As not all transitions are allowed in the behaviorModels and the application model is created before the behavior models,
+     * we have to remove application transitions which are not possible. 
+     * 
+     * @param workloadModel
+     */
+    private void removeUnusedApplicationTransitions(final WorkloadModel workloadModel) {
+    	SessionLayerEFSM sessionLayerEFSM = workloadModel.getApplicationModel().getSessionLayerEFSM();
+    	List<ApplicationTransition> removeList = new ArrayList<ApplicationTransition>();
+    	for (ApplicationState applicationState : sessionLayerEFSM.getApplicationStates()) {
+    		for (ApplicationTransition applicationTransition : applicationState.getOutgoingTransitions()) {
+    			Service fromApplicationStateService = applicationState.getService();
+    			Service targetApplicationStateService = null;
+    			if (applicationTransition.getTargetState() instanceof ApplicationState) {
+    				targetApplicationStateService =  ((ApplicationState) applicationTransition.getTargetState()).getService();
+    				if (!applicationTransitionInBehaviorModel(fromApplicationStateService, targetApplicationStateService, workloadModel)) {
+        				removeList.add(applicationTransition);
+        			}  
+    			}    			  			
+    		}
+    		applicationState.getOutgoingTransitions().removeAll(removeList);
+    		removeList.clear();
+    	}    	
+    }
+    
+    /**
+     * Checks if an applicationTransition is in one of the behaviorModels.
+     * 
+     * @param fromApplicationStateService
+     * @param targetApplicationStateService
+     * @param workloadModel
+     * @return boolean
+     */
+    private boolean applicationTransitionInBehaviorModel(final Service fromApplicationStateService, 
+    		final Service targetApplicationStateService, 
+    		final WorkloadModel workloadModel) {
+    	boolean found = false;
+		for (BehaviorModel behaviorModel : workloadModel.getBehaviorModels()) {
+			for (MarkovState markovState : behaviorModel.getMarkovStates()) {
+				for (m4jdsl.Transition transition : markovState.getOutgoingTransitions()) {
+					Service fromMarkovStateService = markovState.getService();
+					Service targetMarkovStateService = ((MarkovState) transition.getTargetState()).getService();
+	    			if (fromApplicationStateService.equals(fromMarkovStateService) &&
+	    					targetApplicationStateService.equals(targetMarkovStateService)) {
+	    				found = true;
+	    				break;
+	    			}    		    		
+				}
+			}
+		}
+    	return found;
+    }
+    
+    /**
+	 * getTemporalInvariants from synoptic package.
+	 */
+	private void getTemporalInvariants() {    	
+    	String[] args = new String[6];  
+        args[0] = "-r";
+        args[1] = "[$1]+;[0-9]*;(?<TYPE>[\\w_+-]*);(?<ip>[\\w+-]*).[\\w;.-]*";
+        args[2] = "-m";
+        args[3] = "\\k<ip>";
+        args[4] = "-i";
+//        args[5] = "-o";
+//        args[6] = "C:/Users/voegele/Applications/eclipse-jee-kepler-SR2-win32-x86_64/eclipse/workspace/Synoptic/output/output";
+//        args[7] = "-d";
+//        args[8] = "C:/Program Files (x86)/Graphviz2.38/bin/gvedit.exe";
+//        args[5] = "--dumpInvariants=true";
+        args[5] = "examples/specj/input/logFiles/SPECjlog.log";
 
+        SynopticMain.getInstance();
+		try {
+			SynopticMain.main(args);
+			this.invariants = AbstractMain.getInvariants();
+			this.filterInvariants();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Invariants which are AlwaysPrecedesInvariant and CntAlwaysEqualsGreaterInvariant are redundant. Only keep 
+	 * CntAlwaysEqualsGreaterInvariant.
+	 */
+	private void filterInvariants() {
+		List<ITemporalInvariant> removeList = new ArrayList<ITemporalInvariant>();
+		for (ITemporalInvariant invariant : this.invariants.getSet()) {
+			if (invariant instanceof AlwaysPrecedesInvariant) {
+				AlwaysPrecedesInvariant alwaysPrecedesInvariant = (AlwaysPrecedesInvariant) invariant;			
+				String first = alwaysPrecedesInvariant.getFirst().toString();
+				String second = alwaysPrecedesInvariant.getSecond().toString();			
+				for (ITemporalInvariant invariantCompare : this.invariants.getSet()) {
+					if (invariantCompare instanceof CntAlwaysEqualsGreaterInvariant) {
+						CntAlwaysEqualsGreaterInvariant  cntAlwaysEqualsGreaterInvariant = (CntAlwaysEqualsGreaterInvariant) invariantCompare;			
+						String firstCompare = cntAlwaysEqualsGreaterInvariant.getFirst().toString();
+						String secondCompare = cntAlwaysEqualsGreaterInvariant.getSecond().toString();
+						if (first.equals(firstCompare) && second.equals(secondCompare)) {
+							removeList.add(invariant);
+							break;
+						}								
+					}
+				}								
+			}
+		}
+		this.invariants.getSet().removeAll(removeList);	
+	}
+    
+	/**
+	 * Set guards to the applicationTransition.
+	 * 
+	 * @param transition
+	 * @return
+	 */
+	private void getGuard(final ApplicationTransition transition,
+			final SessionLayerEFSM sessionLayerEFSM) {
+		List<Guard> guards = new ArrayList<Guard>();
+		for (ITemporalInvariant invariant : this.invariants.getSet()) {
+			if (invariant instanceof BinaryInvariant) {
+				BinaryInvariant binaryInvariant = (BinaryInvariant) invariant;			
+				String first = binaryInvariant.getFirst().toString();
+				String second = binaryInvariant.getSecond().toString();
+				String targetState = ((ApplicationState) transition.getTargetState()).getService().getName();
+				Guard guard = null;
+				GuardActionParameter guardActionParameter = null;
+				// invariant AlwaysFollowedBy can not be used
+				if (binaryInvariant instanceof AlwaysPrecedesInvariant) {
+					if (targetState.equals(second)) {
+						guardActionParameter = createGuardActionParameter(first, GuardActionParameterType.BOOLEAN, sessionLayerEFSM, first, null);
+						guard = createGuard(guardActionParameter, "${" + first  + "}");
+					}    					
+//    			} else if (binaryInvariant instanceof NeverFollowedInvariant) {
+//    				if (transition.getTarget().getValue().equals(second)) {
+//    					guardActionParameter = createGuardActionParameter(first, GuardActionParameterType.BOOLEAN, sessionLayerEFSM);
+//						guard = createGuard(guardActionParameter, "!${" + first  + "}");    				  
+//    			    }	
+			   } else if (binaryInvariant instanceof CntAlwaysEqualsGreaterInvariant) {
+	   				if (targetState.equals(second)) {
+    					guardActionParameter = createGuardActionParameter(first+second, GuardActionParameterType.INTEGER, sessionLayerEFSM, first, second);
+						guard = createGuard(guardActionParameter, first+second + " > 0"); 
+				    }	
+		       }
+			   if (guard != null) {
+					guards.add(guard);
+			   }			   
+		    }
+		}	
+		transition.getGuard().addAll(guards);
+	}      
 
+	/**
+	 * Sets Actions to the applicationTransition.
+	 * 
+	 * @param transition
+	 * @param sessionLayerEFSM
+	 */
+	private void getAction(final ApplicationTransition transition,
+			final SessionLayerEFSM sessionLayerEFSM) {
+		List<Action> actions = new ArrayList<Action>();
+		String targetName = ((ApplicationState) transition.getTargetState()).getService().getName();
+		GuardActionParameter guardActionParameter = null;
+		Action action = null;
+		for (ITemporalInvariant invariant : this.invariants.getSet()) {
+			BinaryInvariant binaryInvariant = (BinaryInvariant) invariant;	
+			String first = binaryInvariant.getFirst().toString();
+			String second = binaryInvariant.getSecond().toString();
+			if (binaryInvariant instanceof CntAlwaysEqualsGreaterInvariant) {
+				if (targetName.equals(first)) {					
+					guardActionParameter = createGuardActionParameter(first + second, GuardActionParameterType.INTEGER, sessionLayerEFSM, first, second);
+					action = createAction(guardActionParameter, first + second + "++");
+					actions.add(action);
+				} else if (targetName.equals(second)) {
+					guardActionParameter = createGuardActionParameter(first + second, GuardActionParameterType.INTEGER, sessionLayerEFSM, first, second);
+					action = createAction(guardActionParameter, first + second + "--");
+					actions.add(action);
+				}	
+			} else if (binaryInvariant instanceof AlwaysPrecedesInvariant) {
+				if (targetName.equals(first)) {
+					guardActionParameter = createGuardActionParameter(first
+							, GuardActionParameterType.BOOLEAN, sessionLayerEFSM, first, null);
+					action = createAction(guardActionParameter, first + "=true");
+					actions.add(action);
+				}
+			}
+		}
+		transition.getAction().addAll(actions);
+	}
+
+    /**
+     * Create new GuardActionParameter.
+     * 
+     * @param guardActionName
+     * @param guardActionParameterType
+     * @return new GuardActionParameter
+     */
+    protected GuardActionParameter createGuardActionParameter (final String guardActionName,
+    		final GuardActionParameterType guardActionParameterType,
+    		final SessionLayerEFSM sessionLayerEFSM, 
+    		final String sourceName,
+    		final String targetName) {
+    	
+    	// search if parameter already exists
+    	for (GuardActionParameter guardActionParameter : sessionLayerEFSM.getGuardActionParameterList().getGuardActionParameters()) {
+    		if (guardActionParameter.getGuardActionParameterName().equals(guardActionName)) {
+    			return guardActionParameter;
+    		}
+    	} 
+    	
+    	// if not --> create
+	 	final GuardActionParameter guardActionParameter = this.m4jdslFactory.createGuardActionParameter();
+    	guardActionParameter.setGuardActionParameterName(guardActionName);
+    	guardActionParameter.setParameterType(guardActionParameterType);
+    	guardActionParameter.setSourceName(sourceName);
+    	if (targetName != null) {
+        	guardActionParameter.setTargetName(targetName);	
+    	}
+       	sessionLayerEFSM.getGuardActionParameterList().getGuardActionParameters().add(guardActionParameter);
+    	
+    	return guardActionParameter;  	   	
+    	
+    }
+    
+    /**
+     * Create new guard.
+     * 
+     * @param guardActionParameter
+     * @param condition
+     * @return  new Guard
+     */
+    protected Guard createGuard (final GuardActionParameter guardActionParameter,
+    		final String condition) {
+    	final Guard guard = this.m4jdslFactory.createGuard();
+    	guard.setCondition(condition);
+    	guard.setGuardParameter(guardActionParameter);
+    	return guard;
+    }
+        
+    /**
+     * Create new Action.
+     * 
+     * @param guardActionParameter
+     * @param condition
+     * @return new Action
+     */
+    protected Action createAction (final GuardActionParameter guardActionParameter,
+    		final String condition) {
+    	final Action action = this.m4jdslFactory.createAction();
+    	action.setCondition(condition);
+    	action.setActionParameter(guardActionParameter);
+    	return action;    	
+    }
+    
     /* *************************  internal classes  ************************* */
 
 
@@ -652,78 +974,103 @@ public class M4jdslModelGenerator {
     /**
      * Application main method.
      *
-     * @param argv
-     *     sequence of command-line parameters, providing required information
-     *     in the following order:
-     *     <i>workloadIntensityPropertiesFile</i>,
-     *     <i>behaviorModelsPropertiesFile</i>,
-     *     <i>flowsDirectoryPath</i>,
-     *     <i>xmiOutputFilePath</i>,
-     *     <i>graphOutputFilePath</i>.
+     * @param argv  sequence of command-line parameters.
      */
     public static void main (final String[] argv) {
 
-        if (argv.length < 5) {
+        try {
+            // initialize arguments handler for requesting the command line
+            // values afterwards via get() methods; might throw a
+            // NullPointer-, IllegalArgument- or ParseException;
+            CommandLineArgumentsHandler.init(argv);
 
+            // might throw FileNotFound-, Security-, IO- or GeneratorException;
+            M4jdslModelGenerator.readArgumentsAndGenerate();
+
+        } catch (final Exception ex) {
+
+            System.err.println(ex.getMessage() + ".\n");
             M4jdslModelGenerator.printUsage();
-
-        } else {
-
-            // TODO: make "graphFilePath" optional, use a command-line parser;
-            // TODO: retrieve "sessionsCanBeExitedAnytime" value as a command-line parameter;
-            final String workloadIntensityPropertiesFile = argv[0];
-            final String behaviorModelsPropertiesFile    = argv[1];
-            final String flowsDirectoryPath              = argv[2];
-            final String xmiOutputFilePath               = argv[3];
-            final String graphOutputFilePath             = argv[4];
-            final boolean sessionsCanBeExitedAnytime     = true;
-
-            final M4jdslModelGenerator m4jdslModelGenerator =
-                    new M4jdslModelGenerator();
-
-            try {
-
-                // might throw a FileNotFound- or IOException;
-                final Properties workloadIntensityProperties =
-                        M4jdslModelGenerator.loadProperties(
-                                workloadIntensityPropertiesFile);
-
-                // might throw a FileNotFound- or IOException;
-                final Properties behaviorModelsProperties =
-                        M4jdslModelGenerator.loadProperties(
-                                behaviorModelsPropertiesFile);
-
-                final WorkloadModel workloadModel =
-                        m4jdslModelGenerator.generateWorkloadModel(
-                                workloadIntensityProperties,
-                                behaviorModelsProperties,
-                                flowsDirectoryPath,
-                                graphOutputFilePath,
-                                sessionsCanBeExitedAnytime);
-
-
-                //final String outputFile = generatorProperties.
-                //        getProperty(M4jdslModelGenerator.PKEY_XMI_OUTPUT_FILE);
-                final String outputFile = xmiOutputFilePath;
-
-                if (outputFile == null) {
-
-                    throw new IOException("XMI output file is undefined");
-                }
-
-                // might throw an IOException;
-                XmiEcoreHandler.getInstance().ecoreToXMI(
-                        workloadModel,
-                        xmiOutputFilePath);
-
-                System.out.println("Finished.");
-
-            } catch (final Exception ex) {
-
-                System.err.println(ex.getMessage() + ".\n");
-                M4jdslModelGenerator.printUsage();
-            }
         }
+    }
+
+    /**
+     * Starts the generation process with the arguments which have been passed
+     * to command line.
+     *
+     * @throws IOException
+     * @throws SecurityException
+     * @throws FileNotFoundException
+     * @throws GeneratorException
+     *
+     * @throws TransformationException
+     *     if any critical error in the transformation process occurs.
+     */
+    private static void readArgumentsAndGenerate ()
+            throws FileNotFoundException,
+                   SecurityException,
+                   IOException,
+                   GeneratorException {
+
+        final M4jdslModelGenerator m4jdslModelGenerator =
+                new M4jdslModelGenerator();
+
+        final String flowsDirectoryPath =
+                CommandLineArgumentsHandler.getFlowsDirectoryPath();
+
+        final String workloadIntensityPropertiesFile =
+                CommandLineArgumentsHandler.getWorkloadIntensityPropertiesFile();
+
+        final String xmiOutputFilePath =
+                CommandLineArgumentsHandler.getXmiOutputFilePath();
+
+        final String behaviorModelsPropertiesFile =
+                CommandLineArgumentsHandler.getBehaviorModelsPropertiesFile();
+
+        final String graphOutputFilePath =
+                CommandLineArgumentsHandler.getGraphOutputFilePath();
+
+        final boolean sessionsCanBeExitedAnytime =
+                CommandLineArgumentsHandler.getSessionsCanBeExitedAnytime();
+
+        final boolean useFullyQualifiedNames =
+                CommandLineArgumentsHandler.getUseFullyQualifiedNames();
+
+        // might throw a FileNotFound- or IOException;
+        final Properties workloadIntensityProperties =
+                M4jdslModelGenerator.loadProperties(
+                        workloadIntensityPropertiesFile);
+
+        // might throw a FileNotFound- or IOException;
+        final Properties behaviorModelsProperties =
+                (behaviorModelsPropertiesFile != null) ?
+                        M4jdslModelGenerator.loadProperties(
+                                behaviorModelsPropertiesFile) : null;
+
+        final WorkloadModel workloadModel =
+                m4jdslModelGenerator.generateWorkloadModel(
+                        workloadIntensityProperties,
+                        behaviorModelsProperties,
+                        flowsDirectoryPath,
+                        graphOutputFilePath,
+                        sessionsCanBeExitedAnytime,
+                        useFullyQualifiedNames);
+
+        //final String outputFile = generatorProperties.
+        //        getProperty(M4jdslModelGenerator.PKEY_XMI_OUTPUT_FILE);
+        final String outputFile = xmiOutputFilePath;
+
+        if (outputFile == null) {
+
+            throw new IOException("XMI output file is undefined");
+        }
+
+        // might throw an IOException;
+        XmiEcoreHandler.getInstance().ecoreToXMI(
+                workloadModel,
+                xmiOutputFilePath);
+
+        System.out.println("Finished.");
     }
 
     /**

@@ -1,0 +1,197 @@
+Flow GenericFlow {
+Node login {
+    Transition { event="", guard="", action="", target=login }
+    Transition { event="", guard="", action="", target=View_Items }
+    Transition { event="", guard="", action="", target=Add_to_Cart }
+    Transition { event="", guard="", action="", target=shoppingcart }
+    Transition { event="", guard="", action="", target=clearcart }
+    Transition { event="", guard="", action="", target=deferorder }
+    Transition { event="", guard="", action="", target=home }
+    Transition { event="", guard="", action="", target=logout }
+    Transition { event="", guard="", action="", target=inventory }
+    Transition { event="", guard="", action="", target=sellinventory }
+    Transition { event="", guard="", action="", target=purchasecart }
+    Transition { event="", guard="", action="", target=cancelorder }
+    Transition { event="", guard="", action="", target=remove }
+    }
+Node View_Items {
+    Transition { event="", guard="", action="", target=login }
+    Transition { event="", guard="", action="", target=View_Items }
+    Transition { event="", guard="", action="", target=Add_to_Cart }
+    Transition { event="", guard="", action="", target=shoppingcart }
+    Transition { event="", guard="", action="", target=clearcart }
+    Transition { event="", guard="", action="", target=deferorder }
+    Transition { event="", guard="", action="", target=home }
+    Transition { event="", guard="", action="", target=logout }
+    Transition { event="", guard="", action="", target=inventory }
+    Transition { event="", guard="", action="", target=sellinventory }
+    Transition { event="", guard="", action="", target=purchasecart }
+    Transition { event="", guard="", action="", target=cancelorder }
+    Transition { event="", guard="", action="", target=remove }
+    }
+Node Add_to_Cart {
+    Transition { event="", guard="", action="", target=login }
+    Transition { event="", guard="", action="", target=View_Items }
+    Transition { event="", guard="", action="", target=Add_to_Cart }
+    Transition { event="", guard="", action="", target=shoppingcart }
+    Transition { event="", guard="", action="", target=clearcart }
+    Transition { event="", guard="", action="", target=deferorder }
+    Transition { event="", guard="", action="", target=home }
+    Transition { event="", guard="", action="", target=logout }
+    Transition { event="", guard="", action="", target=inventory }
+    Transition { event="", guard="", action="", target=sellinventory }
+    Transition { event="", guard="", action="", target=purchasecart }
+    Transition { event="", guard="", action="", target=cancelorder }
+    Transition { event="", guard="", action="", target=remove }
+    }
+Node shoppingcart {
+    Transition { event="", guard="", action="", target=login }
+    Transition { event="", guard="", action="", target=View_Items }
+    Transition { event="", guard="", action="", target=Add_to_Cart }
+    Transition { event="", guard="", action="", target=shoppingcart }
+    Transition { event="", guard="", action="", target=clearcart }
+    Transition { event="", guard="", action="", target=deferorder }
+    Transition { event="", guard="", action="", target=home }
+    Transition { event="", guard="", action="", target=logout }
+    Transition { event="", guard="", action="", target=inventory }
+    Transition { event="", guard="", action="", target=sellinventory }
+    Transition { event="", guard="", action="", target=purchasecart }
+    Transition { event="", guard="", action="", target=cancelorder }
+    Transition { event="", guard="", action="", target=remove }
+    }
+Node clearcart {
+    Transition { event="", guard="", action="", target=login }
+    Transition { event="", guard="", action="", target=View_Items }
+    Transition { event="", guard="", action="", target=Add_to_Cart }
+    Transition { event="", guard="", action="", target=shoppingcart }
+    Transition { event="", guard="", action="", target=clearcart }
+    Transition { event="", guard="", action="", target=deferorder }
+    Transition { event="", guard="", action="", target=home }
+    Transition { event="", guard="", action="", target=logout }
+    Transition { event="", guard="", action="", target=inventory }
+    Transition { event="", guard="", action="", target=sellinventory }
+    Transition { event="", guard="", action="", target=purchasecart }
+    Transition { event="", guard="", action="", target=cancelorder }
+    Transition { event="", guard="", action="", target=remove }
+    }
+Node deferorder {
+    Transition { event="", guard="", action="", target=login }
+    Transition { event="", guard="", action="", target=View_Items }
+    Transition { event="", guard="", action="", target=Add_to_Cart }
+    Transition { event="", guard="", action="", target=shoppingcart }
+    Transition { event="", guard="", action="", target=clearcart }
+    Transition { event="", guard="", action="", target=deferorder }
+    Transition { event="", guard="", action="", target=home }
+    Transition { event="", guard="", action="", target=logout }
+    Transition { event="", guard="", action="", target=inventory }
+    Transition { event="", guard="", action="", target=sellinventory }
+    Transition { event="", guard="", action="", target=purchasecart }
+    Transition { event="", guard="", action="", target=cancelorder }
+    Transition { event="", guard="", action="", target=remove }
+    }
+Node home {
+    Transition { event="", guard="", action="", target=login }
+    Transition { event="", guard="", action="", target=View_Items }
+    Transition { event="", guard="", action="", target=Add_to_Cart }
+    Transition { event="", guard="", action="", target=shoppingcart }
+    Transition { event="", guard="", action="", target=clearcart }
+    Transition { event="", guard="", action="", target=deferorder }
+    Transition { event="", guard="", action="", target=home }
+    Transition { event="", guard="", action="", target=logout }
+    Transition { event="", guard="", action="", target=inventory }
+    Transition { event="", guard="", action="", target=sellinventory }
+    Transition { event="", guard="", action="", target=purchasecart }
+    Transition { event="", guard="", action="", target=cancelorder }
+    Transition { event="", guard="", action="", target=remove }
+    }
+Node logout {
+    Transition { event="", guard="", action="", target=login }
+    Transition { event="", guard="", action="", target=View_Items }
+    Transition { event="", guard="", action="", target=Add_to_Cart }
+    Transition { event="", guard="", action="", target=shoppingcart }
+    Transition { event="", guard="", action="", target=clearcart }
+    Transition { event="", guard="", action="", target=deferorder }
+    Transition { event="", guard="", action="", target=home }
+    Transition { event="", guard="", action="", target=logout }
+    Transition { event="", guard="", action="", target=inventory }
+    Transition { event="", guard="", action="", target=sellinventory }
+    Transition { event="", guard="", action="", target=purchasecart }
+    Transition { event="", guard="", action="", target=cancelorder }
+    Transition { event="", guard="", action="", target=remove }
+    }
+Node inventory {
+    Transition { event="", guard="", action="", target=login }
+    Transition { event="", guard="", action="", target=View_Items }
+    Transition { event="", guard="", action="", target=Add_to_Cart }
+    Transition { event="", guard="", action="", target=shoppingcart }
+    Transition { event="", guard="", action="", target=clearcart }
+    Transition { event="", guard="", action="", target=deferorder }
+    Transition { event="", guard="", action="", target=home }
+    Transition { event="", guard="", action="", target=logout }
+    Transition { event="", guard="", action="", target=inventory }
+    Transition { event="", guard="", action="", target=sellinventory }
+    Transition { event="", guard="", action="", target=purchasecart }
+    Transition { event="", guard="", action="", target=cancelorder }
+    Transition { event="", guard="", action="", target=remove }
+    }
+Node sellinventory {
+    Transition { event="", guard="", action="", target=login }
+    Transition { event="", guard="", action="", target=View_Items }
+    Transition { event="", guard="", action="", target=Add_to_Cart }
+    Transition { event="", guard="", action="", target=shoppingcart }
+    Transition { event="", guard="", action="", target=clearcart }
+    Transition { event="", guard="", action="", target=deferorder }
+    Transition { event="", guard="", action="", target=home }
+    Transition { event="", guard="", action="", target=logout }
+    Transition { event="", guard="", action="", target=inventory }
+    Transition { event="", guard="", action="", target=sellinventory }
+    Transition { event="", guard="", action="", target=purchasecart }
+    Transition { event="", guard="", action="", target=cancelorder }
+    Transition { event="", guard="", action="", target=remove }
+    }
+Node purchasecart {
+    Transition { event="", guard="", action="", target=login }
+    Transition { event="", guard="", action="", target=View_Items }
+    Transition { event="", guard="", action="", target=Add_to_Cart }
+    Transition { event="", guard="", action="", target=shoppingcart }
+    Transition { event="", guard="", action="", target=clearcart }
+    Transition { event="", guard="", action="", target=deferorder }
+    Transition { event="", guard="", action="", target=home }
+    Transition { event="", guard="", action="", target=logout }
+    Transition { event="", guard="", action="", target=inventory }
+    Transition { event="", guard="", action="", target=sellinventory }
+    Transition { event="", guard="", action="", target=purchasecart }
+    Transition { event="", guard="", action="", target=cancelorder }
+    Transition { event="", guard="", action="", target=remove }
+    }
+Node cancelorder {
+    Transition { event="", guard="", action="", target=login }
+    Transition { event="", guard="", action="", target=View_Items }
+    Transition { event="", guard="", action="", target=Add_to_Cart }
+    Transition { event="", guard="", action="", target=shoppingcart }
+    Transition { event="", guard="", action="", target=clearcart }
+    Transition { event="", guard="", action="", target=deferorder }
+    Transition { event="", guard="", action="", target=home }
+    Transition { event="", guard="", action="", target=logout }
+    Transition { event="", guard="", action="", target=inventory }
+    Transition { event="", guard="", action="", target=sellinventory }
+    Transition { event="", guard="", action="", target=purchasecart }
+    Transition { event="", guard="", action="", target=cancelorder }
+    Transition { event="", guard="", action="", target=remove }
+    }
+Node remove {
+    Transition { event="", guard="", action="", target=login }
+    Transition { event="", guard="", action="", target=View_Items }
+    Transition { event="", guard="", action="", target=Add_to_Cart }
+    Transition { event="", guard="", action="", target=shoppingcart }
+    Transition { event="", guard="", action="", target=clearcart }
+    Transition { event="", guard="", action="", target=deferorder }
+    Transition { event="", guard="", action="", target=home }
+    Transition { event="", guard="", action="", target=logout }
+    Transition { event="", guard="", action="", target=inventory }
+    Transition { event="", guard="", action="", target=sellinventory }
+    Transition { event="", guard="", action="", target=purchasecart }
+    Transition { event="", guard="", action="", target=cancelorder }
+    Transition { event="", guard="", action="", target=remove }
+    }
+}

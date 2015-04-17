@@ -1,0 +1,20 @@
+Flow SearchCars {
+Node Start {
+	Transition { event="", guard="", action="", target=SearchCars }
+	
+	}
+Node SearchCars {
+	Transition { event="carChanged", guard="", action="carChanged", target=SearchCars }
+	Transition { event="editCarDetails", guard="", action="editCarDetails", target=EditCarCall }
+	Transition { event="exit", guard="", action="", target=End }
+	Transition { event="", guard="Save", action="refresh", target=SearchCars }
+	Transition { event="", guard="else", action="", target=SearchCars }
+	
+	}
+Node EditCarCall {
+	
+	}
+Node End {
+	
+	}
+}

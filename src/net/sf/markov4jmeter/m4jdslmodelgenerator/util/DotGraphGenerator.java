@@ -31,6 +31,9 @@ public class DotGraphGenerator {
     /** Shape constant for an ellipse representation of a state.  */
     public final static String STATE_SHAPE_ELLIPSE = "ellipse";
 
+    /** Shape constant for a septagon representation of a state.  */
+    public final static String STATE_SHAPE_SEPTAGON = "septagon";
+
     /** Style constant for a solid-line representation of a transition. */
     public final static String TRANSITION_STYLE_SOLID = "solid";
 

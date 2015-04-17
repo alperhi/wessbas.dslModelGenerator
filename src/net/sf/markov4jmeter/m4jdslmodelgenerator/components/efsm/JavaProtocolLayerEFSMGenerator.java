@@ -43,17 +43,9 @@ extends AbstractProtocolLayerEFSMGenerator {
     /* **************************  public methods  ************************** */
 
 
-    /**
-     * Creates a Protocol Layer EFSM.
-     *
-     * @return
-     *     the newly created Protocol Layer EFSM.
-     *
-     * @throws GeneratorException
-     *     if any error during the generation process occurs.
-     */
-    public ProtocolLayerEFSM generateProtocolLayerEFSM ()
-            throws GeneratorException {
+    @Override
+    public ProtocolLayerEFSM generateProtocolLayerEFSM (
+            final String serviceName) throws GeneratorException {
 
         final ProtocolLayerEFSM protocolLayerEFSM =
                 this.createEmptyProtocolLayerEFSM();
