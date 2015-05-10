@@ -11,16 +11,11 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
-
-import m4jdsl.Action;
 import m4jdsl.ApplicationModel;
 import m4jdsl.ApplicationState;
 import m4jdsl.ApplicationTransition;
 import m4jdsl.BehaviorMix;
 import m4jdsl.BehaviorModel;
-import m4jdsl.Guard;
-import m4jdsl.GuardActionParameter;
-import m4jdsl.GuardActionParameterType;
 import m4jdsl.M4jdslFactory;
 import m4jdsl.MarkovState;
 import m4jdsl.Service;
@@ -35,19 +30,12 @@ import net.sf.markov4jmeter.m4jdslmodelgenerator.components.WorkloadIntensityGen
 import net.sf.markov4jmeter.m4jdslmodelgenerator.components.efsm.AbstractProtocolLayerEFSMGenerator;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.components.efsm.AbstractSessionLayerEFSMGenerator;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.components.efsm.FlowSessionLayerEFSMGenerator;
+import net.sf.markov4jmeter.m4jdslmodelgenerator.components.efsm.GuardsAndActionsGenerator;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.components.efsm.HTTPProtocolLayerEFSMGenerator;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.util.IdGenerator;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.util.XmiEcoreHandler;
-
 import org.eclipse.xtext.xtext.ecoreInference.TransformationException;
 
-import synoptic.invariants.AlwaysPrecedesInvariant;
-import synoptic.invariants.BinaryInvariant;
-import synoptic.invariants.CntAlwaysEqualsGreaterInvariant;
-import synoptic.invariants.ITemporalInvariant;
-import synoptic.invariants.TemporalInvariantSet;
-import synoptic.main.AbstractMain;
-import synoptic.main.SynopticMain;
 
 /**
  * This is the main class of the M4J-DSL Model Generator, which builds models
@@ -113,10 +101,8 @@ public class M4jdslModelGenerator {
     /** Instance for creating M4J-DSL model elements. */
     private final M4jdslFactory m4jdslFactory;
     
-    /**
-     * Invariants from Synoptic.
-     */
-    private TemporalInvariantSet invariants; 
+
+   
 
     /* ***************************  constructors  *************************** */
 
@@ -236,9 +222,7 @@ public class M4jdslModelGenerator {
                 behaviorMixEntries);         
  
         this.removeUnusedApplicationTransitions(workloadModel);
-        
-        this.getTemporalInvariants();
-        
+               
         this.installGuardsAndActions(workloadModel);
 
         return workloadModel;
@@ -445,24 +429,14 @@ public class M4jdslModelGenerator {
     }
     
     /**
-     * Add guards and actions to workloadModel.
+     * Identify guards and actions.
      * 
      * @param workloadModel
      */
-    private void installGuardsAndActions(final WorkloadModel workloadModel) {
-    	SessionLayerEFSM sessionLayerEFSM = workloadModel.getApplicationModel().getSessionLayerEFSM();
-        for (ApplicationState applicationState : sessionLayerEFSM.getApplicationStates()) {
-        	// > 2 as one transition is the exit state
-        	if (applicationState.getOutgoingTransitions().size() > 2) {
-              	for (ApplicationTransition applicationTransition : applicationState.getOutgoingTransitions()) {
-              		if (applicationTransition.getTargetState() instanceof ApplicationState) {
-                		this.getGuard(applicationTransition, sessionLayerEFSM);
-                		this.getAction(applicationTransition, sessionLayerEFSM);	
-              		}
-            	}
-        	}  
-        }
-    }
+    private void installGuardsAndActions (final WorkloadModel workloadModel) {
+    	GuardsAndActionsGenerator guardsAndActionsGenerator = new GuardsAndActionsGenerator(this.m4jdslFactory);
+        guardsAndActionsGenerator.installGuardsAndActions(workloadModel);
+    }    
 
     /* --------------------------  helping methods  ------------------------- */
 
@@ -730,203 +704,6 @@ public class M4jdslModelGenerator {
     	return found;
     }
     
-    /**
-	 * getTemporalInvariants from synoptic package.
-	 */
-	private void getTemporalInvariants() {    	
-    	String[] args = new String[6];  
-        args[0] = "-r";
-        args[1] = "[$1]+;[0-9]*;(?<TYPE>[\\w_+-]*);(?<ip>[\\w+-]*).[\\w;.-]*";
-        args[2] = "-m";
-        args[3] = "\\k<ip>";
-        args[4] = "-i";
-//        args[5] = "-o";
-//        args[6] = "C:/Users/voegele/Applications/eclipse-jee-kepler-SR2-win32-x86_64/eclipse/workspace/Synoptic/output/output";
-//        args[7] = "-d";
-//        args[8] = "C:/Program Files (x86)/Graphviz2.38/bin/gvedit.exe";
-//        args[5] = "--dumpInvariants=true";
-        args[5] = "examples/specj/input/logFiles/SPECjlog.log";
-
-        SynopticMain.getInstance();
-		try {
-			SynopticMain.main(args);
-			this.invariants = AbstractMain.getInvariants();
-			this.filterInvariants();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
-	/**
-	 * Invariants which are AlwaysPrecedesInvariant and CntAlwaysEqualsGreaterInvariant are redundant. Only keep 
-	 * CntAlwaysEqualsGreaterInvariant.
-	 */
-	private void filterInvariants() {
-		List<ITemporalInvariant> removeList = new ArrayList<ITemporalInvariant>();
-		for (ITemporalInvariant invariant : this.invariants.getSet()) {
-			if (invariant instanceof AlwaysPrecedesInvariant) {
-				AlwaysPrecedesInvariant alwaysPrecedesInvariant = (AlwaysPrecedesInvariant) invariant;			
-				String first = alwaysPrecedesInvariant.getFirst().toString();
-				String second = alwaysPrecedesInvariant.getSecond().toString();			
-				for (ITemporalInvariant invariantCompare : this.invariants.getSet()) {
-					if (invariantCompare instanceof CntAlwaysEqualsGreaterInvariant) {
-						CntAlwaysEqualsGreaterInvariant  cntAlwaysEqualsGreaterInvariant = (CntAlwaysEqualsGreaterInvariant) invariantCompare;			
-						String firstCompare = cntAlwaysEqualsGreaterInvariant.getFirst().toString();
-						String secondCompare = cntAlwaysEqualsGreaterInvariant.getSecond().toString();
-						if (first.equals(firstCompare) && second.equals(secondCompare)) {
-							removeList.add(invariant);
-							break;
-						}								
-					}
-				}								
-			}
-		}
-		this.invariants.getSet().removeAll(removeList);	
-	}
-    
-	/**
-	 * Set guards to the applicationTransition.
-	 * 
-	 * @param transition
-	 * @return
-	 */
-	private void getGuard(final ApplicationTransition transition,
-			final SessionLayerEFSM sessionLayerEFSM) {
-		List<Guard> guards = new ArrayList<Guard>();
-		for (ITemporalInvariant invariant : this.invariants.getSet()) {
-			if (invariant instanceof BinaryInvariant) {
-				BinaryInvariant binaryInvariant = (BinaryInvariant) invariant;			
-				String first = binaryInvariant.getFirst().toString();
-				String second = binaryInvariant.getSecond().toString();
-				String targetState = ((ApplicationState) transition.getTargetState()).getService().getName();
-				Guard guard = null;
-				GuardActionParameter guardActionParameter = null;
-				// invariant AlwaysFollowedBy can not be used
-				if (binaryInvariant instanceof AlwaysPrecedesInvariant) {
-					if (targetState.equals(second)) {
-						guardActionParameter = createGuardActionParameter(first, GuardActionParameterType.BOOLEAN, sessionLayerEFSM, first, null);
-						guard = createGuard(guardActionParameter, "${" + first  + "}");
-					}    					
-//    			} else if (binaryInvariant instanceof NeverFollowedInvariant) {
-//    				if (transition.getTarget().getValue().equals(second)) {
-//    					guardActionParameter = createGuardActionParameter(first, GuardActionParameterType.BOOLEAN, sessionLayerEFSM);
-//						guard = createGuard(guardActionParameter, "!${" + first  + "}");    				  
-//    			    }	
-			   } else if (binaryInvariant instanceof CntAlwaysEqualsGreaterInvariant) {
-	   				if (targetState.equals(second)) {
-    					guardActionParameter = createGuardActionParameter(first+second, GuardActionParameterType.INTEGER, sessionLayerEFSM, first, second);
-						guard = createGuard(guardActionParameter, first+second + " > 0"); 
-				    }	
-		       }
-			   if (guard != null) {
-					guards.add(guard);
-			   }			   
-		    }
-		}	
-		transition.getGuard().addAll(guards);
-	}      
-
-	/**
-	 * Sets Actions to the applicationTransition.
-	 * 
-	 * @param transition
-	 * @param sessionLayerEFSM
-	 */
-	private void getAction(final ApplicationTransition transition,
-			final SessionLayerEFSM sessionLayerEFSM) {
-		List<Action> actions = new ArrayList<Action>();
-		String targetName = ((ApplicationState) transition.getTargetState()).getService().getName();
-		GuardActionParameter guardActionParameter = null;
-		Action action = null;
-		for (ITemporalInvariant invariant : this.invariants.getSet()) {
-			BinaryInvariant binaryInvariant = (BinaryInvariant) invariant;	
-			String first = binaryInvariant.getFirst().toString();
-			String second = binaryInvariant.getSecond().toString();
-			if (binaryInvariant instanceof CntAlwaysEqualsGreaterInvariant) {
-				if (targetName.equals(first)) {					
-					guardActionParameter = createGuardActionParameter(first + second, GuardActionParameterType.INTEGER, sessionLayerEFSM, first, second);
-					action = createAction(guardActionParameter, first + second + "++");
-					actions.add(action);
-				} else if (targetName.equals(second)) {
-					guardActionParameter = createGuardActionParameter(first + second, GuardActionParameterType.INTEGER, sessionLayerEFSM, first, second);
-					action = createAction(guardActionParameter, first + second + "--");
-					actions.add(action);
-				}	
-			} else if (binaryInvariant instanceof AlwaysPrecedesInvariant) {
-				if (targetName.equals(first)) {
-					guardActionParameter = createGuardActionParameter(first
-							, GuardActionParameterType.BOOLEAN, sessionLayerEFSM, first, null);
-					action = createAction(guardActionParameter, first + "=true");
-					actions.add(action);
-				}
-			}
-		}
-		transition.getAction().addAll(actions);
-	}
-
-    /**
-     * Create new GuardActionParameter.
-     * 
-     * @param guardActionName
-     * @param guardActionParameterType
-     * @return new GuardActionParameter
-     */
-    protected GuardActionParameter createGuardActionParameter (final String guardActionName,
-    		final GuardActionParameterType guardActionParameterType,
-    		final SessionLayerEFSM sessionLayerEFSM, 
-    		final String sourceName,
-    		final String targetName) {
-    	
-    	// search if parameter already exists
-    	for (GuardActionParameter guardActionParameter : sessionLayerEFSM.getGuardActionParameterList().getGuardActionParameters()) {
-    		if (guardActionParameter.getGuardActionParameterName().equals(guardActionName)) {
-    			return guardActionParameter;
-    		}
-    	} 
-    	
-    	// if not --> create
-	 	final GuardActionParameter guardActionParameter = this.m4jdslFactory.createGuardActionParameter();
-    	guardActionParameter.setGuardActionParameterName(guardActionName);
-    	guardActionParameter.setParameterType(guardActionParameterType);
-    	guardActionParameter.setSourceName(sourceName);
-    	if (targetName != null) {
-        	guardActionParameter.setTargetName(targetName);	
-    	}
-       	sessionLayerEFSM.getGuardActionParameterList().getGuardActionParameters().add(guardActionParameter);
-    	
-    	return guardActionParameter;  	   	
-    	
-    }
-    
-    /**
-     * Create new guard.
-     * 
-     * @param guardActionParameter
-     * @param condition
-     * @return  new Guard
-     */
-    protected Guard createGuard (final GuardActionParameter guardActionParameter,
-    		final String condition) {
-    	final Guard guard = this.m4jdslFactory.createGuard();
-    	guard.setCondition(condition);
-    	guard.setGuardParameter(guardActionParameter);
-    	return guard;
-    }
-        
-    /**
-     * Create new Action.
-     * 
-     * @param guardActionParameter
-     * @param condition
-     * @return new Action
-     */
-    protected Action createAction (final GuardActionParameter guardActionParameter,
-    		final String condition) {
-    	final Action action = this.m4jdslFactory.createAction();
-    	action.setCondition(condition);
-    	action.setActionParameter(guardActionParameter);
-    	return action;    	
-    }
     
     /* *************************  internal classes  ************************* */
 
@@ -1119,5 +896,7 @@ public class M4jdslModelGenerator {
 
         return properties;
     }
+    
+   
 
 }
