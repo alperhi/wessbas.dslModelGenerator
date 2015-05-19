@@ -1,11 +1,14 @@
 package net.sf.markov4jmeter.m4jdslmodelgenerator.components.efsm;
 
+import java.util.ArrayList;
+
 import m4jdsl.M4jdslFactory;
 import m4jdsl.ProtocolExitState;
 import m4jdsl.ProtocolLayerEFSM;
 import m4jdsl.ProtocolState;
 import m4jdsl.ProtocolTransition;
 import m4jdsl.Request;
+import net.sf.markov4jmeter.behaviormodelextractor.extraction.parser.SessionData;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.GeneratorException;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.util.IdGenerator;
 
@@ -34,9 +37,10 @@ extends AbstractProtocolLayerEFSMGenerator {
     public JavaProtocolLayerEFSMGenerator (
             final M4jdslFactory m4jdslFactory,
             final IdGenerator idGenerator,
-            final IdGenerator requestIdGenerator) {
+            final IdGenerator requestIdGenerator,
+            final ArrayList<SessionData> sessions) {
 
-        super(m4jdslFactory, idGenerator, requestIdGenerator);
+        super(m4jdslFactory, idGenerator, requestIdGenerator, sessions);
     }
 
 

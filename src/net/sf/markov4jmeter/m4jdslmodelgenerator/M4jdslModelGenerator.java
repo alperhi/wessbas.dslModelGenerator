@@ -11,6 +11,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
+
 import m4jdsl.ApplicationModel;
 import m4jdsl.ApplicationState;
 import m4jdsl.ApplicationTransition;
@@ -23,6 +24,10 @@ import m4jdsl.SessionLayerEFSM;
 import m4jdsl.WorkloadIntensity;
 import m4jdsl.WorkloadModel;
 import m4jdsl.impl.M4jdslPackageImpl;
+import net.sf.markov4jmeter.behaviormodelextractor.BehaviorModelExtractor;
+import net.sf.markov4jmeter.behaviormodelextractor.extraction.ExtractionException;
+import net.sf.markov4jmeter.behaviormodelextractor.extraction.parser.ParseException;
+import net.sf.markov4jmeter.behaviormodelextractor.extraction.parser.SessionData;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.components.ApplicationModelGenerator;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.components.BehaviorMixGenerator;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.components.BehaviorModelsGenerator;
@@ -34,6 +39,7 @@ import net.sf.markov4jmeter.m4jdslmodelgenerator.components.efsm.GuardsAndAction
 import net.sf.markov4jmeter.m4jdslmodelgenerator.components.efsm.HTTPProtocolLayerEFSMGenerator;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.util.IdGenerator;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.util.XmiEcoreHandler;
+
 import org.eclipse.xtext.xtext.ecoreInference.TransformationException;
 
 
@@ -292,6 +298,9 @@ public class M4jdslModelGenerator {
      *
      * @throws GeneratorException
      *     if the Application Layer installation fails for any reason.
+     * @throws ExtractionException 
+     * @throws ParseException 
+     * @throws IOException 
      */
     private WorkloadModel installApplicationLayer (
             final WorkloadModel workloadModel,
@@ -306,41 +315,60 @@ public class M4jdslModelGenerator {
                         this.m4jdslFactory,
                         new IdGenerator("PS"),
                         new IdGenerator("R"));
-*/
-        final AbstractProtocolLayerEFSMGenerator protocolLayerEFSMGenerator =
-                new HTTPProtocolLayerEFSMGenerator(
-                        this.m4jdslFactory,
-                        new IdGenerator("PS"),
-                        new IdGenerator("R"));
-
-        // might throw a GeneratorException;
-        final File[] flowFiles = this.readFilesFromDirectory(
-                flowsDirectoryPath,
-                M4jdslModelGenerator.FLOW_FILE_SUFFIX);
-
-        final AbstractSessionLayerEFSMGenerator sessionLayerEFSMGenerator =
-                new FlowSessionLayerEFSMGenerator(
-                        this.m4jdslFactory,
-                        serviceRepository,
-                        protocolLayerEFSMGenerator,
-                        new IdGenerator("ASId"),
-                        sessionsCanBeExitedAnytime,
-                        useFullyQualifiedNames,
-                        flowFiles,
-                        graphOutputPath);
-
-        final ApplicationModelGenerator applicationModelGenerator =
-                new ApplicationModelGenerator(this.m4jdslFactory, sessionLayerEFSMGenerator);
-
-        // might throw a GeneratorException;
-        final ApplicationModel applicationModel =
-                applicationModelGenerator.generateApplicationModel();
-
-        workloadModel.setApplicationModel(applicationModel);
+*/   	
+   	
+        try {
+        	
+        	//TODO: configure input file
+        	ArrayList<SessionData> sessions =  BehaviorModelExtractor.
+			        parseSessionsIntoSessionsRepository("C:/Users/voegele/git/wessbas.dslModelGenerator/examples/specj/input/logFiles/sessions.dat");
+		
+	        final AbstractProtocolLayerEFSMGenerator protocolLayerEFSMGenerator =
+	                new HTTPProtocolLayerEFSMGenerator(
+	                        this.m4jdslFactory,
+	                        new IdGenerator("PS"),
+	                        new IdGenerator("R"),
+	                        sessions);
+	
+	        // might throw a GeneratorException;
+	        final File[] flowFiles = this.readFilesFromDirectory(
+	                flowsDirectoryPath,
+	                M4jdslModelGenerator.FLOW_FILE_SUFFIX);
+	
+	        final AbstractSessionLayerEFSMGenerator sessionLayerEFSMGenerator =
+	                new FlowSessionLayerEFSMGenerator(
+	                        this.m4jdslFactory,
+	                        serviceRepository,
+	                        protocolLayerEFSMGenerator,
+	                        new IdGenerator("ASId"),
+	                        sessionsCanBeExitedAnytime,
+	                        useFullyQualifiedNames,
+	                        flowFiles,
+	                        graphOutputPath);
+	
+	        final ApplicationModelGenerator applicationModelGenerator =
+	                new ApplicationModelGenerator(this.m4jdslFactory, sessionLayerEFSMGenerator);
+	
+	        // might throw a GeneratorException;
+	        final ApplicationModel applicationModel =
+	                applicationModelGenerator.generateApplicationModel();
+	
+	        workloadModel.setApplicationModel(applicationModel);
+        
+        } catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ExtractionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        
         return workloadModel;
     }
-
-       
+      
     /**
      * Installs the Behavior Models in a given M4J-DSL model.
      *
@@ -427,6 +455,7 @@ public class M4jdslModelGenerator {
         workloadModel.setBehaviorMix(behaviorMix);
         return workloadModel;
     }
+
     
     /**
      * Identify guards and actions.
@@ -766,7 +795,7 @@ public class M4jdslModelGenerator {
 
         } catch (final Exception ex) {
 
-            System.err.println(ex.getMessage() + ".\n");
+            System.err.println(ex.getMessage() + ".\n");      
             M4jdslModelGenerator.printUsage();
         }
     }

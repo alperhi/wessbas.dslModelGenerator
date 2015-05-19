@@ -1,5 +1,7 @@
 package net.sf.markov4jmeter.m4jdslmodelgenerator.components.efsm;
 
+import java.util.ArrayList;
+
 import m4jdsl.M4jdslFactory;
 import m4jdsl.Parameter;
 import m4jdsl.Property;
@@ -9,6 +11,7 @@ import m4jdsl.ProtocolLayerEFSMState;
 import m4jdsl.ProtocolState;
 import m4jdsl.ProtocolTransition;
 import m4jdsl.Request;
+import net.sf.markov4jmeter.behaviormodelextractor.extraction.parser.SessionData;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.GeneratorException;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.util.IdGenerator;
 
@@ -72,6 +75,9 @@ public abstract class AbstractProtocolLayerEFSMGenerator {
 
     /** Instance for creating unique request IDs. */
     protected final IdGenerator requestIdGenerator;
+    
+    /** Sessions with protocol information. */
+    protected final ArrayList<SessionData> sessions;
 
 
     /* ***************************  constructors  *************************** */
@@ -90,11 +96,13 @@ public abstract class AbstractProtocolLayerEFSMGenerator {
     public AbstractProtocolLayerEFSMGenerator (
             final M4jdslFactory m4jdslFactory,
             final IdGenerator idGenerator,
-            final IdGenerator requestIdGenerator) {
+            final IdGenerator requestIdGenerator,
+            final ArrayList<SessionData> sessions) {
 
         this.m4jdslFactory     = m4jdslFactory;
         this.idGenerator        = idGenerator;
         this.requestIdGenerator = requestIdGenerator;
+        this.sessions = sessions;
     }
 
 
