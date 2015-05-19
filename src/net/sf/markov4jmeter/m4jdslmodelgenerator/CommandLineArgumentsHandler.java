@@ -116,6 +116,18 @@ public class CommandLineArgumentsHandler {
                     true,                                  // isRequired;
                     "./flows/",                            // argName;
                     false);                                // !hasOptionalArg;
+    
+    /** Path to the directory of input Flows that indicate the Session Layer
+     *  EFSM structure. */
+    private final static Option SESSIONDAT_FILE =
+            CmdlOptionFactory.createOption(
+                    "s",                                   // opt;
+                    "flows",                               // longOpt;
+                    "Path to the directory of the session dat"      // description;
+                    + "file.",
+                    false,                                  // isRequired;
+                    "sessions.dat",                            // argName;
+                    false);                                // !hasOptionalArg;
 
     /** Properties file which provides the workload intensity information. */
     private final static Option WORKLOAD_INTENSITY_PROPERTIES_FILE =
@@ -200,6 +212,9 @@ public class CommandLineArgumentsHandler {
     /** Path to the directory of input Flows that indicate the Session Layer
      *  EFSM structure. */
     private static String flowsDirectoryPath;
+    
+    /** Path to the directory of session.dat file. */
+    private static String sessionDatFile;
 
     /** Properties file which provides the workload intensity information. */
     private static String workloadIntensityPropertiesFile;
@@ -240,6 +255,9 @@ public class CommandLineArgumentsHandler {
                 CommandLineArgumentsHandler.FLOWS_DIRECTORY_PATH);
 
         CommandLineArgumentsHandler.options.addOption(
+                CommandLineArgumentsHandler.SESSIONDAT_FILE);
+        
+        CommandLineArgumentsHandler.options.addOption(
                 CommandLineArgumentsHandler.WORKLOAD_INTENSITY_PROPERTIES_FILE);
 
         CommandLineArgumentsHandler.options.addOption(
@@ -271,6 +289,16 @@ public class CommandLineArgumentsHandler {
     public static String getFlowsDirectoryPath () {
 
         return CommandLineArgumentsHandler.flowsDirectoryPath;
+    }
+    
+    /**
+     * Returns the path to the directory of the session.dat file.
+     *
+     * @return  a valid <code>String</code> which denotes a file path.
+     */
+    public static String getSessionDatFilePath () {
+
+        return CommandLineArgumentsHandler.sessionDatFile;
     }
 
     /**
@@ -386,6 +414,11 @@ public class CommandLineArgumentsHandler {
                 CommandLineArgumentsHandler.readOptionValueAsString(
                         commandLine,
                         CommandLineArgumentsHandler.FLOWS_DIRECTORY_PATH);
+        
+        CommandLineArgumentsHandler.sessionDatFile =
+                CommandLineArgumentsHandler.readOptionValueAsString(
+                        commandLine,
+                        CommandLineArgumentsHandler.SESSIONDAT_FILE);
 
         CommandLineArgumentsHandler.workloadIntensityPropertiesFile =
                 CommandLineArgumentsHandler.readOptionValueAsString(

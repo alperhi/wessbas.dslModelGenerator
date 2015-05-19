@@ -27,6 +27,7 @@ import m4jdsl.impl.M4jdslPackageImpl;
 import net.sf.markov4jmeter.behaviormodelextractor.BehaviorModelExtractor;
 import net.sf.markov4jmeter.behaviormodelextractor.extraction.ExtractionException;
 import net.sf.markov4jmeter.behaviormodelextractor.extraction.parser.ParseException;
+import net.sf.markov4jmeter.behaviormodelextractor.extraction.parser.Parser;
 import net.sf.markov4jmeter.behaviormodelextractor.extraction.parser.SessionData;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.components.ApplicationModelGenerator;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.components.BehaviorMixGenerator;
@@ -162,6 +163,7 @@ public class M4jdslModelGenerator {
             final Properties behaviorModelsProperties,
             final String flowsDirectoryPath,
             final String graphOutputPath,
+            final String sessionDatFile,
             final boolean sessionsCanBeExitedAnytime,
             final boolean useFullyQualifiedNames) throws GeneratorException {
 
@@ -210,6 +212,7 @@ public class M4jdslModelGenerator {
                 serviceRepository,
                 flowsDirectoryPath,
                 graphOutputPath,
+                sessionDatFile,
                 sessionsCanBeExitedAnytime,
                 useFullyQualifiedNames);
         
@@ -307,6 +310,7 @@ public class M4jdslModelGenerator {
             final ServiceRepository serviceRepository,
             final String flowsDirectoryPath,
             final String graphOutputPath,
+            final String sessionDatFile,
             final boolean sessionsCanBeExitedAnytime,
             final boolean useFullyQualifiedNames) throws GeneratorException {
 /*
@@ -319,10 +323,9 @@ public class M4jdslModelGenerator {
    	
         try {
         	
-        	//TODO: configure input file
         	ArrayList<SessionData> sessions =  BehaviorModelExtractor.
-			        parseSessionsIntoSessionsRepository("C:/Users/voegele/git/wessbas.dslModelGenerator/examples/specj/input/logFiles/sessions.dat");
-		
+			        parseSessionsIntoSessionsRepository(sessionDatFile);
+        		
 	        final AbstractProtocolLayerEFSMGenerator protocolLayerEFSMGenerator =
 	                new HTTPProtocolLayerEFSMGenerator(
 	                        this.m4jdslFactory,
@@ -823,6 +826,9 @@ public class M4jdslModelGenerator {
 
         final String flowsDirectoryPath =
                 CommandLineArgumentsHandler.getFlowsDirectoryPath();
+        
+        final String sessionDatFilePath =
+                CommandLineArgumentsHandler.getSessionDatFilePath();
 
         final String workloadIntensityPropertiesFile =
                 CommandLineArgumentsHandler.getWorkloadIntensityPropertiesFile();
@@ -857,8 +863,9 @@ public class M4jdslModelGenerator {
                 m4jdslModelGenerator.generateWorkloadModel(
                         workloadIntensityProperties,
                         behaviorModelsProperties,
-                        flowsDirectoryPath,
+                        flowsDirectoryPath,                        
                         graphOutputFilePath,
+                        sessionDatFilePath,
                         sessionsCanBeExitedAnytime,
                         useFullyQualifiedNames);
 
