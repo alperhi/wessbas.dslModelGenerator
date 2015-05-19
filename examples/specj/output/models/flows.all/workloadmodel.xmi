@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ASCII"?>
 <m4jdsl:WorkloadModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:m4jdsl="http://m4jdsl/1.0" xsi:schemaLocation="http://m4jdsl/1.0 m4jdsl.ecore">
-  <workloadIntensity xsi:type="m4jdsl:ConstantWorkloadIntensity" formula="1" numberOfSessions="1"/>
+  <workloadIntensity xsi:type="m4jdsl:ConstantWorkloadIntensity" formula="250" numberOfSessions="250"/>
   <applicationModel>
     <sessionLayerEFSM initialState="ASId2_login">
       <applicationStates eId="ASId4_Add_to_Cart">
@@ -8,11 +8,13 @@
         <protocolDetails initialState="PS6">
           <protocolStates eId="PS6">
             <request xsi:type="m4jdsl:HTTPRequest" eId="R3 (Add_to_Cart)">
-              <properties key="HTTPSampler.domain" value="localhost"/>
-              <properties key="HTTPSampler.port" value="8080"/>
-              <properties key="HTTPSampler.path" value="action-servlet/ActionServlet"/>
-              <properties key="HTTPSampler.method" value="GET"/>
-              <parameters name="action" value="Add_to_Cart"/>
+              <properties key="HTTPSampler.domain" value=""/>
+              <properties key="HTTPSampler.port" value="0"/>
+              <properties key="HTTPSampler.path" value=""/>
+              <properties key="HTTPSampler.method" value=""/>
+              <properties key="HTTPSampler.encoding" value=""/>
+              <properties key="HTTPSampler.protocol" value=""/>
+              <parameters name="action" value="messer;"/>
             </request>
             <outgoingTransitions guard="" targetState="PS5" action=""/>
           </protocolStates>
@@ -20,38 +22,35 @@
         </protocolDetails>
         <outgoingTransitions targetState="$"/>
         <outgoingTransitions targetState="ASId3_View_Items">
-          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.0" condition="${login}"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.1" condition="View_ItemsAdd_to_Cart++"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.2" condition="View_Itemsshoppingcart++"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.3" condition="View_Itemsclearcart++"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.4" condition="View_Itemsdeferorder++"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.5" condition="View_Itemspurchasecart++"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.6" condition="View_Itemsremove++"/>
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.0" negate="true"/>
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.4"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.5"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.6"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.7"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.8"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.9"/>
         </outgoingTransitions>
         <outgoingTransitions targetState="ASId5_shoppingcart">
-          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.0" condition="${login}"/>
-          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.2" condition="View_Itemsshoppingcart > 0"/>
-          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.7" condition="Add_to_Cartshoppingcart > 0"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.2" condition="View_Itemsshoppingcart--"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.7" condition="Add_to_Cartshoppingcart--"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.8" condition="shoppingcartclearcart++"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.9" condition="shoppingcartremove++"/>
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.0" negate="true"/>
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.2"/>
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.6" negate="true"/>
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.11" negate="true"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.6"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.11"/>
         </outgoingTransitions>
         <outgoingTransitions targetState="ASId7_deferorder">
-          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.10" condition="logindeferorder > 0"/>
-          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.4" condition="View_Itemsdeferorder > 0"/>
-          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.11" condition="Add_to_Cartdeferorder > 0"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.10" condition="logindeferorder--"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.4" condition="View_Itemsdeferorder--"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.11" condition="Add_to_Cartdeferorder--"/>
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.0" negate="true"/>
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.5" negate="true"/>
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.10" negate="true"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.5"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.10"/>
         </outgoingTransitions>
         <outgoingTransitions targetState="ASId12_purchasecart">
-          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.12" condition="loginpurchasecart > 0"/>
-          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.5" condition="View_Itemspurchasecart > 0"/>
-          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.13" condition="Add_to_Cartpurchasecart > 0"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.12" condition="loginpurchasecart--"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.5" condition="View_Itemspurchasecart--"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.13" condition="Add_to_Cartpurchasecart--"/>
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.0" negate="true"/>
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.8" negate="true"/>
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.13" negate="true"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.8"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.13"/>
         </outgoingTransitions>
       </applicationStates>
       <applicationStates eId="ASId3_View_Items">
@@ -59,11 +58,13 @@
         <protocolDetails initialState="PS4">
           <protocolStates eId="PS4">
             <request xsi:type="m4jdsl:HTTPRequest" eId="R2 (View_Items)">
-              <properties key="HTTPSampler.domain" value="localhost"/>
-              <properties key="HTTPSampler.port" value="8080"/>
-              <properties key="HTTPSampler.path" value="action-servlet/ActionServlet"/>
-              <properties key="HTTPSampler.method" value="GET"/>
-              <parameters name="action" value="View_Items"/>
+              <properties key="HTTPSampler.domain" value=""/>
+              <properties key="HTTPSampler.port" value="0"/>
+              <properties key="HTTPSampler.path" value=""/>
+              <properties key="HTTPSampler.method" value=""/>
+              <properties key="HTTPSampler.encoding" value=""/>
+              <properties key="HTTPSampler.protocol" value=""/>
+              <parameters name="action" value="messer;"/>
             </request>
             <outgoingTransitions guard="" targetState="PS3" action=""/>
           </protocolStates>
@@ -71,28 +72,25 @@
         </protocolDetails>
         <outgoingTransitions targetState="$"/>
         <outgoingTransitions targetState="ASId3_View_Items">
-          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.0" condition="${login}"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.1" condition="View_ItemsAdd_to_Cart++"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.2" condition="View_Itemsshoppingcart++"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.3" condition="View_Itemsclearcart++"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.4" condition="View_Itemsdeferorder++"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.5" condition="View_Itemspurchasecart++"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.6" condition="View_Itemsremove++"/>
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.0" negate="true"/>
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.4"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.5"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.6"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.7"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.8"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.9"/>
         </outgoingTransitions>
         <outgoingTransitions targetState="ASId4_Add_to_Cart">
-          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.0" condition="${login}"/>
-          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.1" condition="View_ItemsAdd_to_Cart > 0"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.1" condition="View_ItemsAdd_to_Cart--"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.7" condition="Add_to_Cartshoppingcart++"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.14" condition="Add_to_Cartclearcart++"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.11" condition="Add_to_Cartdeferorder++"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.13" condition="Add_to_Cartpurchasecart++"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.15" condition="Add_to_Cartremove++"/>
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.0" negate="true"/>
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.4"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.10"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.11"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.12"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.13"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.14"/>
         </outgoingTransitions>
         <outgoingTransitions targetState="ASId8_home">
-          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.16" condition="loginhome > 0"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.16" condition="loginhome--"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.17" condition="homelogout++"/>
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.0" negate="true"/>
         </outgoingTransitions>
       </applicationStates>
       <applicationStates eId="ASId13_cancelorder">
@@ -100,47 +98,64 @@
         <protocolDetails initialState="PS24">
           <protocolStates eId="PS24">
             <request xsi:type="m4jdsl:HTTPRequest" eId="R12 (cancelorder)">
-              <properties key="HTTPSampler.domain" value="localhost"/>
-              <properties key="HTTPSampler.port" value="8080"/>
-              <properties key="HTTPSampler.path" value="action-servlet/ActionServlet"/>
-              <properties key="HTTPSampler.method" value="GET"/>
-              <parameters name="action" value="cancelorder"/>
+              <properties key="HTTPSampler.domain" value=""/>
+              <properties key="HTTPSampler.port" value="0"/>
+              <properties key="HTTPSampler.path" value=""/>
+              <properties key="HTTPSampler.method" value=""/>
+              <properties key="HTTPSampler.encoding" value=""/>
+              <properties key="HTTPSampler.protocol" value=""/>
+              <parameters name="quantity" value="6;"/>
+              <parameters name="action" value="messer;schere;messing;tach;blubb;papier;"/>
             </request>
             <outgoingTransitions guard="" targetState="PS23" action=""/>
           </protocolStates>
           <exitState eId="PS23"/>
         </protocolDetails>
         <outgoingTransitions targetState="$"/>
-        <outgoingTransitions targetState="ASId10_inventory"/>
+        <outgoingTransitions targetState="ASId10_inventory">
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.1"/>
+        </outgoingTransitions>
       </applicationStates>
       <applicationStates eId="ASId6_clearcart">
         <service name="clearcart"/>
         <protocolDetails initialState="PS10">
           <protocolStates eId="PS10">
             <request xsi:type="m4jdsl:HTTPRequest" eId="R5 (clearcart)">
-              <properties key="HTTPSampler.domain" value="localhost"/>
+              <properties key="HTTPSampler.domain" value="127.0.0.1"/>
               <properties key="HTTPSampler.port" value="8080"/>
-              <properties key="HTTPSampler.path" value="action-servlet/ActionServlet"/>
+              <properties key="HTTPSampler.path" value="/action-servlet/ActionServlet"/>
               <properties key="HTTPSampler.method" value="GET"/>
-              <parameters name="action" value="clearcart"/>
+              <properties key="HTTPSampler.encoding" value="&lt;no-encoding>"/>
+              <properties key="HTTPSampler.protocol" value="HTTP/1.1"/>
+              <parameters name="quantity" value="6;"/>
+              <parameters name="action" value="messer;schere;"/>
             </request>
             <outgoingTransitions guard="" targetState="PS9" action=""/>
           </protocolStates>
           <exitState eId="PS9"/>
         </protocolDetails>
         <outgoingTransitions targetState="$"/>
-        <outgoingTransitions targetState="ASId3_View_Items"/>
+        <outgoingTransitions targetState="ASId3_View_Items">
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.5"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.6"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.7"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.8"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.9"/>
+        </outgoingTransitions>
       </applicationStates>
       <applicationStates eId="ASId7_deferorder">
         <service name="deferorder"/>
         <protocolDetails initialState="PS12">
           <protocolStates eId="PS12">
             <request xsi:type="m4jdsl:HTTPRequest" eId="R6 (deferorder)">
-              <properties key="HTTPSampler.domain" value="localhost"/>
+              <properties key="HTTPSampler.domain" value="127.0.0.1"/>
               <properties key="HTTPSampler.port" value="8080"/>
-              <properties key="HTTPSampler.path" value="action-servlet/ActionServlet"/>
+              <properties key="HTTPSampler.path" value="/action-servlet/ActionServlet"/>
               <properties key="HTTPSampler.method" value="GET"/>
-              <parameters name="action" value="deferorder"/>
+              <properties key="HTTPSampler.encoding" value="&lt;no-encoding>"/>
+              <properties key="HTTPSampler.protocol" value="HTTP/1.1"/>
+              <parameters name="quantity" value="6;"/>
+              <parameters name="action" value="messer;schere;messing;"/>
             </request>
             <outgoingTransitions guard="" targetState="PS11" action=""/>
           </protocolStates>
@@ -154,11 +169,14 @@
         <protocolDetails initialState="PS14">
           <protocolStates eId="PS14">
             <request xsi:type="m4jdsl:HTTPRequest" eId="R7 (home)">
-              <properties key="HTTPSampler.domain" value="localhost"/>
+              <properties key="HTTPSampler.domain" value="127.0.0.1"/>
               <properties key="HTTPSampler.port" value="8080"/>
-              <properties key="HTTPSampler.path" value="action-servlet/ActionServlet"/>
+              <properties key="HTTPSampler.path" value="/action-servlet/ActionServlet"/>
               <properties key="HTTPSampler.method" value="GET"/>
-              <parameters name="action" value="home"/>
+              <properties key="HTTPSampler.encoding" value="&lt;no-encoding>"/>
+              <properties key="HTTPSampler.protocol" value="HTTP/1.1"/>
+              <parameters name="quantity" value="6;"/>
+              <parameters name="action" value="messer;schere;messing;"/>
             </request>
             <outgoingTransitions guard="" targetState="PS13" action=""/>
           </protocolStates>
@@ -172,11 +190,14 @@
         <protocolDetails initialState="PS18">
           <protocolStates eId="PS18">
             <request xsi:type="m4jdsl:HTTPRequest" eId="R9 (inventory)">
-              <properties key="HTTPSampler.domain" value="localhost"/>
+              <properties key="HTTPSampler.domain" value="127.0.0.1"/>
               <properties key="HTTPSampler.port" value="8080"/>
-              <properties key="HTTPSampler.path" value="action-servlet/ActionServlet"/>
+              <properties key="HTTPSampler.path" value="/action-servlet/ActionServlet"/>
               <properties key="HTTPSampler.method" value="GET"/>
-              <parameters name="action" value="inventory"/>
+              <properties key="HTTPSampler.encoding" value="&lt;no-encoding>"/>
+              <properties key="HTTPSampler.protocol" value="HTTP/1.1"/>
+              <parameters name="quantity" value="6;"/>
+              <parameters name="action" value="messer;schere;messing;tach;blubb;"/>
             </request>
             <outgoingTransitions guard="" targetState="PS17" action=""/>
           </protocolStates>
@@ -184,19 +205,17 @@
         </protocolDetails>
         <outgoingTransitions targetState="$"/>
         <outgoingTransitions targetState="ASId10_inventory">
-          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.0" condition="${login}"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.18" condition="inventory=true"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.19" condition="inventorycancelorder++"/>
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.0" negate="true"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.1"/>
         </outgoingTransitions>
         <outgoingTransitions targetState="ASId11_sellinventory">
-          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.0" condition="${login}"/>
-          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.18" condition="${inventory}"/>
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.0" negate="true"/>
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.1" negate="true"/>
         </outgoingTransitions>
         <outgoingTransitions targetState="ASId13_cancelorder">
-          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.20" condition="logincancelorder > 0"/>
-          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.19" condition="inventorycancelorder > 0"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.20" condition="logincancelorder--"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.19" condition="inventorycancelorder--"/>
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.0" negate="true"/>
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.3"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.3"/>
         </outgoingTransitions>
       </applicationStates>
       <applicationStates eId="ASId2_login">
@@ -204,11 +223,13 @@
         <protocolDetails initialState="PS2">
           <protocolStates eId="PS2">
             <request xsi:type="m4jdsl:HTTPRequest" eId="R1 (login)">
-              <properties key="HTTPSampler.domain" value="localhost"/>
+              <properties key="HTTPSampler.domain" value="127.0.0.1"/>
               <properties key="HTTPSampler.port" value="8080"/>
-              <properties key="HTTPSampler.path" value="action-servlet/ActionServlet"/>
+              <properties key="HTTPSampler.path" value="/action-servlet/ActionServlet"/>
               <properties key="HTTPSampler.method" value="GET"/>
-              <parameters name="action" value="login"/>
+              <properties key="HTTPSampler.encoding" value="&lt;no-encoding>"/>
+              <properties key="HTTPSampler.protocol" value="HTTP/1.1"/>
+              <parameters name="action" value="messer;"/>
             </request>
             <outgoingTransitions guard="" targetState="PS1" action=""/>
           </protocolStates>
@@ -216,18 +237,17 @@
         </protocolDetails>
         <outgoingTransitions targetState="$"/>
         <outgoingTransitions targetState="ASId3_View_Items">
-          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.0" condition="${login}"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.1" condition="View_ItemsAdd_to_Cart++"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.2" condition="View_Itemsshoppingcart++"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.3" condition="View_Itemsclearcart++"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.4" condition="View_Itemsdeferorder++"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.5" condition="View_Itemspurchasecart++"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.6" condition="View_Itemsremove++"/>
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.0" negate="true"/>
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.4"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.5"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.6"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.7"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.8"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.9"/>
         </outgoingTransitions>
         <outgoingTransitions targetState="ASId10_inventory">
-          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.0" condition="${login}"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.18" condition="inventory=true"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.19" condition="inventorycancelorder++"/>
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.0" negate="true"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.1"/>
         </outgoingTransitions>
       </applicationStates>
       <applicationStates eId="ASId9_logout">
@@ -235,11 +255,14 @@
         <protocolDetails initialState="PS16">
           <protocolStates eId="PS16">
             <request xsi:type="m4jdsl:HTTPRequest" eId="R8 (logout)">
-              <properties key="HTTPSampler.domain" value="localhost"/>
+              <properties key="HTTPSampler.domain" value="127.0.0.1"/>
               <properties key="HTTPSampler.port" value="8080"/>
-              <properties key="HTTPSampler.path" value="action-servlet/ActionServlet"/>
+              <properties key="HTTPSampler.path" value="/action-servlet/ActionServlet"/>
               <properties key="HTTPSampler.method" value="GET"/>
-              <parameters name="action" value="logout"/>
+              <properties key="HTTPSampler.encoding" value="&lt;no-encoding>"/>
+              <properties key="HTTPSampler.protocol" value="HTTP/1.1"/>
+              <parameters name="quantity" value="6;"/>
+              <parameters name="action" value="messer;schere;messing;tach;"/>
             </request>
             <outgoingTransitions guard="" targetState="PS15" action=""/>
           </protocolStates>
@@ -252,11 +275,14 @@
         <protocolDetails initialState="PS22">
           <protocolStates eId="PS22">
             <request xsi:type="m4jdsl:HTTPRequest" eId="R11 (purchasecart)">
-              <properties key="HTTPSampler.domain" value="localhost"/>
-              <properties key="HTTPSampler.port" value="8080"/>
-              <properties key="HTTPSampler.path" value="action-servlet/ActionServlet"/>
-              <properties key="HTTPSampler.method" value="GET"/>
-              <parameters name="action" value="purchasecart"/>
+              <properties key="HTTPSampler.domain" value=""/>
+              <properties key="HTTPSampler.port" value="0"/>
+              <properties key="HTTPSampler.path" value=""/>
+              <properties key="HTTPSampler.method" value=""/>
+              <properties key="HTTPSampler.encoding" value=""/>
+              <properties key="HTTPSampler.protocol" value=""/>
+              <parameters name="quantity" value="6;"/>
+              <parameters name="action" value="messer;schere;messing;tach;blubb;papier;"/>
             </request>
             <outgoingTransitions guard="" targetState="PS21" action=""/>
           </protocolStates>
@@ -270,11 +296,14 @@
         <protocolDetails initialState="PS26">
           <protocolStates eId="PS26">
             <request xsi:type="m4jdsl:HTTPRequest" eId="R13 (remove)">
-              <properties key="HTTPSampler.domain" value="localhost"/>
-              <properties key="HTTPSampler.port" value="8080"/>
-              <properties key="HTTPSampler.path" value="action-servlet/ActionServlet"/>
-              <properties key="HTTPSampler.method" value="GET"/>
-              <parameters name="action" value="remove"/>
+              <properties key="HTTPSampler.domain" value=""/>
+              <properties key="HTTPSampler.port" value="0"/>
+              <properties key="HTTPSampler.path" value=""/>
+              <properties key="HTTPSampler.method" value=""/>
+              <properties key="HTTPSampler.encoding" value=""/>
+              <properties key="HTTPSampler.protocol" value=""/>
+              <parameters name="quantity" value="6;"/>
+              <parameters name="action" value="messer;schere;messing;tach;blubb;papier;"/>
             </request>
             <outgoingTransitions guard="" targetState="PS25" action=""/>
           </protocolStates>
@@ -282,29 +311,26 @@
         </protocolDetails>
         <outgoingTransitions targetState="$"/>
         <outgoingTransitions targetState="ASId5_shoppingcart">
-          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.0" condition="${login}"/>
-          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.2" condition="View_Itemsshoppingcart > 0"/>
-          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.7" condition="Add_to_Cartshoppingcart > 0"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.2" condition="View_Itemsshoppingcart--"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.7" condition="Add_to_Cartshoppingcart--"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.8" condition="shoppingcartclearcart++"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.9" condition="shoppingcartremove++"/>
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.0" negate="true"/>
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.2"/>
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.6" negate="true"/>
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.11" negate="true"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.6"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.11"/>
         </outgoingTransitions>
         <outgoingTransitions targetState="ASId7_deferorder">
-          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.10" condition="logindeferorder > 0"/>
-          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.4" condition="View_Itemsdeferorder > 0"/>
-          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.11" condition="Add_to_Cartdeferorder > 0"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.10" condition="logindeferorder--"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.4" condition="View_Itemsdeferorder--"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.11" condition="Add_to_Cartdeferorder--"/>
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.0" negate="true"/>
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.5" negate="true"/>
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.10" negate="true"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.5"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.10"/>
         </outgoingTransitions>
         <outgoingTransitions targetState="ASId12_purchasecart">
-          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.12" condition="loginpurchasecart > 0"/>
-          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.5" condition="View_Itemspurchasecart > 0"/>
-          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.13" condition="Add_to_Cartpurchasecart > 0"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.12" condition="loginpurchasecart--"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.5" condition="View_Itemspurchasecart--"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.13" condition="Add_to_Cartpurchasecart--"/>
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.0" negate="true"/>
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.8" negate="true"/>
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.13" negate="true"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.8"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.13"/>
         </outgoingTransitions>
       </applicationStates>
       <applicationStates eId="ASId11_sellinventory">
@@ -312,11 +338,14 @@
         <protocolDetails initialState="PS20">
           <protocolStates eId="PS20">
             <request xsi:type="m4jdsl:HTTPRequest" eId="R10 (sellinventory)">
-              <properties key="HTTPSampler.domain" value="localhost"/>
+              <properties key="HTTPSampler.domain" value="127.0.0.1"/>
               <properties key="HTTPSampler.port" value="8080"/>
-              <properties key="HTTPSampler.path" value="action-servlet/ActionServlet"/>
+              <properties key="HTTPSampler.path" value="/action-servlet/ActionServlet"/>
               <properties key="HTTPSampler.method" value="GET"/>
-              <parameters name="action" value="sellinventory"/>
+              <properties key="HTTPSampler.encoding" value="&lt;no-encoding>"/>
+              <properties key="HTTPSampler.protocol" value="HTTP/1.1"/>
+              <parameters name="quantity" value="6;"/>
+              <parameters name="action" value="messer;schere;messing;tach;blubb;papier;"/>
             </request>
             <outgoingTransitions guard="" targetState="PS19" action=""/>
           </protocolStates>
@@ -324,13 +353,11 @@
         </protocolDetails>
         <outgoingTransitions targetState="$"/>
         <outgoingTransitions targetState="ASId8_home">
-          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.16" condition="loginhome > 0"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.16" condition="loginhome--"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.17" condition="homelogout++"/>
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.0" negate="true"/>
         </outgoingTransitions>
         <outgoingTransitions targetState="ASId11_sellinventory">
-          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.0" condition="${login}"/>
-          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.18" condition="${inventory}"/>
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.0" negate="true"/>
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.1" negate="true"/>
         </outgoingTransitions>
       </applicationStates>
       <applicationStates eId="ASId5_shoppingcart">
@@ -338,11 +365,13 @@
         <protocolDetails initialState="PS8">
           <protocolStates eId="PS8">
             <request xsi:type="m4jdsl:HTTPRequest" eId="R4 (shoppingcart)">
-              <properties key="HTTPSampler.domain" value="localhost"/>
-              <properties key="HTTPSampler.port" value="8080"/>
-              <properties key="HTTPSampler.path" value="action-servlet/ActionServlet"/>
-              <properties key="HTTPSampler.method" value="GET"/>
-              <parameters name="action" value="shoppingcart"/>
+              <properties key="HTTPSampler.domain" value=""/>
+              <properties key="HTTPSampler.port" value="0"/>
+              <properties key="HTTPSampler.path" value=""/>
+              <properties key="HTTPSampler.method" value=""/>
+              <properties key="HTTPSampler.encoding" value=""/>
+              <properties key="HTTPSampler.protocol" value=""/>
+              <parameters name="action" value="messer;"/>
             </request>
             <outgoingTransitions guard="" targetState="PS7" action=""/>
           </protocolStates>
@@ -350,56 +379,49 @@
         </protocolDetails>
         <outgoingTransitions targetState="$"/>
         <outgoingTransitions targetState="ASId6_clearcart">
-          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.21" condition="loginclearcart > 0"/>
-          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.3" condition="View_Itemsclearcart > 0"/>
-          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.14" condition="Add_to_Cartclearcart > 0"/>
-          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.8" condition="shoppingcartclearcart > 0"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.21" condition="loginclearcart--"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.3" condition="View_Itemsclearcart--"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.14" condition="Add_to_Cartclearcart--"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.8" condition="shoppingcartclearcart--"/>
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.0" negate="true"/>
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.2"/>
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.4"/>
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.7" negate="true"/>
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.12" negate="true"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.2"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.7"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.12"/>
         </outgoingTransitions>
         <outgoingTransitions targetState="ASId14_remove">
-          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.0" condition="${login}"/>
-          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.6" condition="View_Itemsremove > 0"/>
-          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.15" condition="Add_to_Cartremove > 0"/>
-          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.9" condition="shoppingcartremove > 0"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.6" condition="View_Itemsremove--"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.15" condition="Add_to_Cartremove--"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.9" condition="shoppingcartremove--"/>
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.0" negate="true"/>
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.2"/>
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.9" negate="true"/>
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.14" negate="true"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.4"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.9"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.14"/>
         </outgoingTransitions>
       </applicationStates>
       <exitState eId="$"/>
       <guardActionParameterList>
         <guardActionParameters guardActionParameterName="login" sourceName="login"/>
-        <guardActionParameters guardActionParameterName="View_ItemsAdd_to_Cart" parameterType="INTEGER" sourceName="View_Items" targetName="Add_to_Cart"/>
+        <guardActionParameters guardActionParameterName="inventory" sourceName="inventory"/>
+        <guardActionParameters guardActionParameterName="clearcart" sourceName="clearcart"/>
+        <guardActionParameters guardActionParameterName="cancelorder" sourceName="cancelorder"/>
+        <guardActionParameters guardActionParameterName="remove" sourceName="remove"/>
+        <guardActionParameters guardActionParameterName="View_Itemsdeferorder" parameterType="INTEGER" sourceName="View_Items" targetName="deferorder"/>
         <guardActionParameters guardActionParameterName="View_Itemsshoppingcart" parameterType="INTEGER" sourceName="View_Items" targetName="shoppingcart"/>
         <guardActionParameters guardActionParameterName="View_Itemsclearcart" parameterType="INTEGER" sourceName="View_Items" targetName="clearcart"/>
-        <guardActionParameters guardActionParameterName="View_Itemsdeferorder" parameterType="INTEGER" sourceName="View_Items" targetName="deferorder"/>
         <guardActionParameters guardActionParameterName="View_Itemspurchasecart" parameterType="INTEGER" sourceName="View_Items" targetName="purchasecart"/>
         <guardActionParameters guardActionParameterName="View_Itemsremove" parameterType="INTEGER" sourceName="View_Items" targetName="remove"/>
-        <guardActionParameters guardActionParameterName="Add_to_Cartshoppingcart" parameterType="INTEGER" sourceName="Add_to_Cart" targetName="shoppingcart"/>
-        <guardActionParameters guardActionParameterName="shoppingcartclearcart" parameterType="INTEGER" sourceName="shoppingcart" targetName="clearcart"/>
-        <guardActionParameters guardActionParameterName="shoppingcartremove" parameterType="INTEGER" sourceName="shoppingcart" targetName="remove"/>
-        <guardActionParameters guardActionParameterName="logindeferorder" parameterType="INTEGER" sourceName="login" targetName="deferorder"/>
         <guardActionParameters guardActionParameterName="Add_to_Cartdeferorder" parameterType="INTEGER" sourceName="Add_to_Cart" targetName="deferorder"/>
-        <guardActionParameters guardActionParameterName="loginpurchasecart" parameterType="INTEGER" sourceName="login" targetName="purchasecart"/>
-        <guardActionParameters guardActionParameterName="Add_to_Cartpurchasecart" parameterType="INTEGER" sourceName="Add_to_Cart" targetName="purchasecart"/>
+        <guardActionParameters guardActionParameterName="Add_to_Cartshoppingcart" parameterType="INTEGER" sourceName="Add_to_Cart" targetName="shoppingcart"/>
         <guardActionParameters guardActionParameterName="Add_to_Cartclearcart" parameterType="INTEGER" sourceName="Add_to_Cart" targetName="clearcart"/>
+        <guardActionParameters guardActionParameterName="Add_to_Cartpurchasecart" parameterType="INTEGER" sourceName="Add_to_Cart" targetName="purchasecart"/>
         <guardActionParameters guardActionParameterName="Add_to_Cartremove" parameterType="INTEGER" sourceName="Add_to_Cart" targetName="remove"/>
-        <guardActionParameters guardActionParameterName="loginhome" parameterType="INTEGER" sourceName="login" targetName="home"/>
-        <guardActionParameters guardActionParameterName="homelogout" parameterType="INTEGER" sourceName="home" targetName="logout"/>
-        <guardActionParameters guardActionParameterName="inventory" sourceName="inventory"/>
-        <guardActionParameters guardActionParameterName="inventorycancelorder" parameterType="INTEGER" sourceName="inventory" targetName="cancelorder"/>
-        <guardActionParameters guardActionParameterName="logincancelorder" parameterType="INTEGER" sourceName="login" targetName="cancelorder"/>
-        <guardActionParameters guardActionParameterName="loginclearcart" parameterType="INTEGER" sourceName="login" targetName="clearcart"/>
       </guardActionParameterList>
     </sessionLayerEFSM>
   </applicationModel>
   <behaviorMix>
-    <relativeFrequencies behaviorModel="//@behaviorModels.2" value="0.5"/>
-    <relativeFrequencies behaviorModel="//@behaviorModels.0" value="0.2"/>
-    <relativeFrequencies behaviorModel="//@behaviorModels.1" value="0.3"/>
+    <relativeFrequencies behaviorModel="//@behaviorModels.2" value="0.24621138211382113"/>
+    <relativeFrequencies behaviorModel="//@behaviorModels.0" value="0.2487479674796748"/>
+    <relativeFrequencies behaviorModel="//@behaviorModels.1" value="0.505040650406504"/>
   </behaviorMix>
   <behaviorModels name="Behavior_Model_1" filename="output/filename1.csv" initialState="MSId9_login">
     <markovStates eId="MSId2_Add_to_Cart" service="//@applicationModel/@sessionLayerEFSM/@applicationStates.0/@service"/>
