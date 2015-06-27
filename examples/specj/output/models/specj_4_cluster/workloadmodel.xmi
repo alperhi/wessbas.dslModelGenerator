@@ -29,26 +29,33 @@
         <outgoingTransitions targetState="$"/>
         <outgoingTransitions targetState="ASId5_shoppingcart">
           <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.0" negate="true"/>
-          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.2" negate="true"/>
-          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.7" negate="true"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.2"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.7"/>
-        </outgoingTransitions>
-        <outgoingTransitions targetState="ASId7_deferorder">
-          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.0" negate="true"/>
           <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.4" negate="true"/>
           <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.9" negate="true"/>
           <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.4"/>
           <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.9"/>
         </outgoingTransitions>
+        <outgoingTransitions targetState="ASId7_deferorder">
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.0" negate="true"/>
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.2" negate="true"/>
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.7" negate="true"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.2"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.7"/>
+        </outgoingTransitions>
         <outgoingTransitions targetState="ASId12_purchasecart">
           <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.0" negate="true"/>
-          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.5" negate="true"/>
-          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.10" negate="true"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.5"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.10"/>
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.3" negate="true"/>
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.8" negate="true"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.3"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.8"/>
         </outgoingTransitions>
-        <outgoingTransitions targetState="ASId15_View_Items_quantity"/>
+        <outgoingTransitions targetState="ASId15_View_Items_quantity">
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.0" negate="true"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.2"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.3"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.4"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.5"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.6"/>
+        </outgoingTransitions>
       </applicationStates>
       <applicationStates eId="ASId3_View_Items">
         <service name="View_Items"/>
@@ -72,11 +79,6 @@
         <outgoingTransitions targetState="$"/>
         <outgoingTransitions targetState="ASId3_View_Items">
           <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.0" negate="true"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.2"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.3"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.4"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.5"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.6"/>
         </outgoingTransitions>
         <outgoingTransitions targetState="ASId8_home">
           <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.0" negate="true"/>
@@ -152,7 +154,13 @@
           <exitState eId="PS9"/>
         </protocolDetails>
         <outgoingTransitions targetState="$"/>
-        <outgoingTransitions targetState="ASId15_View_Items_quantity"/>
+        <outgoingTransitions targetState="ASId15_View_Items_quantity">
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.2"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.3"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.4"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.5"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.6"/>
+        </outgoingTransitions>
       </applicationStates>
       <applicationStates eId="ASId7_deferorder">
         <service name="deferorder"/>
@@ -247,17 +255,19 @@
         <outgoingTransitions targetState="$"/>
         <outgoingTransitions targetState="ASId3_View_Items">
           <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.0" negate="true"/>
+        </outgoingTransitions>
+        <outgoingTransitions targetState="ASId10_inventory">
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.0" negate="true"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.1"/>
+        </outgoingTransitions>
+        <outgoingTransitions targetState="ASId15_View_Items_quantity">
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.0" negate="true"/>
           <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.2"/>
           <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.3"/>
           <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.4"/>
           <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.5"/>
           <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.6"/>
         </outgoingTransitions>
-        <outgoingTransitions targetState="ASId10_inventory">
-          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.0" negate="true"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.1"/>
-        </outgoingTransitions>
-        <outgoingTransitions targetState="ASId15_View_Items_quantity"/>
       </applicationStates>
       <applicationStates eId="ASId9_logout">
         <service name="logout"/>
@@ -320,24 +330,24 @@
         <outgoingTransitions targetState="$"/>
         <outgoingTransitions targetState="ASId5_shoppingcart">
           <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.0" negate="true"/>
-          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.2" negate="true"/>
-          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.7" negate="true"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.2"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.7"/>
-        </outgoingTransitions>
-        <outgoingTransitions targetState="ASId7_deferorder">
-          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.0" negate="true"/>
           <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.4" negate="true"/>
           <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.9" negate="true"/>
           <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.4"/>
           <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.9"/>
         </outgoingTransitions>
+        <outgoingTransitions targetState="ASId7_deferorder">
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.0" negate="true"/>
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.2" negate="true"/>
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.7" negate="true"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.2"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.7"/>
+        </outgoingTransitions>
         <outgoingTransitions targetState="ASId12_purchasecart">
           <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.0" negate="true"/>
-          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.5" negate="true"/>
-          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.10" negate="true"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.5"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.10"/>
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.3" negate="true"/>
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.8" negate="true"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.3"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.8"/>
         </outgoingTransitions>
       </applicationStates>
       <applicationStates eId="ASId11_sellinventory">
@@ -388,10 +398,10 @@
         <outgoingTransitions targetState="$"/>
         <outgoingTransitions targetState="ASId6_clearcart">
           <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.0" negate="true"/>
-          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.3" negate="true"/>
-          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.8" negate="true"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.3"/>
-          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.8"/>
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.5" negate="true"/>
+          <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.10" negate="true"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.5"/>
+          <action actionParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.10"/>
         </outgoingTransitions>
         <outgoingTransitions targetState="ASId14_remove">
           <guard guardParameter="//@applicationModel/@sessionLayerEFSM/@guardActionParameterList/@guardActionParameters.0" negate="true"/>
@@ -405,15 +415,15 @@
       <guardActionParameterList>
         <guardActionParameters guardActionParameterName="login" sourceName="login"/>
         <guardActionParameters guardActionParameterName="inventory" sourceName="inventory"/>
-        <guardActionParameters guardActionParameterName="View_Itemsshoppingcart" parameterType="INTEGER" sourceName="View_Items" targetName="shoppingcart"/>
-        <guardActionParameters guardActionParameterName="View_Itemsclearcart" parameterType="INTEGER" sourceName="View_Items" targetName="clearcart"/>
-        <guardActionParameters guardActionParameterName="View_Itemsdeferorder" parameterType="INTEGER" sourceName="View_Items" targetName="deferorder"/>
-        <guardActionParameters guardActionParameterName="View_Itemspurchasecart" parameterType="INTEGER" sourceName="View_Items" targetName="purchasecart"/>
-        <guardActionParameters guardActionParameterName="View_Itemsremove" parameterType="INTEGER" sourceName="View_Items" targetName="remove"/>
-        <guardActionParameters guardActionParameterName="Add_to_Cartshoppingcart" parameterType="INTEGER" sourceName="Add_to_Cart" targetName="shoppingcart"/>
-        <guardActionParameters guardActionParameterName="Add_to_Cartclearcart" parameterType="INTEGER" sourceName="Add_to_Cart" targetName="clearcart"/>
+        <guardActionParameters guardActionParameterName="View_Items_quantitydeferorder" parameterType="INTEGER" sourceName="View_Items_quantity" targetName="deferorder"/>
+        <guardActionParameters guardActionParameterName="View_Items_quantitypurchasecart" parameterType="INTEGER" sourceName="View_Items_quantity" targetName="purchasecart"/>
+        <guardActionParameters guardActionParameterName="View_Items_quantityshoppingcart" parameterType="INTEGER" sourceName="View_Items_quantity" targetName="shoppingcart"/>
+        <guardActionParameters guardActionParameterName="View_Items_quantityclearcart" parameterType="INTEGER" sourceName="View_Items_quantity" targetName="clearcart"/>
+        <guardActionParameters guardActionParameterName="View_Items_quantityremove" parameterType="INTEGER" sourceName="View_Items_quantity" targetName="remove"/>
         <guardActionParameters guardActionParameterName="Add_to_Cartdeferorder" parameterType="INTEGER" sourceName="Add_to_Cart" targetName="deferorder"/>
         <guardActionParameters guardActionParameterName="Add_to_Cartpurchasecart" parameterType="INTEGER" sourceName="Add_to_Cart" targetName="purchasecart"/>
+        <guardActionParameters guardActionParameterName="Add_to_Cartshoppingcart" parameterType="INTEGER" sourceName="Add_to_Cart" targetName="shoppingcart"/>
+        <guardActionParameters guardActionParameterName="Add_to_Cartclearcart" parameterType="INTEGER" sourceName="Add_to_Cart" targetName="clearcart"/>
         <guardActionParameters guardActionParameterName="Add_to_Cartremove" parameterType="INTEGER" sourceName="Add_to_Cart" targetName="remove"/>
       </guardActionParameterList>
     </sessionLayerEFSM>
@@ -481,7 +491,7 @@
       <outgoingTransitions targetState="MSId12_purchasecart" probability="0.2158">
         <thinkTime xsi:type="m4jdsl:NormallyDistributedThinkTime" mean="2252.0" deviation="214.0"/>
       </outgoingTransitions>
-      <outgoingTransitions targetState="MSId7_deferorder" probability="0.2002">
+      <outgoingTransitions targetState="MSId7_deferorder" probability="0.2003">
         <thinkTime xsi:type="m4jdsl:NormallyDistributedThinkTime" mean="2247.0" deviation="193.0"/>
       </outgoingTransitions>
       <outgoingTransitions targetState="MSId15_shoppingcart" probability="0.5839">
