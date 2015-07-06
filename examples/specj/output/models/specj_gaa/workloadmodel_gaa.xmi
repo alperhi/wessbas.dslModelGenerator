@@ -1338,7 +1338,7 @@
         service="//@applicationModel/@sessionLayerEFSM/@applicationStates.13/@service">
       <outgoingTransitions
           targetState="MSId21_clearcart"
-          probability="0.2">
+          probability="0.1">
         <thinkTime
             xsi:type="m4jdsl:NormallyDistributedThinkTime"
             mean="1503.0"
@@ -1360,7 +1360,7 @@
       </outgoingTransitions>
       <outgoingTransitions
           targetState="MSId28_remove"
-          probability="0.1">
+          probability="0.2">
         <thinkTime
             xsi:type="m4jdsl:NormallyDistributedThinkTime"
             mean="1508.0"
