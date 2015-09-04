@@ -68,12 +68,11 @@ public class GuardsAndActionsGenerator {
     public void installGuardsAndActions(final WorkloadModel workloadModel) {    	
     	// init invariants
     	this.getTemporalInvariants();
-    	this.filterInvariants();
-    	
+    	this.filterInvariants();    	   	
     	SessionLayerEFSM sessionLayerEFSM = workloadModel.getApplicationModel().getSessionLayerEFSM();    	
     	// for each found invariant
-      	for (ITemporalInvariant invariant : this.invariants.getSet()) {
-    		if (invariant instanceof BinaryInvariant) {  
+      	for (ITemporalInvariant invariant : this.invariants.getSet()) {      		
+    		if (invariant instanceof BinaryInvariant) {       			
     			BinaryInvariant binaryInvariant = (BinaryInvariant) invariant;		
 				ApplicationState first = getApplicationState(binaryInvariant.getFirst().toString(), sessionLayerEFSM);
 				ApplicationState second = getApplicationState(binaryInvariant.getSecond().toString(), sessionLayerEFSM);		
@@ -84,10 +83,11 @@ public class GuardsAndActionsGenerator {
 				if (checkIfGuardsAreNeeded(guardApplicationTransitions, first, second, sessionLayerEFSM)) {
 					if (binaryInvariant instanceof AlwaysPrecedesInvariant) {					
 						installGuardsActionsAlwaysPrecedesInvariant(first, sessionLayerEFSM, actionApplicationTransitions, guardApplicationTransitions);
-					} else if (binaryInvariant instanceof NeverFollowedInvariant) {					
-						installGuardsActionsNeverFollowedInvariant(first, second, sessionLayerEFSM, actionApplicationTransitions, guardApplicationTransitions);	
-					} else if (binaryInvariant instanceof CntAlwaysEqualsGreaterInvariant) {						
-						installGuardsActionsCntAlwaysEqualsGreaterInvariant(first, second, sessionLayerEFSM, actionApplicationTransitions, guardApplicationTransitions);
+//					} else if (binaryInvariant instanceof NeverFollowedInvariant) {					
+//						installGuardsActionsNeverFollowedInvariant(first, second, sessionLayerEFSM, actionApplicationTransitions, guardApplicationTransitions);	
+					} else if (binaryInvariant instanceof CntAlwaysEqualsGreaterInvariant) {
+						CntAlwaysEqualsGreaterInvariant cntAlwaysEqualsGreaterInvariant = (CntAlwaysEqualsGreaterInvariant) binaryInvariant;
+						installGuardsActionsCntAlwaysEqualsGreaterInvariant(first, second, sessionLayerEFSM, actionApplicationTransitions, guardApplicationTransitions, cntAlwaysEqualsGreaterInvariant.getDiffMinimum() );
 					}
 				}				
     		}	
@@ -102,16 +102,16 @@ public class GuardsAndActionsGenerator {
 	private void getTemporalInvariants() {    	
     	String[] args = new String[7];  
         args[0] = "-r";
-        args[1] = "[$1]+;[0-9]*;(?<TYPE>[\\w_+-]*);(?<ip>[\\w+-]*).[\\w;.-]*";
-        args[2] = "-m";
-        args[3] = "\\k<ip>";
+        args[1] = "(?<TYPE>.*)";
+        args[2] = "-s";
+        args[3] = "^---$";
         args[4] = "-i";
 //        args[5] = "-o";
 //        args[6] = "C:/Users/voegele/Applications/eclipse-jee-kepler-SR2-win32-x86_64/eclipse/workspace/Synoptic/output/output";
 //        args[7] = "-d";
 //        args[8] = "C:/Program Files (x86)/Graphviz2.38/bin/gvedit.exe";
         args[5] = "--dumpInvariants=true";
-        args[6] = "examples/specj/input/logFiles/SPECjlog.log";
+        args[6] = "examples/specj/input/logFiles/specjlog2.log";
 
         SynopticMain.getInstance();
 		try {
@@ -123,6 +123,31 @@ public class GuardsAndActionsGenerator {
 		}
 	}
 	
+    
+//	private void getTemporalInvariants() {    	
+//    	String[] args = new String[7];  
+//        args[0] = "-r";
+//        args[1] = "[$1]+;[0-9]*;(?<TYPE>[\\w_+-]*);(?<ip>[\\w+-]*).[\\w;.-]*";
+//        args[2] = "-m";
+//        args[3] = "\\k<ip>";
+//        args[4] = "-i";
+////        args[5] = "-o";
+////        args[6] = "C:/Users/voegele/Applications/eclipse-jee-kepler-SR2-win32-x86_64/eclipse/workspace/Synoptic/output/output";
+////        args[7] = "-d";
+////        args[8] = "C:/Program Files (x86)/Graphviz2.38/bin/gvedit.exe";
+//        args[5] = "--dumpInvariants=true";
+//        args[6] = "examples/specj/input/logFiles/SPECjlog.log";
+//
+//        SynopticMain.getInstance();
+//		try {
+//			SynopticMain.main(args);
+//			this.invariants = AbstractMain.getInvariants();
+//			this.filterInvariants();
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//	}
+    
 	
 	/**
 	 * Invariants which are AlwaysPrecedesInvariant and CntAlwaysEqualsGreaterInvariant are redundant. Only keep 
@@ -223,12 +248,15 @@ public class GuardsAndActionsGenerator {
      * @param sessionLayerEFSM
      * @param actionApplicationTransitions
      * @param guardApplicationTransitions
+     * @param guardApplicationTransitions
+     * 		minimum difference between a and b
      */
     private void installGuardsActionsCntAlwaysEqualsGreaterInvariant (final ApplicationState first,
     		final ApplicationState second,
     		final SessionLayerEFSM sessionLayerEFSM,
     		final List<ApplicationTransition> actionApplicationTransitions,
-    		final List<ApplicationTransition> guardApplicationTransitions) {
+    		final List<ApplicationTransition> guardApplicationTransitions, 
+    		final int diffMinimum) {
     	String variableName = first.getService().getName()+second.getService().getName();					
 		GuardActionParameter guardActionParameter = createGuardActionParameter(
 				variableName,
@@ -249,7 +277,7 @@ public class GuardsAndActionsGenerator {
 			}
 		}					
 		for (ApplicationTransition applicationTransition:guardApplicationTransitions) {
-			Guard guard = createGuard(guardActionParameter, true);
+			Guard guard = createGuard(guardActionParameter, true, diffMinimum);
 			applicationTransition.getGuard().add(guard);
 		}
     }
@@ -353,7 +381,7 @@ public class GuardsAndActionsGenerator {
     }
     
     /**
-     * Return a list of ApplicationTransition which are incoming transitions to the serviceName. 
+     * Return a list of GuardTransitions which are incoming transitions to the serviceName. 
      * 
      * @param serviceName
      * @param sessionLayerEFSM
@@ -412,7 +440,7 @@ public class GuardsAndActionsGenerator {
     		if (guardActionParameter.getGuardActionParameterName().equals(guardActionName)) {
     			return guardActionParameter;
     		}
-    	} 
+    	}     	
     	
     	// if not --> create
 	 	final GuardActionParameter guardActionParameter = this.m4jdslFactory.createGuardActionParameter();
@@ -422,6 +450,7 @@ public class GuardsAndActionsGenerator {
     	if (targetName != null) {
         	guardActionParameter.setTargetName(targetName);	
     	}
+    	
        	sessionLayerEFSM.getGuardActionParameterList().getGuardActionParameters().add(guardActionParameter);
     	return guardActionParameter;  	   	
     }
@@ -437,6 +466,21 @@ public class GuardsAndActionsGenerator {
     	final Guard guard = this.m4jdslFactory.createGuard();
     	guard.setGuardParameter(guardActionParameter);
     	guard.setNegate(negate);
+    	return guard;
+    }
+    
+    /**
+     * Create new guard.
+     * 
+     * @param guardActionParameter
+     * @param condition
+     * @return  new Guard
+     */
+    private Guard createGuard (final GuardActionParameter guardActionParameter, final boolean negate, final int diffMinimum) {
+    	final Guard guard = this.m4jdslFactory.createGuard();
+    	guard.setGuardParameter(guardActionParameter);
+    	guard.setNegate(negate);
+    	guard.setDiffMinimum(diffMinimum);
     	return guard;
     }
         

@@ -5,22 +5,11 @@
 	<classpathentry kind="lib" path="lib/org.eclipse.emf.common_2.9.2.v20131212-0545.jar"/>
 	<classpathentry kind="lib" path="lib/org.eclipse.emf.ecore_2.9.2.v20131212-0545.jar"/>
 	<classpathentry kind="lib" path="lib/org.eclipse.emf.ecore.xmi_2.9.1.v20131212-0545.jar"/>
-	<classpathentry kind="lib" path="lib/flowdsl/com.google.inject_3.0.0.v201312141243.jar"/>
-	<classpathentry kind="lib" path="lib/flowdsl/flowdsl.jar"/>
-	<classpathentry kind="lib" path="lib/flowdsl/org.eclipse.xtext_2.5.4.v201404100756.jar"/>
-	<classpathentry kind="lib" path="lib/flowdsl/org.eclipse.emf.mwe.utils_1.3.2.v201403310351.jar"/>
-	<classpathentry kind="lib" path="lib/flowdsl/org.eclipse.emf.mwe.core_1.3.1.v201403310351.jar"/>
-	<classpathentry kind="lib" path="lib/flowdsl/org.apache.commons.logging_1.1.1.v201101211721.jar"/>
-	<classpathentry kind="lib" path="lib/flowdsl/javax.inject_1.0.0.v20091030.jar"/>
-	<classpathentry kind="lib" path="lib/flowdsl/org.apache.log4j_1.2.15.v201012070815.jar"/>
-	<classpathentry kind="lib" path="lib/flowdsl/org.eclipse.xtext.common.types_2.5.4.v201404100756.jar"/>
-	<classpathentry kind="lib" path="lib/flowdsl/com.google.guava_11.0.2.v201303041551.jar"/>
-	<classpathentry kind="lib" path="lib/flowdsl/org.antlr.runtime_3.2.0.v201101311130.jar"/>
-	<classpathentry kind="lib" path="lib/flowdsl/org.eclipse.xtext.util_2.5.4.v201404100756.jar"/>
 	<classpathentry kind="lib" path="lib/org.apache.commons.io_2.0.1.v201105210651.jar"/>
 	<classpathentry kind="lib" path="lib/org.apache.commons.lang_2.6.0.v201205030909.jar"/>
 	<classpathentry kind="lib" path="lib/commons-cli-20040117.000000.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/Synoptic"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/net.sf.markov4jmeter.m4jdsl"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/net.sf.markov4jmeter.behaviormodelextractor"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -13,6 +13,7 @@ Node login {
     Transition { event="", guard="", action="", target=purchasecart }
     Transition { event="", guard="", action="", target=cancelorder }
     Transition { event="", guard="", action="", target=remove }
+    Transition { event="", guard="", action="", target=View_Items_quantity }
     }
 Node View_Items {
     Transition { event="", guard="", action="", target=login }
@@ -28,6 +29,7 @@ Node View_Items {
     Transition { event="", guard="", action="", target=purchasecart }
     Transition { event="", guard="", action="", target=cancelorder }
     Transition { event="", guard="", action="", target=remove }
+    Transition { event="", guard="", action="", target=View_Items_quantity }
     }
 Node Add_to_Cart {
     Transition { event="", guard="", action="", target=login }
@@ -43,6 +45,7 @@ Node Add_to_Cart {
     Transition { event="", guard="", action="", target=purchasecart }
     Transition { event="", guard="", action="", target=cancelorder }
     Transition { event="", guard="", action="", target=remove }
+    Transition { event="", guard="", action="", target=View_Items_quantity }    
     }
 Node shoppingcart {
     Transition { event="", guard="", action="", target=login }
@@ -58,6 +61,7 @@ Node shoppingcart {
     Transition { event="", guard="", action="", target=purchasecart }
     Transition { event="", guard="", action="", target=cancelorder }
     Transition { event="", guard="", action="", target=remove }
+    Transition { event="", guard="", action="", target=View_Items_quantity }    
     }
 Node clearcart {
     Transition { event="", guard="", action="", target=login }
@@ -73,6 +77,7 @@ Node clearcart {
     Transition { event="", guard="", action="", target=purchasecart }
     Transition { event="", guard="", action="", target=cancelorder }
     Transition { event="", guard="", action="", target=remove }
+    Transition { event="", guard="", action="", target=View_Items_quantity }    
     }
 Node deferorder {
     Transition { event="", guard="", action="", target=login }
@@ -88,6 +93,7 @@ Node deferorder {
     Transition { event="", guard="", action="", target=purchasecart }
     Transition { event="", guard="", action="", target=cancelorder }
     Transition { event="", guard="", action="", target=remove }
+    Transition { event="", guard="", action="", target=View_Items_quantity }    
     }
 Node home {
     Transition { event="", guard="", action="", target=login }
@@ -103,6 +109,7 @@ Node home {
     Transition { event="", guard="", action="", target=purchasecart }
     Transition { event="", guard="", action="", target=cancelorder }
     Transition { event="", guard="", action="", target=remove }
+    Transition { event="", guard="", action="", target=View_Items_quantity }    
     }
 Node logout {
     Transition { event="", guard="", action="", target=login }
@@ -118,6 +125,7 @@ Node logout {
     Transition { event="", guard="", action="", target=purchasecart }
     Transition { event="", guard="", action="", target=cancelorder }
     Transition { event="", guard="", action="", target=remove }
+    Transition { event="", guard="", action="", target=View_Items_quantity }    
     }
 Node inventory {
     Transition { event="", guard="", action="", target=login }
@@ -133,6 +141,7 @@ Node inventory {
     Transition { event="", guard="", action="", target=purchasecart }
     Transition { event="", guard="", action="", target=cancelorder }
     Transition { event="", guard="", action="", target=remove }
+    Transition { event="", guard="", action="", target=View_Items_quantity }    
     }
 Node sellinventory {
     Transition { event="", guard="", action="", target=login }
@@ -148,6 +157,7 @@ Node sellinventory {
     Transition { event="", guard="", action="", target=purchasecart }
     Transition { event="", guard="", action="", target=cancelorder }
     Transition { event="", guard="", action="", target=remove }
+    Transition { event="", guard="", action="", target=View_Items_quantity }    
     }
 Node purchasecart {
     Transition { event="", guard="", action="", target=login }
@@ -163,6 +173,7 @@ Node purchasecart {
     Transition { event="", guard="", action="", target=purchasecart }
     Transition { event="", guard="", action="", target=cancelorder }
     Transition { event="", guard="", action="", target=remove }
+    Transition { event="", guard="", action="", target=View_Items_quantity }    
     }
 Node cancelorder {
     Transition { event="", guard="", action="", target=login }
@@ -178,6 +189,7 @@ Node cancelorder {
     Transition { event="", guard="", action="", target=purchasecart }
     Transition { event="", guard="", action="", target=cancelorder }
     Transition { event="", guard="", action="", target=remove }
+    Transition { event="", guard="", action="", target=View_Items_quantity }    
     }
 Node remove {
     Transition { event="", guard="", action="", target=login }
@@ -193,5 +205,22 @@ Node remove {
     Transition { event="", guard="", action="", target=purchasecart }
     Transition { event="", guard="", action="", target=cancelorder }
     Transition { event="", guard="", action="", target=remove }
+    Transition { event="", guard="", action="", target=View_Items_quantity }    
+    }
+Node View_Items_quantity {
+    Transition { event="", guard="", action="", target=login }
+    Transition { event="", guard="", action="", target=View_Items }
+    Transition { event="", guard="", action="", target=Add_to_Cart }
+    Transition { event="", guard="", action="", target=shoppingcart }
+    Transition { event="", guard="", action="", target=clearcart }
+    Transition { event="", guard="", action="", target=deferorder }
+    Transition { event="", guard="", action="", target=home }
+    Transition { event="", guard="", action="", target=logout }
+    Transition { event="", guard="", action="", target=inventory }
+    Transition { event="", guard="", action="", target=sellinventory }
+    Transition { event="", guard="", action="", target=purchasecart }
+    Transition { event="", guard="", action="", target=cancelorder }
+    Transition { event="", guard="", action="", target=remove }
+    Transition { event="", guard="", action="", target=View_Items_quantity }    
     }
 }

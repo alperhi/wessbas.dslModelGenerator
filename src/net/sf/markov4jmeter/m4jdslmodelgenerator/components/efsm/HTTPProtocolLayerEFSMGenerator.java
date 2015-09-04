@@ -62,7 +62,7 @@ extends AbstractProtocolLayerEFSMGenerator {
     @Override
     public ProtocolLayerEFSM generateProtocolLayerEFSM (
             final String serviceName) throws GeneratorException {
-    	
+ 	
     	ArrayList<UseCase> relatedUseCases = new ArrayList<UseCase>();    	
     	String ip = "";    
     	int port = 0;    
@@ -73,12 +73,12 @@ extends AbstractProtocolLayerEFSMGenerator {
 
     	// get useCases for this serviceName
     	for (SessionData sessionData : this.sessions)  {
-    		for (UseCase useCase : sessionData.getUseCases()) {
+    		for (UseCase useCase : sessionData.getUseCases()) {    			
     			if (useCase.getName().equals(serviceName)) {
-    				relatedUseCases.add(useCase);
+    				relatedUseCases.add(useCase);   				
     			}
     		}
-    	}    	
+    	}  
     		
     	if (relatedUseCases.size() > 0 ) {
     		// take the value form the first useCase
@@ -123,19 +123,19 @@ extends AbstractProtocolLayerEFSMGenerator {
         request.setEId(eId);
 
         final ProtocolState protocolState = this.createProtocolState(request);
-
-        final String guard;  // no SUT-specific guard available yet ...
-        final String action;  // no SUT-specific action available yet ...
-
+        final String guard = "";  // no SUT-specific guard available yet ...
+        final String action = "";  // no SUT-specific action available yet ...
         final ProtocolTransition protocolTransition =
                 this.createProtocolTransition(
                         protocolExitState,
-                        "",
-                        "");
+                        guard,
+                        action);
 
         protocolState.getOutgoingTransitions().add(protocolTransition);
         protocolLayerEFSM.getProtocolStates().add(protocolState);
         protocolLayerEFSM.setInitialState(protocolState);
+        
+        parameterMap.clear();
 
         return protocolLayerEFSM;
     }
@@ -148,7 +148,7 @@ extends AbstractProtocolLayerEFSMGenerator {
     private String getValuesAsString(final HashSet<String> parameterValues, final String delimiter) {
     	String returnString = "";
     	for (String value : parameterValues) {
-    		returnString += value + delimiter;
+    		returnString += value.trim() + delimiter;
     	}
     	return returnString;
     }
@@ -184,12 +184,13 @@ extends AbstractProtocolLayerEFSMGenerator {
      */
     private void initializeParameterMap(final ArrayList<UseCase> relatedUseCases) {
 		for (UseCase useCase : relatedUseCases) {
+					
 			try {
 				Map<String, List<String>> parameterRequest = splitQuery(useCase.getQueryString());
-				for (String parameterName : parameterRequest.keySet()) {					
-					if (!parameterName.equals("<no-query-string>")) {						
-						List<String> parameterValues = parameterRequest.get(parameterName);
-						for (String parameterValue : parameterValues) {
+				for (String parameterName : parameterRequest.keySet()) {
+    				if (!parameterName.equals("<no-query-string>")) {						
+    					List<String> parameterValues = parameterRequest.get(parameterName);
+						for (String parameterValue : parameterValues) {								
 							addToParameters(parameterName, parameterValue);
 						}
 					}		

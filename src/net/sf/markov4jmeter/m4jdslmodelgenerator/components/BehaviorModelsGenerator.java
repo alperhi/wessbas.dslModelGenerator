@@ -288,7 +288,6 @@ public class BehaviorModelsGenerator {
             }
 
         } else {
-
             this.info(
                     BehaviorModelsGenerator.
                     WARNING_BEHAVIOR_FILE_LOADING_FAILED,

@@ -1,5 +1,6 @@
 package net.sf.markov4jmeter.m4jdslmodelgenerator.components.efsm;
 
+import java.io.File;
 import java.io.IOException;
 
 import org.eclipse.emf.common.util.EList;
@@ -62,6 +63,10 @@ public abstract class AbstractSessionLayerEFSMGenerator {
     /** Path of the DOT graph output file; might be <code>null</code>, if no
      *  graph shall be generated. */
     private final String graphFilePath;
+    
+    /** Instance for storing the <code>Service</code> instances which are
+     *  included in the Session Layer EFSM. */
+    protected final File[] fileNames;
 
 
     /* ***************************  constructors  *************************** */
@@ -89,7 +94,8 @@ public abstract class AbstractSessionLayerEFSMGenerator {
             final AbstractProtocolLayerEFSMGenerator protocolLayerEFSMGenerator,
             final IdGenerator idGenerator,
             final String graphFilePath,
-            final DotGraphGenerator dotGraphGenerator) {
+            final DotGraphGenerator dotGraphGenerator,
+            final File[] fileNames) {
 
         this.m4jdslFactory              = m4jdslFactory;
         this.serviceRepository          = serviceRepository;
@@ -97,6 +103,7 @@ public abstract class AbstractSessionLayerEFSMGenerator {
         this.idGenerator                = idGenerator;
         this.graphFilePath              = graphFilePath;
         this.dotGraphGenerator          = dotGraphGenerator;
+        this.fileNames          = fileNames;
     }
 
 

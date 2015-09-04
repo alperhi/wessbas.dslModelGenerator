@@ -104,19 +104,7 @@ import org.apache.commons.cli.ParseException;
  * @version  1.0
  */
 public class CommandLineArgumentsHandler {
-
-    /** Path to the directory of input Flows that indicate the Session Layer
-     *  EFSM structure. */
-    private final static Option FLOWS_DIRECTORY_PATH =
-            CmdlOptionFactory.createOption(
-                    "f",                                   // opt;
-                    "flows",                               // longOpt;
-                    "Path to the directory of input "      // description;
-                    + "Flows that indicate the Session Layer EFSM structure.",
-                    true,                                  // isRequired;
-                    "./flows/",                            // argName;
-                    false);                                // !hasOptionalArg;
-    
+   
     /** Path to the directory of input Flows that indicate the Session Layer
      *  EFSM structure. */
     private final static Option SESSIONDAT_FILE =
@@ -250,9 +238,6 @@ public class CommandLineArgumentsHandler {
 
         // fill the options container;
         CommandLineArgumentsHandler.options = new Options();
-
-        CommandLineArgumentsHandler.options.addOption(
-                CommandLineArgumentsHandler.FLOWS_DIRECTORY_PATH);
 
         CommandLineArgumentsHandler.options.addOption(
                 CommandLineArgumentsHandler.SESSIONDAT_FILE);
@@ -409,12 +394,7 @@ public class CommandLineArgumentsHandler {
         // might throw a ParseException;
         final CommandLine commandLine =
                 CommandLineArgumentsHandler.parseCommands(args);
-
-        CommandLineArgumentsHandler.flowsDirectoryPath =
-                CommandLineArgumentsHandler.readOptionValueAsString(
-                        commandLine,
-                        CommandLineArgumentsHandler.FLOWS_DIRECTORY_PATH);
-        
+       
         CommandLineArgumentsHandler.sessionDatFile =
                 CommandLineArgumentsHandler.readOptionValueAsString(
                         commandLine,

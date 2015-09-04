@@ -1,7 +1,6 @@
 package net.sf.markov4jmeter.m4jdslmodelgenerator;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -27,7 +26,6 @@ import m4jdsl.impl.M4jdslPackageImpl;
 import net.sf.markov4jmeter.behaviormodelextractor.BehaviorModelExtractor;
 import net.sf.markov4jmeter.behaviormodelextractor.extraction.ExtractionException;
 import net.sf.markov4jmeter.behaviormodelextractor.extraction.parser.ParseException;
-import net.sf.markov4jmeter.behaviormodelextractor.extraction.parser.Parser;
 import net.sf.markov4jmeter.behaviormodelextractor.extraction.parser.SessionData;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.components.ApplicationModelGenerator;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.components.BehaviorMixGenerator;
@@ -35,13 +33,11 @@ import net.sf.markov4jmeter.m4jdslmodelgenerator.components.BehaviorModelsGenera
 import net.sf.markov4jmeter.m4jdslmodelgenerator.components.WorkloadIntensityGenerator;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.components.efsm.AbstractProtocolLayerEFSMGenerator;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.components.efsm.AbstractSessionLayerEFSMGenerator;
-import net.sf.markov4jmeter.m4jdslmodelgenerator.components.efsm.FlowSessionLayerEFSMGenerator;
+import net.sf.markov4jmeter.m4jdslmodelgenerator.components.efsm.SessionLayerEFSMGenerator;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.components.efsm.GuardsAndActionsGenerator;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.components.efsm.HTTPProtocolLayerEFSMGenerator;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.util.IdGenerator;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.util.XmiEcoreHandler;
-
-import org.eclipse.xtext.xtext.ecoreInference.TransformationException;
 
 
 /**
@@ -59,9 +55,6 @@ public class M4jdslModelGenerator {
     /* *****************************  constants  **************************** */
 
 
-    /** Suffix of Flow-DSL files. */
-    private final static String FLOW_FILE_SUFFIX = ".flows";
-
     /** Property key for Behavior Model definitions. */
     private final static String PKEY_BEHAVIOR_MODELS = "behaviorModels";
 
@@ -75,17 +68,6 @@ public class M4jdslModelGenerator {
 
 
     /* --------------------------  error messages  -------------------------- */
-
-
-    /** Error message for the case that a required <code>File</code> instance
-     *  denoting a directory is <code>null</code>. */
-    private final static String ERROR_DIRECTORY_FILE_IS_NULL =
-            "directory file is null";
-
-    /** Error message for the case that a passed <code>File</code> instance,
-     *  which is expected to denote a directory, is a regular file. */
-    private final static String ERROR_DIRECTORY_FILE_DENOTES_NO_DIRECTORY =
-            "file \"%s\" does not denote a directory";
 
     /** Error message for the case that a parameter sequence for a Behavior
      *  Model has too few parameters. */
@@ -164,8 +146,7 @@ public class M4jdslModelGenerator {
             final String flowsDirectoryPath,
             final String graphOutputPath,
             final String sessionDatFile,
-            final boolean sessionsCanBeExitedAnytime,
-            final boolean useFullyQualifiedNames) throws GeneratorException {
+            final boolean sessionsCanBeExitedAnytime) throws GeneratorException {
 
         // to be returned;
         final WorkloadModel workloadModel =
@@ -214,7 +195,7 @@ public class M4jdslModelGenerator {
                 graphOutputPath,
                 sessionDatFile,
                 sessionsCanBeExitedAnytime,
-                useFullyQualifiedNames);
+                behaviorFiles.toArray(new File[]{}));
         
         // might throw a GeneratorException;
         this.installBehaviorModels(
@@ -223,7 +204,7 @@ public class M4jdslModelGenerator {
                 names.toArray(new String[]{}),
                 filenames.toArray(new String[]{}),
                 behaviorFiles.toArray(new File[]{}));
-        
+                
         // might throw a GeneratorException;
         this.installBehaviorMix(
                 workloadModel,
@@ -231,7 +212,7 @@ public class M4jdslModelGenerator {
                 behaviorMixEntries);         
  
         this.removeUnusedApplicationTransitions(workloadModel);
-               
+                      
         this.installGuardsAndActions(workloadModel);
 
         return workloadModel;
@@ -312,7 +293,7 @@ public class M4jdslModelGenerator {
             final String graphOutputPath,
             final String sessionDatFile,
             final boolean sessionsCanBeExitedAnytime,
-            final boolean useFullyQualifiedNames) throws GeneratorException {
+            final File[] filenames) throws GeneratorException {
 /*
         final AbstractProtocolLayerEFSMGenerator protocolLayerEFSMGenerator =
                 new JavaProtocolLayerEFSMGenerator(
@@ -331,23 +312,17 @@ public class M4jdslModelGenerator {
 	                        this.m4jdslFactory,
 	                        new IdGenerator("PS"),
 	                        new IdGenerator("R"),
-	                        sessions);
-	
-	        // might throw a GeneratorException;
-	        final File[] flowFiles = this.readFilesFromDirectory(
-	                flowsDirectoryPath,
-	                M4jdslModelGenerator.FLOW_FILE_SUFFIX);
+	                        sessions);	
 	
 	        final AbstractSessionLayerEFSMGenerator sessionLayerEFSMGenerator =
-	                new FlowSessionLayerEFSMGenerator(
+	                new SessionLayerEFSMGenerator(
 	                        this.m4jdslFactory,
 	                        serviceRepository,
 	                        protocolLayerEFSMGenerator,
 	                        new IdGenerator("ASId"),
 	                        sessionsCanBeExitedAnytime,
-	                        useFullyQualifiedNames,
-	                        flowFiles,
-	                        graphOutputPath);
+	                        graphOutputPath,
+	                        filenames);
 	
 	        final ApplicationModelGenerator applicationModelGenerator =
 	                new ApplicationModelGenerator(this.m4jdslFactory, sessionLayerEFSMGenerator);
@@ -483,92 +458,6 @@ public class M4jdslModelGenerator {
                 M4jdslModelGenerator.class.getSimpleName() );
 
         System.out.println(message);
-    }
-
-    /**
-     * Collects all files with a specified suffix from a given directory.
-     *
-     * @param directoryPath
-     *     directory which contains the files to be collected.
-     * @param suffix
-     *     suffix of the files to be collected.
-     *
-     * @return
-     *     the files whose suffix matches the specified one.
-     *
-     * @throws IOException
-     *     if any I/O error occurs.
-     * @throws GeneratorException
-     *     if <code>null</code> has been passed as a directory path, or if the
-     *     specified path does not denote a directory.
-     */
-    private File[] readFilesFromDirectory (
-            final String directoryPath,
-            final String suffix) throws GeneratorException {
-
-        try {
-
-            // might throw a NullPointerException;
-            final File directory = new File(directoryPath);
-
-            // might throw an IllegalArgument- or IOException;
-            final File[] files = this.readFilesFromDirectory(
-                    directory,
-                    suffix);
-
-            return files;
-
-        } catch (final Exception ex) {
-
-            throw new GeneratorException( ex.getMessage() );
-        }
-    }
-
-    /**
-     * Collects all files with a specified suffix from a given directory.
-     *
-     * @param directory
-     *     directory which contains the files to be collected.
-     * @param suffix
-     *     suffix of the files to be collected.
-     *
-     * @return
-     *     the files whose suffix matches the specified one.
-     *
-     * @throws IOException
-     *     if any I/O error occurs.
-     * @throws IllegalArgumentException
-     *     if <code>null</code> has been passed as a <code>File</code> instance,
-     *     or if the given file does not denote a directory.
-     */
-    private File[] readFilesFromDirectory (
-            final File directory,
-            final String suffix) throws IllegalArgumentException, IOException {
-
-        if (directory == null) {
-
-            throw new IllegalArgumentException(
-                    M4jdslModelGenerator.ERROR_DIRECTORY_FILE_IS_NULL);
-        }
-
-        if ( !directory.isDirectory() ) {
-
-            final String message = String.format(
-                    M4jdslModelGenerator.
-                    ERROR_DIRECTORY_FILE_DENOTES_NO_DIRECTORY,
-                    directory.getAbsolutePath());
-
-            throw new IllegalArgumentException(message);
-        }
-
-        return directory.listFiles(new FileFilter() {
-
-            @Override
-            public boolean accept (final File file) {
-
-                return !file.isDirectory() && file.getName().endsWith(suffix);
-            }
-        });
     }
 
     /**
@@ -724,12 +613,14 @@ public class M4jdslModelGenerator {
 			for (MarkovState markovState : behaviorModel.getMarkovStates()) {
 				for (m4jdsl.Transition transition : markovState.getOutgoingTransitions()) {
 					Service fromMarkovStateService = markovState.getService();
-					Service targetMarkovStateService = ((MarkovState) transition.getTargetState()).getService();
-	    			if (fromApplicationStateService.equals(fromMarkovStateService) &&
-	    					targetApplicationStateService.equals(targetMarkovStateService)) {
-	    				found = true;
-	    				break;
-	    			}    		    		
+					if (transition.getTargetState() instanceof MarkovState) {
+						Service targetMarkovStateService = ((MarkovState) transition.getTargetState()).getService();
+		    			if (fromApplicationStateService.equals(fromMarkovStateService) &&
+		    					targetApplicationStateService.equals(targetMarkovStateService)) {
+		    				found = true;
+		    				break;
+		    			}    	
+					}						    		
 				}
 			}
 		}
@@ -800,6 +691,7 @@ public class M4jdslModelGenerator {
 
             System.err.println(ex.getMessage() + ".\n");      
             M4jdslModelGenerator.printUsage();
+            
         }
     }
 
@@ -845,9 +737,6 @@ public class M4jdslModelGenerator {
         final boolean sessionsCanBeExitedAnytime =
                 CommandLineArgumentsHandler.getSessionsCanBeExitedAnytime();
 
-        final boolean useFullyQualifiedNames =
-                CommandLineArgumentsHandler.getUseFullyQualifiedNames();
-
         // might throw a FileNotFound- or IOException;
         final Properties workloadIntensityProperties =
                 M4jdslModelGenerator.loadProperties(
@@ -866,8 +755,7 @@ public class M4jdslModelGenerator {
                         flowsDirectoryPath,                        
                         graphOutputFilePath,
                         sessionDatFilePath,
-                        sessionsCanBeExitedAnytime,
-                        useFullyQualifiedNames);
+                        sessionsCanBeExitedAnytime);
 
         //final String outputFile = generatorProperties.
         //        getProperty(M4jdslModelGenerator.PKEY_XMI_OUTPUT_FILE);

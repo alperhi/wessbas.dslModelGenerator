@@ -1,6 +1,7 @@
 package net.sf.markov4jmeter.m4jdslmodelgenerator.components.efsm;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -18,13 +19,9 @@ import m4jdsl.ProtocolLayerEFSM;
 import m4jdsl.Service;
 import m4jdsl.SessionLayerEFSM;
 import m4jdsl.SessionLayerEFSMState;
-import net.sf.markov4jmeter.gear.flowdsl.Flow;
-import net.sf.markov4jmeter.gear.flowdsl.FlowRepository;
-import net.sf.markov4jmeter.gear.flowdsl.Node;
-import net.sf.markov4jmeter.gear.flowdsl.Transition;
-import net.sf.markov4jmeter.m4jdslmodelgenerator.FlowDSLParser;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.GeneratorException;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.ServiceRepository;
+import net.sf.markov4jmeter.m4jdslmodelgenerator.util.CSVHandler;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.util.DotGraphGenerator;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.util.FlowDotGraphGenerator;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.util.IdGenerator;
@@ -35,32 +32,20 @@ import net.sf.markov4jmeter.m4jdslmodelgenerator.util.IdGenerator;
  * @author   Eike Schulz (esc@informatik.uni-kiel.de)
  * @version  1.0
  */
-public class FlowSessionLayerEFSMGenerator extends
+public class SessionLayerEFSMGenerator extends
         AbstractSessionLayerEFSMGenerator {
 
 
     /* *************************  global constants  ************************* */
-
-
-    /** Name of each Flow's start node. */
-    private final static String FLOW_START_NODE_NAME = "Start";
 
     /** (Service-)name of the Application Layer's generic initial state. */
     public final static String INITIAL_STATE__SERVICE_NAME = "Init*";
 
     /** (Service-)name of the Application Layer's generic exit state. */
     private final static String EXIT_STATE_NAME = "$";
-
-    /** Error message for the case that the parsing of Flows fails for any
-     *  reason. */
-    private final static String ERROR_FLOWS_PARSING_FAILED =
-            "could not parse flows properly (%s)";
-
-    /** Error message for the case that a target node of a Flow transition does
-     *  not refer to node which is defined in the related Flow. */
-    private final static String ERROR_UNKNOWN_NODE =
-            "transition target \"%s\" in node \"%s\" of flow \"%s\" is not "
-            + "defined in that flow";
+    
+    /** This STring identifies an initial State. */
+    private final static String INITIAL_STATE_IDENTIFIER = "*";
 
     /** Warning message for the case that no initial state has been detected. */
     private final static String WARNING_NO_INITIAL_STATE =
@@ -95,20 +80,11 @@ public class FlowSessionLayerEFSMGenerator extends
     /* *************************  global variables  ************************* */
 
 
-    /** Flow files to be read. */
-    private final File[] flowFiles;
-
     /** <code>true</code> if and only if sessions can be exited at any time,
      *  which is generally given in Web applications; if this flag is set
      *  <code>true</code>, transitions to the exit state will be installed for
      *  all states of the Application Layer. */
     private final boolean sessionsCanBeExitedAnytime;
-
-    /** <code>true</code> if and only if fully qualified state names shall be
-     *  used; if this flag is <code>false</code>, plain Node names will be used
-     *  as state names, without any related Flow names being added as prefixes.
-     */
-    private final boolean useFullyQualifiedNames;
     
     /* ***************************  constructors  *************************** */
 
@@ -135,36 +111,35 @@ public class FlowSessionLayerEFSMGenerator extends
      *     be used; if this flag is <code>false</code>, plain Node names will be
      *     used as state names, without any related Flow names being added as
      *     prefixes.
-     * @param flowFiles
-     *     Flow files to be read.
      * @param graphFilePath
      *     path of the DOT graph output file; might be <code>null</code>, if no
      *     graph shall be generated.
+     * @param filenames 
+     *     behaviorModel filenames.    
      */
-    public FlowSessionLayerEFSMGenerator (
+    public SessionLayerEFSMGenerator (
             final M4jdslFactory m4jdslFactory,
             final ServiceRepository serviceRepository,
             final AbstractProtocolLayerEFSMGenerator protocolLayerEFSMGenerator,
             final IdGenerator idGenerator,
             final boolean sessionsCanBeExitedAnytime,
-            final boolean useFullyQualifiedNames,
-            final File[] flowFiles,
-            final String graphFilePath) {
+            final String graphFilePath,
+            final File[] filenames) {
 
         super(m4jdslFactory,
               serviceRepository,
               protocolLayerEFSMGenerator,
               idGenerator,
               graphFilePath,
-              (graphFilePath != null) ? new FlowDotGraphGenerator() : null );
+              (graphFilePath != null) ? new FlowDotGraphGenerator() : null,
+              filenames);
 
         this.sessionsCanBeExitedAnytime = sessionsCanBeExitedAnytime;
-        this.useFullyQualifiedNames     = useFullyQualifiedNames;
-        this.flowFiles = flowFiles;
+
     }
  
     /**
-     * Constructor for a Flow Session Layer EFSM Generator.
+     * Constructor for a Session Layer EFSM Generator.
      *
      * @param m4jdslFactory
      *     instance for creating M4J-DSL model elements.
@@ -185,26 +160,21 @@ public class FlowSessionLayerEFSMGenerator extends
      *     be used; if this flag is <code>false</code>, plain Node names will be
      *     used as state names, without any related Flow names being added as
      *     prefixes.
-     * @param flowFiles
-     *     Flow files to be read.
      */
-    public FlowSessionLayerEFSMGenerator (
+    public SessionLayerEFSMGenerator (
             final M4jdslFactory m4jdslFactory,
             final ServiceRepository serviceRepository,
             final JavaProtocolLayerEFSMGenerator protocolLayerEFSMGenerator,
             final IdGenerator idGenerator,
             final boolean sessionsCanBeExitedAnytime,
-            final boolean useFullyQualifiedNames,
-            final File[] flowFiles) {
+            final File[] filenames) {
 
         this(m4jdslFactory,
              serviceRepository,
              protocolLayerEFSMGenerator,
              idGenerator,
              sessionsCanBeExitedAnytime,
-             useFullyQualifiedNames,
-             flowFiles,
-             null);  // no graph file path;
+             null, filenames);  // no graph file path;
     }
 
 
@@ -213,7 +183,7 @@ public class FlowSessionLayerEFSMGenerator extends
 
     /**
      * {@inheritDoc}
-     * <p> This method creates an EFSM which builds on <b>b+m gear Flows</b>.
+     * <p> This method creates an EFSM.
      */
     @Override
     public SessionLayerEFSM generateSessionLayerEFSM ()
@@ -222,7 +192,7 @@ public class FlowSessionLayerEFSMGenerator extends
         // EFSM to be returned;
         final SessionLayerEFSM sessionLayerEFSM =
                 this.createEmptySessionLayerEFSM(
-                        FlowSessionLayerEFSMGenerator.EXIT_STATE_NAME);
+                        SessionLayerEFSMGenerator.EXIT_STATE_NAME);
         
         final GuardActionParameterList guardActionParameterList = 
         		createGuardActionParamterList();
@@ -232,11 +202,10 @@ public class FlowSessionLayerEFSMGenerator extends
         final HashMap<Service, ApplicationState> serviceAppStateHashMap =
                 new HashMap<Service, ApplicationState>();
 
-        // might throw a GeneratorException;
-        final FlowRepository flowRepository = this.parseFlows();        
+        HashMap<String, List<String>> allowedTransitions = this.getAllAllowedTransitions( this.fileNames );          
        
         final Service initialService = this.determineInitialService(
-                flowRepository,
+        		allowedTransitions,
                 sessionLayerEFSM,
                 serviceAppStateHashMap);
 
@@ -244,32 +213,24 @@ public class FlowSessionLayerEFSMGenerator extends
                 sessionLayerEFSM,
                 serviceAppStateHashMap);
 
-        this.installFlowStates(
+        this.installStates(
                 sessionLayerEFSM,
                 serviceAppStateHashMap,
-                flowRepository,
+                allowedTransitions,
                 initialService);
 
         sessionLayerEFSM.setInitialState(
                 serviceAppStateHashMap.get(initialService));
 
-        if ( this.isGenericInitialService(initialService) ) {
-
-            this.installGenericTransitionsFromInitialState(
-                    sessionLayerEFSM,
-                    serviceAppStateHashMap,
-                    flowRepository);
-        }
-
         this.installGenericTransitionsToExitState(
                 sessionLayerEFSM,
                 serviceAppStateHashMap,
-                flowRepository);
+                allowedTransitions);
 
         this.installFlowTransitions(
                 sessionLayerEFSM,
                 serviceAppStateHashMap,
-                flowRepository);
+                allowedTransitions);
 
         return sessionLayerEFSM;
     }
@@ -277,13 +238,8 @@ public class FlowSessionLayerEFSMGenerator extends
 
     /* *********  private methods (Application States installation)  ******** */
     
-	private boolean isGenericInitialService (final Service initialService) {
-        return FlowSessionLayerEFSMGenerator.INITIAL_STATE__SERVICE_NAME.equals(
-                initialService.getName());
-    }
-
     private Service determineInitialService (
-            final FlowRepository flowRepository,
+            final HashMap<String, List<String>> allowedTransitions,
             final SessionLayerEFSM sessionLayerEFSM,
             final HashMap<Service, ApplicationState> serviceAppStateHashMap)
                     throws GeneratorException {
@@ -291,17 +247,17 @@ public class FlowSessionLayerEFSMGenerator extends
         final Service initialService;
 
         final LinkedList<Service> initialServices =
-                this.findInitialServices(flowRepository);
+                this.findInitialServices(allowedTransitions);
 
         switch (initialServices.size()) {
 
             case 0 :  // no initial service detected;
 
                 // ensure that at least one initial service is available;
-                initialService = this.findFirstService(flowRepository);
+                initialService = this.findFirstService(allowedTransitions);
 
                 this.warn(
-                        FlowSessionLayerEFSMGenerator.WARNING_NO_INITIAL_STATE,
+                        SessionLayerEFSMGenerator.WARNING_NO_INITIAL_STATE,
                         initialService.getName());
 
                 break;
@@ -322,133 +278,51 @@ public class FlowSessionLayerEFSMGenerator extends
     }
 
     private LinkedList<Service> findInitialServices (
-            final FlowRepository flowRepository) {
+            final HashMap<String, List<String>> allowedTransitions) {
 
         // initial services to be returned;
         final LinkedList<Service> initialServices = new LinkedList<Service>();
 
-        for (final Flow flow : flowRepository.getFlows()) {
+        for (String fromState : allowedTransitions.keySet() ) {        	
 
-            final String flowName = flow.getName();
+        	if (fromState.contains(INITIAL_STATE_IDENTIFIER)) {
+        		
+        		String fromStateName = getFullyQualifiedName(fromState);  
+        		
+        		initialServices.add(this.createService(fromStateName));
 
-            for (final Node node : flow.getNodes()) {
+                if (SessionLayerEFSMGenerator.DEBUG) {
 
-                final String nodeName = node.getName();
-
-                if ( this.isInitialNode(flowName, nodeName, flowRepository) ) {
-
-                    final String serviceName =
-                            this.getFullyQualifiedName(flowName, nodeName);
-
-                    initialServices.add(this.createService(serviceName));
-
-                    if (FlowSessionLayerEFSMGenerator.DEBUG) {
-
-                        this.printDebugInfo(
-                                FlowSessionLayerEFSMGenerator.
-                                DEBUG_INFO__DETECTED_INITIAL_STATE,
-                                serviceName);
-                    }
+                    this.printDebugInfo(
+                            SessionLayerEFSMGenerator.
+                            DEBUG_INFO__DETECTED_INITIAL_STATE,
+                            fromStateName);
                 }
-            }
+        		
+        	} 	
+            
         }
 
         return initialServices;
-    }
-
-    private boolean isInitialNode (
-            final String flowName,
-            final String nodeName,
-            final FlowRepository flowRepository) {
-
-        if (FlowSessionLayerEFSMGenerator.FLOW_START_NODE_NAME.equals(
-                nodeName)) {
-
-            return this.isUnreferencedFlow(flowName, flowRepository);
-
-        } else {
-
-            final Flow flow = this.findFlowByName(flowRepository, flowName);
-
-            return this.isUnreferencedNode(flow, nodeName);
-        }
-    }
-
-    private boolean isUnreferencedFlow (
-            final String flowName,
-            final FlowRepository flowRepository) {
-
-        for (final Flow flow : flowRepository.getFlows()) {
-
-            for (final Node node : flow.getNodes()) {
-
-                if (node.getTransitions().size() == 0) {  // is node reference?
-
-                    final String nodeName = node.getName();
-
-                    if ( nodeName.equals(flowName) ) {
-
-                        return false;  // found reference to flow;
-                    }
-
-                    // "Call" might be appended to node name optionally;
-                    if ( nodeName.endsWith("Call") ) {
-
-                        final String nodeNameNoCall =
-                                this.removeCallSuffix(nodeName);
-
-                        if ( nodeNameNoCall.equals(flowName) ) {
-
-                            return false;  // found reference to flow;
-                        }
-                    }
-                }
-            }
+    }    
+    
+    private Service findFirstService (
+            final HashMap<String, List<String>> allowedTransitions) {
+    	
+    	Service service = null;
+    	
+        for (String fromState : allowedTransitions.keySet() ) {            	
+        		
+        		String fromStateName = getFullyQualifiedName(fromState);  
+        		
+        		service = this.createService(fromStateName);
+              
+                break;
+            
         }
 
-        return true;  // no reference to flow found;
-    }
-
-    private boolean isUnreferencedNode (
-            final Flow flow,
-            final String nodeName) {
-
-        for (final Node node : flow.getNodes()) {
-
-            for (final Transition transition : node.getTransitions()) {
-
-                final String targetName = transition.getTarget().getValue();
-
-                if ( targetName.equals(nodeName) ) {
-
-                    return false;  // found reference to node;
-                }
-            }
-        }
-
-        return true;  // no transition targets the node in the given flow;
-    }
-
-    private Service findFirstService(final FlowRepository flowRepository) {
-
-        for (final Flow flow : flowRepository.getFlows()) {
-
-            final List<Node> nodes = flow.getNodes();
-
-            if (nodes.size() > 0) {
-
-                final String flowName = flow.getName();
-                final String nodeName = nodes.get(0).getName();
-
-                final String fullyQualifiedName =
-                        this.getFullyQualifiedName(flowName, nodeName);
-
-                return this.createService(fullyQualifiedName);
-            }
-        }
-
-        return null;  // no node available (should never happen);
-    }
+        return service;
+    }  
 
     /**
      * Installs a (unique) generic initial state, if multiple initial states are
@@ -463,7 +337,7 @@ public class FlowSessionLayerEFSMGenerator extends
             final HashMap<Service, ApplicationState> serviceAppStateHashMap) throws GeneratorException {
 
         final String serviceName =
-                FlowSessionLayerEFSMGenerator.INITIAL_STATE__SERVICE_NAME;
+                SessionLayerEFSMGenerator.INITIAL_STATE__SERVICE_NAME;
 
         final Service initialService = this.createService(serviceName);
 
@@ -474,7 +348,7 @@ public class FlowSessionLayerEFSMGenerator extends
                         this.createDefaultProtocolLayerEFSM(serviceName));  // FIXME: create specific Protocol Layer EFSM;
 
         applicationInitialState.setEId(
-                FlowSessionLayerEFSMGenerator.INITIAL_STATE__SERVICE_NAME);
+                SessionLayerEFSMGenerator.INITIAL_STATE__SERVICE_NAME);
 
         // (generic) initial state must be registered as a non-exit state;
         serviceAppStateHashMap.put(initialService, applicationInitialState);
@@ -497,7 +371,7 @@ public class FlowSessionLayerEFSMGenerator extends
         final String exitStateId = sessionLayerEFSM.getExitState().getEId();
 
         this.printDebugInfo(
-                FlowSessionLayerEFSMGenerator.DEBUG_INFO__INSTALLED_STATE,
+                SessionLayerEFSMGenerator.DEBUG_INFO__INSTALLED_STATE,
                 exitStateId,
                 exitStateId);
 
@@ -506,31 +380,31 @@ public class FlowSessionLayerEFSMGenerator extends
                 DotGraphGenerator.STATE_SHAPE_DOUBLE_CIRCLE);
     }
 
-    private void installFlowStates (
+    private void installStates (
             final SessionLayerEFSM sessionLayerEFSM,
             final HashMap<Service, ApplicationState> serviceAppStateHashMap,
-            final FlowRepository flowRepository,
+            final HashMap<String, List<String>> allowedTransitions,
             final Service initialService) throws GeneratorException {
 
         // collect all Application States indicated by nodes;
         // might throw a GeneratorException;
         this.collectApplicationStates(
-                flowRepository,
+        		allowedTransitions,
                 serviceAppStateHashMap);
 
         final List<ApplicationState> applicationStates =
                 sessionLayerEFSM.getApplicationStates();
-
+        
         final List<Service> services = this.serviceRepository.getServices();
 
         // just ensure that all collected services are in the repository;
-        if ( FlowSessionLayerEFSMGenerator.DEBUG &&
+        if ( SessionLayerEFSMGenerator.DEBUG &&
              !this.isServiceRepositoryConsistent(
                      serviceAppStateHashMap.keySet(),
                      services) ) {
 
             System.err.println(
-                    FlowSessionLayerEFSMGenerator.
+                    SessionLayerEFSMGenerator.
                     DEBUG_ERROR__SERVICE_REPOSITORY_INCONSISTENT);
         }
 
@@ -547,7 +421,7 @@ public class FlowSessionLayerEFSMGenerator extends
             this.addDotState(service.getName(), shape);
 
             this.printDebugInfo(
-                    FlowSessionLayerEFSMGenerator.DEBUG_INFO__INSTALLED_STATE,
+                    SessionLayerEFSMGenerator.DEBUG_INFO__INSTALLED_STATE,
                     as.getService().getName(),
                     as.getEId());
         }
@@ -574,33 +448,25 @@ public class FlowSessionLayerEFSMGenerator extends
     }
 
     private void collectApplicationStates (
-            final FlowRepository flowRepository,
+            final HashMap<String, List<String>> allowedTransitions,
             final HashMap<Service, ApplicationState> serviceAppStateHashMap) throws GeneratorException {
 
-        for (final Flow flow : flowRepository.getFlows()) {
-
-            final String flowName = flow.getName();
-
-            for (final Node node : flow.getNodes()) {
-
-                final String nodeName = node.getName();
+        for (final String fromState : allowedTransitions.keySet()) {
 
                 // might throw a GeneratorException;
                 this.registerApplicationState(
-                        flowName,
-                        nodeName,
+                        fromState,
                         serviceAppStateHashMap);
-            }
+
         }
     }
 
     private void registerApplicationState (
-            final String flowName,
             final String nodeName,
             final HashMap<Service, ApplicationState> serviceAppStateHashMap) throws GeneratorException {
 
         final String serviceName =
-                this.getFullyQualifiedName(flowName, nodeName);
+                this.getFullyQualifiedName(nodeName);
 
         final Service service = this.createService(serviceName);
 
@@ -622,50 +488,6 @@ public class FlowSessionLayerEFSMGenerator extends
 
     /* ******  private methods (Application Transitions installation)  ****** */
 
-
-    private void installGenericTransitionsFromInitialState (
-            final SessionLayerEFSM sessionLayerEFSM,
-            final HashMap<Service, ApplicationState> serviceAppStateHashMap,
-            final FlowRepository flowRepository) {
-
-        // install transitions from initial state to all "Start" states;
-
-        String sourceServiceName =
-                FlowSessionLayerEFSMGenerator.INITIAL_STATE__SERVICE_NAME;
-
-        for (final Flow flow : flowRepository.getFlows()) {
-
-            final Node node = this.findNodeByName(
-                    flow,
-                    FlowSessionLayerEFSMGenerator.FLOW_START_NODE_NAME);
-
-            if (node != null) {
-
-                final String targetServiceName = this.getFullyQualifiedName(
-                        flow.getName(),
-                        node.getName());
-
-                this.installApplicationTransition(
-                        sourceServiceName,
-                        targetServiceName,
-                        null,  // guard, always empty by default;
-                        null,  // action, always empty be default;
-                        serviceAppStateHashMap);
-            }
-        }
-
-        if (this.sessionsCanBeExitedAnytime) {
-
-            this.installApplicationTransition(
-                    sourceServiceName,
-                    FlowSessionLayerEFSMGenerator.EXIT_STATE_NAME,
-                    null,  // guard, always empty by default;
-                    null,  // action, always empty be default;
-                    serviceAppStateHashMap,
-                    sessionLayerEFSM.getExitState());
-        }
-    }
-
     /**
      * Installs transitions from all "End" states to the exit state.
      *
@@ -676,49 +498,34 @@ public class FlowSessionLayerEFSMGenerator extends
     private void installGenericTransitionsToExitState (
             final SessionLayerEFSM sessionLayerEFSM,
             final HashMap<Service, ApplicationState> serviceAppStateHashMap,
-            final FlowRepository flowRepository) {
+            final HashMap<String, List<String>> allowedTransitions) {
 
         final String targetServiceName =
-                FlowSessionLayerEFSMGenerator.EXIT_STATE_NAME;
+                SessionLayerEFSMGenerator.EXIT_STATE_NAME;
 
-        for (final Flow flow : flowRepository.getFlows()) {
+        for (final String fromString : allowedTransitions.keySet()) {
 
-            for (final Node node : flow.getNodes()) {
+            if ( this.sessionsCanBeExitedAnytime ) {
 
-                if ( this.sessionsCanBeExitedAnytime ||
-                     (node.getTransitions().isEmpty() &&
-                      !this.isFlowReference(flowRepository, node)) ) {
+                final String sourceServiceName = this.getFullyQualifiedName(
+                		fromString);
 
-                    final String sourceServiceName = this.getFullyQualifiedName(
-                            flow.getName(),
-                            node.getName());
-
-                    this.installApplicationTransition(
-                            sourceServiceName,
-                            targetServiceName,
-                            null,  // guard, always empty by default;
-                            null,  // action, always empty be default;
-                            serviceAppStateHashMap,
-                            sessionLayerEFSM.getExitState());
-                }
+                this.installApplicationTransition(
+                        sourceServiceName,
+                        targetServiceName,
+                        null,  // guard, always empty by default;
+                        null,  // action, always empty be default;
+                        serviceAppStateHashMap,
+                        sessionLayerEFSM.getExitState());
             }
+
         }
-    }
-
-    private boolean isFlowReference (
-            final FlowRepository flowRepository,
-            final Node node) {
-
-        final String nodeName = node.getName();
-        final Flow   refFlow  = this.findTargetFlow(flowRepository, nodeName);
-
-        return refFlow != null;
     }
 
     private void installFlowTransitions (
             final SessionLayerEFSM sessionLayerEFSM,
             final HashMap<Service, ApplicationState> serviceAppStateHashMap,
-            final FlowRepository flowRepository) {
+            final HashMap<String, List<String>> allowedTransitions) {
 
         final HashMap<ApplicationState, HashSet<ApplicationTransition>>
         serviceAppTransitionsHashMap =
@@ -726,161 +533,48 @@ public class FlowSessionLayerEFSMGenerator extends
 
         // collect all Application States indicated by nodes;
         this.collectApplicationTransitions(
-                flowRepository,
+        		allowedTransitions,
                 serviceAppStateHashMap,
                 serviceAppTransitionsHashMap, sessionLayerEFSM);
     }
 
 
     private void collectApplicationTransitions (
-            final FlowRepository flowRepository,
+            final HashMap<String, List<String>> allowedTransitions,
             final HashMap<Service, ApplicationState> serviceAppStateHashMap,
             final HashMap<ApplicationState, HashSet<ApplicationTransition>>
             serviceAppTransitionsHashMap, 
             final SessionLayerEFSM sessionLayerEFSM) {
 
-        for (final Flow flow : flowRepository.getFlows()) {
-        	
-            final String flowName = flow.getName();
+    		for (final String fromState : allowedTransitions.keySet()) {
+    	
+               final String sourceServiceName =
+                        this.getFullyQualifiedName(fromState);
 
-            for (final Node node : flow.getNodes()) {
+                final List<String> toStates = allowedTransitions.get(fromState);
 
-                final String nodeName = node.getName();
+                if ( !toStates.isEmpty() ) {
 
-                final String sourceServiceName =
-                        this.getFullyQualifiedName(flowName, nodeName);
-
-                final List<Transition> transitions = node.getTransitions();
-
-                if ( transitions.isEmpty() ) {
-
-                    // node has no transitions --> reference to next Flow?
-                    final Flow refFlow =
-                            this.findTargetFlow(flowRepository, nodeName);
-
-                    if (refFlow != null) {
-
-                        // flow found --> find "Start" node;
-                        final Node targetNode = this.findNodeByName(
-                                refFlow,
-                                FlowSessionLayerEFSMGenerator.FLOW_START_NODE_NAME);
-
-                        if (targetNode != null) {
-
-                            final String targetServiceName =
-                                    this.getFullyQualifiedName(
-                                            refFlow.getName(),
-                                            targetNode.getName());
-
-                            this.installApplicationTransition(
-                                    sourceServiceName,
-                                    targetServiceName,
-                                    null,  // guard, always empty by default;
-                                    null,  // action, always empty be default;
-                                    serviceAppStateHashMap);
-                        } else {
-
-                            // no "Start" node in flow (should never happen);
-                            // TODO: give warning message;
-                        }
-                    }
-
-                } else {  // !transitions.isEmpty();
-
-                    for (final Transition transition : transitions) {
-
-                       // final String event  = transition.getEvent().getValue();                        
-                       // final List<Guard> guards  = getGuard(transition, sessionLayerEFSM);
-                       // final List<Action> actions = getAction(transition, sessionLayerEFSM);                                
-                        final String target = transition.getTarget().getValue();
-
-                        final Node targetNode =
-                                this.findNodeByName(flow, target);
-
-                        if (targetNode == null) {
-
-                            // target node is unknown within flow;
-
-                            final String message = String.format(
-                                    FlowSessionLayerEFSMGenerator.
-                                    ERROR_UNKNOWN_NODE,
-                                    target,
-                                    nodeName,
-                                    flowName);
-
-                            System.out.println(message);
-
-                        } else {  // FIXME: check End node -> $
-
-                            final String targetServiceName =
-                                    this.getFullyQualifiedName(
-                                            flowName,
-                                            targetNode.getName());
-
+                    for (final String toString : toStates) {
+                    	
+                    	if (!toString.equals(EXIT_STATE_NAME)) {
+	
+	                       // final String event  = transition.getEvent().getValue();                        
+	                       // final List<Guard> guards  = getGuard(transition, sessionLayerEFSM);
+	                       // final List<Action> actions = getAction(transition, sessionLayerEFSM);                                
+	                        final String targetServiceName = this.getFullyQualifiedName(toString);		
+	
                             this.installApplicationTransition(
                                     sourceServiceName,
                                     targetServiceName,
                                     null,
                                     null,
                                     serviceAppStateHashMap);
-                        }
-                    }
-                }
-            }
+                    	}
+	    
+                  }       
+             }
         }
-    }
-
-    private Flow findTargetFlow (
-            final FlowRepository flowRepository,
-            final String flowName) {
-
-        Flow refFlow = this.findFlowByName(flowRepository, flowName);
-
-        if (refFlow == null && flowName.endsWith("Call")) {
-
-            final String flowNameNoCall = this.removeCallSuffix(flowName);
-
-            refFlow = this.findFlowByName(flowRepository, flowNameNoCall);
-        }
-
-        return refFlow;  // might be null, if no flow has been found;
-    }
-
-    private String removeCallSuffix (final String flowName) {
-
-        // second try; remove "Call" suffix from name;
-        //final String flowNameNoCall = flowName.replaceFirst("Call$", "");
-        final int endIndex = flowName.length() - 4;
-
-        return flowName.substring(0, endIndex);
-    }
-
-    private Node findNodeByName (final Flow flow, final String name) {
-
-        for (final Node node : flow.getNodes()) {
-
-            if ( name.equals(node.getName()) ) {
-
-                return node;
-            }
-        }
-
-        return null;  // no matching node found;
-    }
-
-    private Flow findFlowByName (
-            final FlowRepository flowRepository,
-            final String name) {
-
-        for (final Flow flow : flowRepository.getFlows()) {
-
-            if ( name.equals(flow.getName()) ) {
-
-                return flow;
-            }
-        }
-
-        return null;  // no matching flow found;
     }
 
     private void installApplicationTransition (
@@ -912,7 +606,7 @@ public class FlowSessionLayerEFSMGenerator extends
                 serviceAppStateHashMap);
 
         final SessionLayerEFSMState target =
-                FlowSessionLayerEFSMGenerator.EXIT_STATE_NAME.equals(
+                SessionLayerEFSMGenerator.EXIT_STATE_NAME.equals(
                         targetServiceName) ?
                                 applicationExitState :
                                 this.findApplicationStateByServiceName(
@@ -945,7 +639,7 @@ public class FlowSessionLayerEFSMGenerator extends
         source.getOutgoingTransitions().add(transition);
 
         this.printDebugInfo(
-                FlowSessionLayerEFSMGenerator.DEBUG_INFO__INSTALLED_TRANSITION,
+                SessionLayerEFSMGenerator.DEBUG_INFO__INSTALLED_TRANSITION,
                 "",
                 "",
                 sourceServiceName,
@@ -1012,32 +706,12 @@ public class FlowSessionLayerEFSMGenerator extends
 
     /* *********************  private methods (helpers)  ******************** */
 
-
-    private FlowRepository parseFlows () throws GeneratorException {
-
-        final FlowDSLParser parser = new FlowDSLParser();
-
-        try {
-
-            return (FlowRepository) parser.parse(flowFiles);
-
-        } catch (final Exception ex) {
-
-            final String message = String.format(
-                    FlowSessionLayerEFSMGenerator.ERROR_FLOWS_PARSING_FAILED,
-                    ex.getMessage());
-
-            throw new GeneratorException(message);
-        }
-    }
-
     private String getFullyQualifiedName (
-            final String flowName,
             final String nodeName) {
 
-        return this.useFullyQualifiedNames ?
-                flowName + "." + nodeName :
-                nodeName;
+    	String returnString = nodeName.replace(INITIAL_STATE_IDENTIFIER, "");
+    	
+        return returnString;
     }
 
     private ProtocolLayerEFSM createDefaultProtocolLayerEFSM (
@@ -1052,7 +726,7 @@ public class FlowSessionLayerEFSMGenerator extends
 
     private void printDebugInfo (final String template, Object... args) {
 
-        if (FlowSessionLayerEFSMGenerator.DEBUG) {
+        if (SessionLayerEFSMGenerator.DEBUG) {
 
             final String message = String.format(template, args);
 
@@ -1065,5 +739,69 @@ public class FlowSessionLayerEFSMGenerator extends
         final String message = String.format(template, args);
 
         System.out.println("WARNING: " + message);
+    }
+    
+    /**
+     * Identify all allowed transitions based on the behaviorModels .csv files. 
+     * 
+     * @param fileNames 
+     * 		behaviorModel fileNames
+     * @return allAllowedTransitions
+     */
+    private HashMap<String, List<String>> getAllAllowedTransitions(final File[] fileNames) {   
+    	HashMap<String, List<String>> allowedTransitions = new HashMap<String, List<String>>();
+    	for (File file : fileNames) {    		
+            final String[][] behaviorInformation =
+                    this.readBehaviorInformation( file.getAbsolutePath() );            
+            for (int row = 1; row < behaviorInformation.length; row++) {
+            	String fromState = behaviorInformation[row][0];     
+            	String toState = "";
+            	for (int col = 1; col < behaviorInformation[row].length; col++) {            		
+            		if (!behaviorInformation[row][col].contains("0.0;")) {
+            			toState = behaviorInformation[0][col];            			
+            			if (allowedTransitions.containsKey(fromState)) {
+            				List<String> toTransitions = allowedTransitions.get(fromState);
+            				if (!toTransitions.contains(toState)) {
+            					toTransitions.add(toState);
+                				allowedTransitions.put(fromState, toTransitions);
+            				}
+            			} else {
+            				List<String> toTransitions = new ArrayList<String>();
+            				if (!toTransitions.contains(toState)) {
+            					toTransitions.add(toState);
+                				allowedTransitions.put(fromState, toTransitions);
+            				}
+            			}                    			
+            		}            		
+            	}            	
+            }        		
+    	}       
+    	return allowedTransitions;
+    }
+    
+    /**
+     * Reads the behavior information from a given CSV file.
+     *
+     * @param filename
+     *     CSV file which provides the behavior information as matrix.
+     *
+     * @return
+     *     the matrix which has been read from the given CSV file, or
+     *     <code>null</code> if the file could not be read.
+     */
+    private String[][] readBehaviorInformation (final String filename) {
+
+        String[][] information;  // to be returned;
+
+        try {
+        	CSVHandler cSVHandler = new CSVHandler();
+            information = cSVHandler.readValues(filename);
+
+        } catch (final Exception ex) {
+
+            information = null;  // null indicates an error;
+        }
+
+        return information;
     }
 }
