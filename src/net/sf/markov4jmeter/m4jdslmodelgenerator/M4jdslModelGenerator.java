@@ -12,14 +12,9 @@ import java.util.List;
 import java.util.Properties;
 
 import m4jdsl.ApplicationModel;
-import m4jdsl.ApplicationState;
-import m4jdsl.ApplicationTransition;
 import m4jdsl.BehaviorMix;
 import m4jdsl.BehaviorModel;
 import m4jdsl.M4jdslFactory;
-import m4jdsl.MarkovState;
-import m4jdsl.Service;
-import m4jdsl.SessionLayerEFSM;
 import m4jdsl.WorkloadIntensity;
 import m4jdsl.WorkloadModel;
 import m4jdsl.impl.M4jdslPackageImpl;
@@ -210,8 +205,6 @@ public class M4jdslModelGenerator {
                 workloadModel,
                 workloadModel.getBehaviorModels(),
                 behaviorMixEntries);         
- 
-        this.removeUnusedApplicationTransitions(workloadModel);
                       
         this.installGuardsAndActions(workloadModel);
 
@@ -571,62 +564,7 @@ public class M4jdslModelGenerator {
                 frequency,
                 behaviorFile);
     }
-        
-    /**
-     * As not all transitions are allowed in the behaviorModels and the application model is created before the behavior models,
-     * we have to remove application transitions which are not possible. 
-     * 
-     * @param workloadModel
-     */
-    private void removeUnusedApplicationTransitions(final WorkloadModel workloadModel) {
-    	SessionLayerEFSM sessionLayerEFSM = workloadModel.getApplicationModel().getSessionLayerEFSM();
-    	List<ApplicationTransition> removeList = new ArrayList<ApplicationTransition>();
-    	for (ApplicationState applicationState : sessionLayerEFSM.getApplicationStates()) {
-    		for (ApplicationTransition applicationTransition : applicationState.getOutgoingTransitions()) {
-    			Service fromApplicationStateService = applicationState.getService();
-    			Service targetApplicationStateService = null;
-    			if (applicationTransition.getTargetState() instanceof ApplicationState) {
-    				targetApplicationStateService =  ((ApplicationState) applicationTransition.getTargetState()).getService();
-    				if (!applicationTransitionInBehaviorModel(fromApplicationStateService, targetApplicationStateService, workloadModel)) {
-        				removeList.add(applicationTransition);
-        			}  
-    			}    			  			
-    		}
-    		applicationState.getOutgoingTransitions().removeAll(removeList);
-    		removeList.clear();
-    	}    	
-    }
-    
-    /**
-     * Checks if an applicationTransition is in one of the behaviorModels.
-     * 
-     * @param fromApplicationStateService
-     * @param targetApplicationStateService
-     * @param workloadModel
-     * @return boolean
-     */
-    private boolean applicationTransitionInBehaviorModel(final Service fromApplicationStateService, 
-    		final Service targetApplicationStateService, 
-    		final WorkloadModel workloadModel) {
-    	boolean found = false;
-		for (BehaviorModel behaviorModel : workloadModel.getBehaviorModels()) {
-			for (MarkovState markovState : behaviorModel.getMarkovStates()) {
-				for (m4jdsl.Transition transition : markovState.getOutgoingTransitions()) {
-					Service fromMarkovStateService = markovState.getService();
-					if (transition.getTargetState() instanceof MarkovState) {
-						Service targetMarkovStateService = ((MarkovState) transition.getTargetState()).getService();
-		    			if (fromApplicationStateService.equals(fromMarkovStateService) &&
-		    					targetApplicationStateService.equals(targetMarkovStateService)) {
-		    				found = true;
-		    				break;
-		    			}    	
-					}						    		
-				}
-			}
-		}
-    	return found;
-    }
-    
+                
     
     /* *************************  internal classes  ************************* */
 
