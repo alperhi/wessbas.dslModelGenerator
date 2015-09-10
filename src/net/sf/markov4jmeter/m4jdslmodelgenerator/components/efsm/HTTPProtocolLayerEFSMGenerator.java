@@ -61,63 +61,93 @@ extends AbstractProtocolLayerEFSMGenerator {
      */
     @Override
     public ProtocolLayerEFSM generateProtocolLayerEFSM (
-            final String serviceName) throws GeneratorException {
- 	
-    	ArrayList<UseCase> relatedUseCases = new ArrayList<UseCase>();    	
-    	String ip = "";    
-    	int port = 0;    
-    	String uri = "";   
-    	String method = "";   
-    	String encoding = "";   
-    	String protocol = "";  
-
-    	// get useCases for this serviceName
-    	for (SessionData sessionData : this.sessions)  {
-    		for (UseCase useCase : sessionData.getUseCases()) {    			
-    			if (useCase.getName().equals(serviceName)) {
-    				relatedUseCases.add(useCase);   				
-    			}
-    		}
-    	}  
-    		
-    	if (relatedUseCases.size() > 0 ) {
-    		// take the value form the first useCase
-    		ip = relatedUseCases.get(0).getIp();
-    		port = relatedUseCases.get(0).getPort();
-    		uri = relatedUseCases.get(0).getUri();
-    		method = relatedUseCases.get(0).getMethode();
-    		encoding = relatedUseCases.get(0).getEncoding();
-    		protocol = relatedUseCases.get(0).getProtocol();
-    		initializeParameterMap(relatedUseCases);		
-    	}    	    	
-   
+            final String serviceName) throws GeneratorException { 	   	
+    	   
         final ProtocolLayerEFSM protocolLayerEFSM =
                 this.createEmptyProtocolLayerEFSM();
 
         final ProtocolExitState protocolExitState =
                 protocolLayerEFSM.getExitState();
-
-        String[][] requestParameter = new String[parameterMap.keySet().size()][2];
-        int i = 0;
-        for (String key : parameterMap.keySet()) {
-        	HashSet<String> parameterValues = parameterMap.get(key);
-        	requestParameter[i][0] =  key;
-        	requestParameter[i][1] =  getValuesAsString(parameterValues, ";");
-        	i++;
+        
+        Request request;
+        
+        boolean generateProtocolInformation = true;
+        if (this.sessions.get(0).getUseCases().get(0).getUri() == null) {
+        	generateProtocolInformation = false;
         }
+    	
+        if (generateProtocolInformation) {
+        	
+        	ArrayList<UseCase> relatedUseCases = new ArrayList<UseCase>();    	
+        	String ip = "";    
+        	int port = 0;    
+        	String uri = "";   
+        	String method = "";   
+        	String encoding = "";   
+        	String protocol = "";  
 
-        // z.B. http://localhost:8080/action-servlet/ActionServlet?action=sellInventory
-        final Request request = this.createRequest(
-                AbstractProtocolLayerEFSMGenerator.REQUEST_TYPE_HTTP,
-                new String[][] {  // properties;
-                        {"HTTPSampler.domain", ip},
-                        {"HTTPSampler.port",  Integer.toString(port)},
-                        {"HTTPSampler.path",  uri},
-                        {"HTTPSampler.method", method},
-                        {"HTTPSampler.encoding", encoding},
-                        {"HTTPSampler.protocol", protocol}
-                }, requestParameter);
+        	// get useCases for this serviceName
+        	for (SessionData sessionData : this.sessions)  {
+        		for (UseCase useCase : sessionData.getUseCases()) {    			
+        			if (useCase.getName().equals(serviceName)) {
+        				relatedUseCases.add(useCase);   				
+        			}
+        		}
+        	}      	
+      
+        	if (relatedUseCases.size() > 0) {
+        		// take the value form the first useCase
+        		ip = relatedUseCases.get(0).getIp();
+        		port = relatedUseCases.get(0).getPort();
+        		uri = relatedUseCases.get(0).getUri();
+        		method = relatedUseCases.get(0).getMethode();
+        		encoding = relatedUseCases.get(0).getEncoding();
+        		protocol = relatedUseCases.get(0).getProtocol();
+        		initializeParameterMap(relatedUseCases);		
+        	}   
 
+            String[][] requestParameter = new String[parameterMap.keySet().size()][2];
+            int i = 0;
+            for (String key : parameterMap.keySet()) {
+            	HashSet<String> parameterValues = parameterMap.get(key);
+            	requestParameter[i][0] =  key;
+            	requestParameter[i][1] =  getValuesAsString(parameterValues, ";");
+            	i++;
+            }
+
+            // z.B. http://localhost:8080/action-servlet/ActionServlet?action=sellInventory  
+            
+            
+            request = this.createRequest(
+                    AbstractProtocolLayerEFSMGenerator.REQUEST_TYPE_HTTP,
+                    new String[][] {  // properties;
+                            {"HTTPSampler.domain", ip},
+                            {"HTTPSampler.port",  Integer.toString(port)},
+                            {"HTTPSampler.path",  uri},
+                            {"HTTPSampler.method", method},
+                            {"HTTPSampler.encoding", encoding},
+                            {"HTTPSampler.protocol", protocol}
+                    }, requestParameter);
+        	
+        } else {
+        	
+        	request = this.createRequest(
+                    AbstractProtocolLayerEFSMGenerator.REQUEST_TYPE_HTTP,
+                    new String[][]{  // properties;
+                            {"HTTPSampler.domain", "localhost"},
+                            {"HTTPSampler.port",   "8080"},
+                            {"HTTPSampler.path",   "action-servlet/ActionServlet"},
+                            {"HTTPSampler.method", "GET"},
+                    },
+                    new String[][]{  // parameters;
+                            {"action", serviceName}
+                    });           
+        	
+        }
+    	
+        
+          
+        
         String eId = request.getEId();
         eId = eId + " (" + serviceName + ")";
         request.setEId(eId);

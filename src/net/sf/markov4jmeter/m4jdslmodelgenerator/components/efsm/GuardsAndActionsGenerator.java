@@ -111,7 +111,7 @@ public class GuardsAndActionsGenerator {
 //        args[7] = "-d";
 //        args[8] = "C:/Program Files (x86)/Graphviz2.38/bin/gvedit.exe";
         args[5] = "--dumpInvariants=true";
-        args[6] = "examples/specj/input/logFiles/specjlog2.log";
+        args[6] = "C:/Users/voegele/git/wessbas.dslModelGenerator/examples/specj/input/logFiles/specjlog2.log";
 
         SynopticMain.getInstance();
 		try {
@@ -121,8 +121,7 @@ public class GuardsAndActionsGenerator {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
-	
+	}	
     
 //	private void getTemporalInvariants() {    	
 //    	String[] args = new String[7];  
