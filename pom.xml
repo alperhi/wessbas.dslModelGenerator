@@ -3,6 +3,7 @@
   <groupId>wessbas.dslModelGenerator</groupId>
   <artifactId>wessbas.dslModelGenerator</artifactId>
   <version>0.0.1-SNAPSHOT</version>
+  <packaging>jar</packaging>
   <parent>
   	<groupId>wessbas</groupId>
   	<artifactId>parent</artifactId>
