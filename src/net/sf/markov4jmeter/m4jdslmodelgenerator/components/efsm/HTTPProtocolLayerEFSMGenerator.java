@@ -10,14 +10,15 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import wessbas.commons.parser.SessionData;
+import wessbas.commons.parser.UseCase;
+
 import m4jdsl.M4jdslFactory;
 import m4jdsl.ProtocolExitState;
 import m4jdsl.ProtocolLayerEFSM;
 import m4jdsl.ProtocolState;
 import m4jdsl.ProtocolTransition;
 import m4jdsl.Request;
-import net.sf.markov4jmeter.behaviormodelextractor.extraction.parser.SessionData;
-import net.sf.markov4jmeter.behaviormodelextractor.extraction.parser.UseCase;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.GeneratorException;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.util.IdGenerator;
 
@@ -71,6 +72,7 @@ extends AbstractProtocolLayerEFSMGenerator {
         
         Request request;
         
+        // check if protocoll information are available.
         boolean generateProtocolInformation = true;
         if (this.sessions.get(0).getUseCases().get(0).getUri() == null) {
         	generateProtocolInformation = false;
@@ -102,7 +104,7 @@ extends AbstractProtocolLayerEFSMGenerator {
         		uri = relatedUseCases.get(0).getUri();
         		method = relatedUseCases.get(0).getMethode();
         		encoding = relatedUseCases.get(0).getEncoding();
-        		protocol = relatedUseCases.get(0).getProtocol();
+          		protocol = relatedUseCases.get(0).getProtocol().equals("HTTP/1.1") ? "http" : "";
         		initializeParameterMap(relatedUseCases);		
         	}   
 
@@ -115,9 +117,7 @@ extends AbstractProtocolLayerEFSMGenerator {
             	i++;
             }
 
-            // z.B. http://localhost:8080/action-servlet/ActionServlet?action=sellInventory  
-            
-            
+            // z.B. http://localhost:8080/action-servlet/ActionServlet?action=sellInventory             
             request = this.createRequest(
                     AbstractProtocolLayerEFSMGenerator.REQUEST_TYPE_HTTP,
                     new String[][] {  // properties;

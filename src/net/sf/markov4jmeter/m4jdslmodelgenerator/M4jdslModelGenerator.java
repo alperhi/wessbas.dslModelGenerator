@@ -1,5 +1,6 @@
 package net.sf.markov4jmeter.m4jdslmodelgenerator;
 
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -11,6 +12,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
+import wessbas.commons.parser.ParseException;
+import wessbas.commons.parser.Parser;
+import wessbas.commons.parser.SessionData;
+
 import m4jdsl.ApplicationModel;
 import m4jdsl.BehaviorMix;
 import m4jdsl.BehaviorModel;
@@ -18,10 +23,6 @@ import m4jdsl.M4jdslFactory;
 import m4jdsl.WorkloadIntensity;
 import m4jdsl.WorkloadModel;
 import m4jdsl.impl.M4jdslPackageImpl;
-import net.sf.markov4jmeter.behaviormodelextractor.BehaviorModelExtractor;
-import net.sf.markov4jmeter.behaviormodelextractor.extraction.ExtractionException;
-import net.sf.markov4jmeter.behaviormodelextractor.extraction.parser.ParseException;
-import net.sf.markov4jmeter.behaviormodelextractor.extraction.parser.SessionData;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.components.ApplicationModelGenerator;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.components.BehaviorMixGenerator;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.components.BehaviorModelsGenerator;
@@ -297,7 +298,7 @@ public class M4jdslModelGenerator {
    	
         try {
         	
-        	ArrayList<SessionData> sessions =  BehaviorModelExtractor.
+        	ArrayList<SessionData> sessions =  Parser.
 			        parseSessionsIntoSessionsRepository(sessionDatFile);
         		
 	        final AbstractProtocolLayerEFSMGenerator protocolLayerEFSMGenerator =
@@ -330,9 +331,6 @@ public class M4jdslModelGenerator {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ExtractionException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

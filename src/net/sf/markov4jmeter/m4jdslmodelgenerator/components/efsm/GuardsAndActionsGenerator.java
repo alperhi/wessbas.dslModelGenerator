@@ -25,7 +25,7 @@ import synoptic.main.SynopticMain;
 /**
  * Identified invariants using synoptic and the translates these invariants to guards and actions. 
  *
- * @author   Christian Vögele (voegele@fortiss.org)
+ * @author   Christian Vï¿½gele (voegele@fortiss.org)
  * @version  1.0
  */
 public class GuardsAndActionsGenerator {

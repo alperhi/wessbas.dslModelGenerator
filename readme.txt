@@ -1,8 +1,16 @@
-This project contains the source code for the M4J-DSL Model Generator, which
-builds models that comply to the M4J-DSL, based on Flow files and CSV-formatted
+INTRODUCTION
+------------
+
+This project contains the source code for the WESSBAS DSL Model Generator, which
+builds models that comply to the WESSBAS DSL, based on CSV-formatted
 user behavior information (probabilities and think times). Each resulting model
-represents a Markov4JMeter workload model, including workload intensity,
+represents a WESSBAS workload model, including workload intensity,
 Application Layer, Behavior Models and Behavior Mix.
+
+Input: Behavior Models, Workload Intensity and Behavior Mix
+ (Output of wessbas.behaviormodelextractor), Configuration files
+
+Output: WESSBAS DSL instance
 
 
 SYSTEM REQUIREMENTS
@@ -10,11 +18,15 @@ SYSTEM REQUIREMENTS
 
 The project has been developed with the use of the following tools:
 
-  - Eclipse Kepler
   - JDK 1.7
   - Xtext 2.5.4
+  - Eclipse Modeling Tools
 
-An Eclipse environment for this project should be configured accordingly.
+ACADEMIC LITERATURE
+------------------  
+  
+Automatic extraction of probabilistic workload specifications for 
+load testing session-based application systems  (Hoorn, Vögele, Schulz, Hasselbring, Krcmar)
 
 
 PROJECT CONTENT
@@ -27,28 +39,8 @@ folders are included:
     running the generator. In particular, these files demonstrate how to
     define workload intensity and Behavior Models respectively. 
 
-  - folder "examples" contains some example input Flow files and user behavior
-    information, as well as several models. The following sub-folders are
-    included:
-
-      o "behavior"      -- example behavior information as it might be retrieved
-                           from monitoring data, including probabilities and
-                           (normally distributed) think times.
-
-      o "flows"         -- example Flows which have been retrieved from the
-                           generation process of the b+m gear application
-                           "CarShare".
-
-      o "flows.subset1" -- closed subset of CarShare Flows, which appears to be
-                           independent from the remaining Flows. This might be
-                           used for test runs with less input data, as the full
-                           amount of Flows requires much more processing time.
-
-      o "flows.subset2" -- another closed subset of CarShare Flows.
-
-      o "models"        -- some simple example workload models which comply to
-                           the M4J-DSL. These models serve for testing purposes
-                           only.
+  - folder "examples" contains some example input user behavior
+    information, as well as several models. 
 
   - folder "output" contains the output files of a test run, which generally
     include a workload model (.XMI) and a graph visualization file (.DOT).
@@ -67,9 +59,6 @@ command-line in a specific order. The following parameters need to be provided:
   <behaviorModels.properties>    -- path to the properties file with Behavior
                                     Models definitions.
 
-  <flowsDirPath>                 -- path to the directory which contains the
-                                    input Flows files.
-
   <xmiOutputFile>                -- path to the XMI output file.
 
   <graphOutputFile>              -- path to the graph output file.
@@ -77,34 +66,21 @@ command-line in a specific order. The following parameters need to be provided:
 An example parameter sequence (to be used in the Eclipse run configuration)
 might look as follows (in one row):
 
-  ./configuration/workloadIntensity.properties
-    ./configuration/behaviorModels.properties
-      ./examples/flows.subset2/ ./output/workloadmodel.xmi ./output/graph.dot
+-w "./configuration/specj/workloadIntensity.properties" 
+-b "./configuration/specj/behaviorModels.properties" 
+-o "./examples/specj/output/models/specj_2_cluster/workloadmodel.xmi" 
+-g "./examples/specj/output/models/flows.all/graph.dot" 
+-q false 
+-s "./examples/specj/input/logFiles/sessions.dat"
 
 Starting the application with these parameters will produce corresponding output
 in the "output" folder.
-
 
 DEVELOPMENT NOTES
 -----------------
 
 The source code is comprehensively commented, and most of it should be
-self-explaining; all required libraries are included. Two classes are still in
-progress, since they are b+m gear-specific and details regarding to the
-generation of Markov4JMeter models based on b+m gear Flows need to be cleared:
-
-  - FlowSessionLayerEFSMGenerator:
-    class for building Session Layer EFSMs based on Flows; the Session Layer
-    EFSM structure will be probably changed in future releases.
-
-  - JavaProtocolLayerEFSMGenerator:
-    class for building Protocol Layer EFSMs based on Java requests; the
-    construction of the Protocol Layer EFSMs still requires additional
-    information regarding to states, transitions and request parameters.
-
-Both classes are marked with "warning" signs in the Eclipse Package Explorer,
-indicating their open issues. As a future work, the generalization of these
-classes should be envisioned for reducing their dependency from certain systems.
+self-explaining; all required libraries are included. 
 
 An executable JAR archive can be easily generated by using the File->Export
 option in Eclipse. Note that the configuration files have to be provided

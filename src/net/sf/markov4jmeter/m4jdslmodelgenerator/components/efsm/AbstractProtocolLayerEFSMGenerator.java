@@ -2,6 +2,8 @@ package net.sf.markov4jmeter.m4jdslmodelgenerator.components.efsm;
 
 import java.util.ArrayList;
 
+import wessbas.commons.parser.SessionData;
+
 import m4jdsl.M4jdslFactory;
 import m4jdsl.Parameter;
 import m4jdsl.Property;
@@ -11,7 +13,6 @@ import m4jdsl.ProtocolLayerEFSMState;
 import m4jdsl.ProtocolState;
 import m4jdsl.ProtocolTransition;
 import m4jdsl.Request;
-import net.sf.markov4jmeter.behaviormodelextractor.extraction.parser.SessionData;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.GeneratorException;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.util.IdGenerator;
 
