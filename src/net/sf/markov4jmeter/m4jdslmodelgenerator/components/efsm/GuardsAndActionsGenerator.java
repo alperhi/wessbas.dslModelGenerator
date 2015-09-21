@@ -2,6 +2,7 @@ package net.sf.markov4jmeter.m4jdslmodelgenerator.components.efsm;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.Stack;
 
 import m4jdsl.Action;
@@ -29,6 +30,39 @@ import synoptic.main.SynopticMain;
  * @version  1.0
  */
 public class GuardsAndActionsGenerator {
+	
+	
+    /* *****************************  constants  **************************** */
+
+
+    /** Property key for workload intensity type. */
+    private final static String PKEY_SYNOPTIC_EXPRESSION =
+            "synoptic.expression";
+
+    /** Property key for workload intensity formula. */
+    private final static String PKEY_SYNOPTIC_EXPRESSION_VALUE =
+            "synoptic.expression.value";
+    
+    /** Property key for workload intensity type. */
+    private final static String PKEY_SYNOPTIC_SEPARATOR =
+            "synoptic.separator";
+
+    /** Property key for workload intensity formula. */
+    private final static String PKEY_SYNOPTIC_SEPARATOR_VALUE =
+            "synoptic.separator.value";
+    
+    /** Property key for workload intensity type. */
+    private final static String PKEY_SYNOPTIC_DUMPINVARIANTS =
+            "synoptic.dumpinvariants";
+
+    /** Property key for workload intensity formula. */
+    private final static String PKEY_SYNOPTIC_DUMPINVARIANTS_VALUE =
+            "synoptic.dumpinvariants.value";
+    
+    /** Property key for workload intensity type. */
+    private final static String PKEY_SYNOPTIC_LOGFILE =
+            "synoptic.logfile";
+	
 	
     /* *************************  global variables  ************************* */
 
@@ -65,33 +99,42 @@ public class GuardsAndActionsGenerator {
      * 
      * @param workloadModel
      */
-    public void installGuardsAndActions(final WorkloadModel workloadModel) {    	
+    public void installGuardsAndActions(final WorkloadModel workloadModel, final Properties synopticProperties) {    	
     	// init invariants
-    	this.getTemporalInvariants();
-    	this.filterInvariants();    	   	
-    	SessionLayerEFSM sessionLayerEFSM = workloadModel.getApplicationModel().getSessionLayerEFSM();    	
-    	// for each found invariant
-      	for (ITemporalInvariant invariant : this.invariants.getSet()) {      		
-    		if (invariant instanceof BinaryInvariant) {       			
-    			BinaryInvariant binaryInvariant = (BinaryInvariant) invariant;		
-				ApplicationState first = getApplicationState(binaryInvariant.getFirst().toString(), sessionLayerEFSM);
-				ApplicationState second = getApplicationState(binaryInvariant.getSecond().toString(), sessionLayerEFSM);		
-				List<ApplicationTransition> actionApplicationTransitions = getActionApplicationTransition(binaryInvariant.getFirst().toString(), sessionLayerEFSM);
-				List<ApplicationTransition> guardApplicationTransitions = getGuardApplicationTransition(binaryInvariant.getSecond().toString(), sessionLayerEFSM);	
-				
-				// not all guards are needed. First check. 
-				if (checkIfGuardsAreNeeded(guardApplicationTransitions, first, second, sessionLayerEFSM)) {
-					if (binaryInvariant instanceof AlwaysPrecedesInvariant) {					
-						installGuardsActionsAlwaysPrecedesInvariant(first, sessionLayerEFSM, actionApplicationTransitions, guardApplicationTransitions);
-//					} else if (binaryInvariant instanceof NeverFollowedInvariant) {					
-//						installGuardsActionsNeverFollowedInvariant(first, second, sessionLayerEFSM, actionApplicationTransitions, guardApplicationTransitions);	
-					} else if (binaryInvariant instanceof CntAlwaysEqualsGreaterInvariant) {
-						CntAlwaysEqualsGreaterInvariant cntAlwaysEqualsGreaterInvariant = (CntAlwaysEqualsGreaterInvariant) binaryInvariant;
-						installGuardsActionsCntAlwaysEqualsGreaterInvariant(first, second, sessionLayerEFSM, actionApplicationTransitions, guardApplicationTransitions, cntAlwaysEqualsGreaterInvariant.getDiffMinimum() );
-					}
-				}				
-    		}	
-    	}       	
+    	
+    	if (synopticProperties != null) {    	
+    	
+	    	this.getTemporalInvariants(synopticProperties);
+	    	
+	    	if (this.invariants != null) {	    	
+	    	
+		    	this.filterInvariants();    	   	
+		    	SessionLayerEFSM sessionLayerEFSM = workloadModel.getApplicationModel().getSessionLayerEFSM();    	
+		    	// for each found invariant
+		      	for (ITemporalInvariant invariant : this.invariants.getSet()) {      		
+		    		if (invariant instanceof BinaryInvariant) {       			
+		    			BinaryInvariant binaryInvariant = (BinaryInvariant) invariant;		
+						ApplicationState first = getApplicationState(binaryInvariant.getFirst().toString(), sessionLayerEFSM);
+						ApplicationState second = getApplicationState(binaryInvariant.getSecond().toString(), sessionLayerEFSM);		
+						List<ApplicationTransition> actionApplicationTransitions = getActionApplicationTransition(binaryInvariant.getFirst().toString(), sessionLayerEFSM);
+						List<ApplicationTransition> guardApplicationTransitions = getGuardApplicationTransition(binaryInvariant.getSecond().toString(), sessionLayerEFSM);	
+						
+						// not all guards are needed. First check. 
+						if (checkIfGuardsAreNeeded(guardApplicationTransitions, first, second, sessionLayerEFSM)) {
+							if (binaryInvariant instanceof AlwaysPrecedesInvariant) {					
+								installGuardsActionsAlwaysPrecedesInvariant(first, sessionLayerEFSM, actionApplicationTransitions, guardApplicationTransitions);
+		//					} else if (binaryInvariant instanceof NeverFollowedInvariant) {					
+		//						installGuardsActionsNeverFollowedInvariant(first, second, sessionLayerEFSM, actionApplicationTransitions, guardApplicationTransitions);	
+							} else if (binaryInvariant instanceof CntAlwaysEqualsGreaterInvariant) {
+								CntAlwaysEqualsGreaterInvariant cntAlwaysEqualsGreaterInvariant = (CntAlwaysEqualsGreaterInvariant) binaryInvariant;
+								installGuardsActionsCntAlwaysEqualsGreaterInvariant(first, second, sessionLayerEFSM, actionApplicationTransitions, guardApplicationTransitions, cntAlwaysEqualsGreaterInvariant.getDiffMinimum() );
+							}
+						}				
+		    		}	
+		    	}      
+	      	
+	    	}      	
+    	}
     }
     
     /* **************************  private methods  ************************* */
@@ -99,19 +142,15 @@ public class GuardsAndActionsGenerator {
     /**
 	 * getTemporalInvariants from synoptic package.
 	 */
-	private void getTemporalInvariants() {    	
-    	String[] args = new String[7];  
-        args[0] = "-r";
-        args[1] = "(?<TYPE>.*)";
-        args[2] = "-s";
-        args[3] = "^---$";
-        args[4] = "-i";
-//        args[5] = "-o";
-//        args[6] = "C:/Users/voegele/Applications/eclipse-jee-kepler-SR2-win32-x86_64/eclipse/workspace/Synoptic/output/output";
-//        args[7] = "-d";
-//        args[8] = "C:/Program Files (x86)/Graphviz2.38/bin/gvedit.exe";
-        args[5] = "--dumpInvariants=true";
-        args[6] = "C:/Users/voegele/git/wessbas.dslModelGenerator/examples/specj/input/logFiles/specjlog2.log";
+	private void getTemporalInvariants(final Properties synopticProperties) { 		
+    	String[] args = new String[synopticProperties.keySet().size()];  
+        args[0] = synopticProperties.getProperty(GuardsAndActionsGenerator.PKEY_SYNOPTIC_EXPRESSION);
+        args[1] = synopticProperties.getProperty(GuardsAndActionsGenerator.PKEY_SYNOPTIC_EXPRESSION_VALUE);
+        args[2] = synopticProperties.getProperty(GuardsAndActionsGenerator.PKEY_SYNOPTIC_SEPARATOR);
+        args[3] = synopticProperties.getProperty(GuardsAndActionsGenerator.PKEY_SYNOPTIC_SEPARATOR_VALUE);
+        args[4] = synopticProperties.getProperty(GuardsAndActionsGenerator.PKEY_SYNOPTIC_DUMPINVARIANTS);
+        args[5] = synopticProperties.getProperty(GuardsAndActionsGenerator.PKEY_SYNOPTIC_DUMPINVARIANTS_VALUE);
+        args[6] = synopticProperties.getProperty(GuardsAndActionsGenerator.PKEY_SYNOPTIC_LOGFILE);
 
         SynopticMain.getInstance();
 		try {
@@ -119,7 +158,7 @@ public class GuardsAndActionsGenerator {
 			this.invariants = AbstractMain.getInvariants();
 			this.filterInvariants();
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.out.println("Synoptic properties are not correct! Guards and actions cannot be generated!");
 		}
 	}	
     
@@ -145,8 +184,7 @@ public class GuardsAndActionsGenerator {
 //		} catch (Exception e) {
 //			e.printStackTrace();
 //		}
-//	}
-    
+//	}    
 	
 	/**
 	 * Invariants which are AlwaysPrecedesInvariant and CntAlwaysEqualsGreaterInvariant are redundant. Only keep 

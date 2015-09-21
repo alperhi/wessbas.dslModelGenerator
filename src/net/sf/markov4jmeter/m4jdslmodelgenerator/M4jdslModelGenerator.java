@@ -1,6 +1,5 @@
 package net.sf.markov4jmeter.m4jdslmodelgenerator;
 
-import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -58,7 +57,6 @@ public class M4jdslModelGenerator {
     private final static String USAGE = "Usage: %s "  // %s = application name;
             + "<workloadIntensity.properties> "
             + "<behaviorModels.properties> "
-            + "<flowsDirPath> "
             + "<xmiOutputFile> "
             + "<graphOutputFile>";
 
@@ -139,7 +137,7 @@ public class M4jdslModelGenerator {
     public WorkloadModel generateWorkloadModel (
             final Properties workloadIntensityProperties,
             final Properties behaviorModelsProperties,
-            final String flowsDirectoryPath,
+            final Properties synopticProperties,
             final String graphOutputPath,
             final String sessionDatFile,
             final boolean sessionsCanBeExitedAnytime) throws GeneratorException {
@@ -187,7 +185,6 @@ public class M4jdslModelGenerator {
         this.installApplicationLayer(
                 workloadModel,
                 serviceRepository,
-                flowsDirectoryPath,
                 graphOutputPath,
                 sessionDatFile,
                 sessionsCanBeExitedAnytime,
@@ -207,7 +204,7 @@ public class M4jdslModelGenerator {
                 workloadModel.getBehaviorModels(),
                 behaviorMixEntries);         
                       
-        this.installGuardsAndActions(workloadModel);
+        this.installGuardsAndActions(workloadModel, synopticProperties);
 
         return workloadModel;
     }
@@ -283,7 +280,6 @@ public class M4jdslModelGenerator {
     private WorkloadModel installApplicationLayer (
             final WorkloadModel workloadModel,
             final ServiceRepository serviceRepository,
-            final String flowsDirectoryPath,
             final String graphOutputPath,
             final String sessionDatFile,
             final boolean sessionsCanBeExitedAnytime,
@@ -431,9 +427,9 @@ public class M4jdslModelGenerator {
      * 
      * @param workloadModel
      */
-    private void installGuardsAndActions (final WorkloadModel workloadModel) {
+    private void installGuardsAndActions (final WorkloadModel workloadModel, final Properties synoticProperties) {
     	GuardsAndActionsGenerator guardsAndActionsGenerator = new GuardsAndActionsGenerator(this.m4jdslFactory);
-        guardsAndActionsGenerator.installGuardsAndActions(workloadModel);
+        guardsAndActionsGenerator.installGuardsAndActions(workloadModel, synoticProperties);
     }    
 
     /* --------------------------  helping methods  ------------------------- */
@@ -474,7 +470,7 @@ public class M4jdslModelGenerator {
                 new LinkedList<BehaviorModelParameters>();
 
         final String behaviorModelsParameters = properties.getProperty(
-                M4jdslModelGenerator.PKEY_BEHAVIOR_MODELS);
+                M4jdslModelGenerator.PKEY_BEHAVIOR_MODELS);       
 
         if (behaviorModelsParameters == null) {
 
@@ -615,6 +611,11 @@ public class M4jdslModelGenerator {
     public static void main (final String[] argv) {
 
         try {
+        	
+			System.out.println("****************************");
+			System.out.println("Start WESSBAS DSL Generation");
+			System.out.println("****************************");
+        	
             // initialize arguments handler for requesting the command line
             // values afterwards via get() methods; might throw a
             // NullPointer-, IllegalArgument- or ParseException;
@@ -622,6 +623,10 @@ public class M4jdslModelGenerator {
 
             // might throw FileNotFound-, Security-, IO- or GeneratorException;
             M4jdslModelGenerator.readArgumentsAndGenerate();
+            
+			System.out.println("****************************");
+			System.out.println("END WESSBAS DSL Generation");
+			System.out.println("****************************");
 
         } catch (final Exception ex) {
 
@@ -651,9 +656,6 @@ public class M4jdslModelGenerator {
 
         final M4jdslModelGenerator m4jdslModelGenerator =
                 new M4jdslModelGenerator();
-
-        final String flowsDirectoryPath =
-                CommandLineArgumentsHandler.getFlowsDirectoryPath();
         
         final String sessionDatFilePath =
                 CommandLineArgumentsHandler.getSessionDatFilePath();
@@ -666,6 +668,9 @@ public class M4jdslModelGenerator {
 
         final String behaviorModelsPropertiesFile =
                 CommandLineArgumentsHandler.getBehaviorModelsPropertiesFile();
+        
+        final String synopticPropertiesFile =
+                CommandLineArgumentsHandler.getSynopticPropertiesFile();
 
         final String graphOutputFilePath =
                 CommandLineArgumentsHandler.getGraphOutputFilePath();
@@ -683,12 +688,18 @@ public class M4jdslModelGenerator {
                 (behaviorModelsPropertiesFile != null) ?
                         M4jdslModelGenerator.loadProperties(
                                 behaviorModelsPropertiesFile) : null;
+                                
+        // might throw a FileNotFound- or IOException;
+        final Properties synopticProperties =
+                (synopticPropertiesFile != null) ? 
+                		M4jdslModelGenerator.loadProperties(
+                		synopticPropertiesFile) : null;
 
         final WorkloadModel workloadModel =
                 m4jdslModelGenerator.generateWorkloadModel(
                         workloadIntensityProperties,
-                        behaviorModelsProperties,
-                        flowsDirectoryPath,                        
+                        behaviorModelsProperties,     
+                        synopticProperties,
                         graphOutputFilePath,
                         sessionDatFilePath,
                         sessionsCanBeExitedAnytime);
@@ -706,8 +717,6 @@ public class M4jdslModelGenerator {
         XmiEcoreHandler.getInstance().ecoreToXMI(
                 workloadModel,
                 xmiOutputFilePath);
-
-        System.out.println("Finished.");
     }
 
     /**
