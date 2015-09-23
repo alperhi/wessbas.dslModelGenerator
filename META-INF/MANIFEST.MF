@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: M4jdslmodelgenerator
-Bundle-SymbolicName: net.sf.markov4jmeter.m4jdslmodelgenerator
+Bundle-SymbolicName: net.sf.markov4jmeter.m4jdslmodelgenerator;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-ClassPath: lib/org.eclipse.emf.common_2.9.2.v20131212-0545.jar,
  lib/org.eclipse.emf.ecore_2.9.2.v20131212-0545.jar,
@@ -12,3 +12,7 @@ Bundle-ClassPath: lib/org.eclipse.emf.common_2.9.2.v20131212-0545.jar,
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Require-Bundle: net.sf.markov4jmeter.m4jdsl;bundle-version="0.1.0",
  wessbas.commons;bundle-version="1.0.0"
+Export-Package: net.sf.markov4jmeter.m4jdslmodelgenerator
+Import-Package: synoptic.invariants,
+ synoptic.main
+Bundle-ActivationPolicy: lazy
