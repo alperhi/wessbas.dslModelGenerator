@@ -14,6 +14,7 @@ import java.util.Properties;
 import wessbas.commons.parser.ParseException;
 import wessbas.commons.parser.Parser;
 import wessbas.commons.parser.SessionData;
+import wessbas.commons.util.XmiEcoreHandler;
 
 import m4jdsl.ApplicationModel;
 import m4jdsl.BehaviorMix;
@@ -32,7 +33,6 @@ import net.sf.markov4jmeter.m4jdslmodelgenerator.components.efsm.SessionLayerEFS
 import net.sf.markov4jmeter.m4jdslmodelgenerator.components.efsm.GuardsAndActionsGenerator;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.components.efsm.HTTPProtocolLayerEFSMGenerator;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.util.IdGenerator;
-import net.sf.markov4jmeter.m4jdslmodelgenerator.util.XmiEcoreHandler;
 
 
 /**
