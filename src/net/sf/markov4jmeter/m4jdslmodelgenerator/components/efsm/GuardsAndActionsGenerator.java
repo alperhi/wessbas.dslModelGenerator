@@ -18,6 +18,7 @@ import synoptic.invariants.AlwaysPrecedesInvariant;
 import synoptic.invariants.BinaryInvariant;
 import synoptic.invariants.CntAlwaysEqualsGreaterInvariant;
 import synoptic.invariants.ITemporalInvariant;
+import synoptic.invariants.NeverFollowedInvariant;
 import synoptic.invariants.TemporalInvariantSet;
 import synoptic.main.AbstractMain;
 import synoptic.main.SynopticMain;
@@ -134,12 +135,11 @@ public class GuardsAndActionsGenerator {
 										first, sessionLayerEFSM,
 										actionApplicationTransitions,
 										guardApplicationTransitions);
-								// } else if (binaryInvariant instanceof
-								// NeverFollowedInvariant) {
-								// installGuardsActionsNeverFollowedInvariant(
-								// first, second, sessionLayerEFSM,
-								// actionApplicationTransitions,
-								// guardApplicationTransitions);
+							} else if (binaryInvariant instanceof NeverFollowedInvariant) {
+								installGuardsActionsNeverFollowedInvariant(
+										first, second, sessionLayerEFSM,
+										actionApplicationTransitions,
+										guardApplicationTransitions);
 							} else if (binaryInvariant instanceof CntAlwaysEqualsGreaterInvariant) {
 								CntAlwaysEqualsGreaterInvariant cntAlwaysEqualsGreaterInvariant = (CntAlwaysEqualsGreaterInvariant) binaryInvariant;
 								installGuardsActionsCntAlwaysEqualsGreaterInvariant(
@@ -153,6 +153,7 @@ public class GuardsAndActionsGenerator {
 					}
 				}
 			}
+
 		}
 	}
 

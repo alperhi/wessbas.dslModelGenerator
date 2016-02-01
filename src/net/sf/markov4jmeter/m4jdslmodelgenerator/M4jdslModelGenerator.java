@@ -267,15 +267,8 @@ public class M4jdslModelGenerator {
 
 		try {
 
-			int threshold = 0;
-			if (CommandLineArgumentsHandler.getThresholdSessionTime() != null) {
-				threshold = Integer.parseInt(CommandLineArgumentsHandler
-						.getThresholdSessionTime());
-			}
-
 			ArrayList<SessionData> sessions = Parser
-					.parseSessionsIntoSessionsRepository(sessionDatFile,
-							threshold);
+					.parseSessionsIntoSessionsRepository(sessionDatFile, true);
 
 			final AbstractProtocolLayerEFSMGenerator protocolLayerEFSMGenerator = new HTTPProtocolLayerEFSMGenerator(
 					this.m4jdslFactory, new IdGenerator("PS"), new IdGenerator(
