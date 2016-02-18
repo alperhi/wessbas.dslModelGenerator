@@ -268,7 +268,7 @@ public class M4jdslModelGenerator {
 		try {
 
 			ArrayList<SessionData> sessions = Parser
-					.parseSessionsIntoSessionsRepository(sessionDatFile, true);
+					.parseSessionsIntoSessionsRepository(sessionDatFile);
 
 			final AbstractProtocolLayerEFSMGenerator protocolLayerEFSMGenerator = new HTTPProtocolLayerEFSMGenerator(
 					this.m4jdslFactory, new IdGenerator("PS"), new IdGenerator(
