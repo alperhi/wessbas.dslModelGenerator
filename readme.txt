@@ -66,12 +66,12 @@ command-line in a specific order. The following parameters need to be provided:
 An example parameter sequence (to be used in the Eclipse run configuration)
 might look as follows (in one row):
 
--w "./configuration/specj/workloadIntensity.properties" 
--b "./configuration/specj/behaviorModels.properties" 
--o "./examples/specj/output/models/specj_2_cluster/workloadmodel.xmi" 
--g "./examples/specj/output/models/flows.all/graph.dot" 
+-w "./examples/specj/input/workloadIntensity.properties" 
+-b "./examples/specj/input/behaviorMix.txt" 
+-o "./examples/specj/output/workloadmodel.xmi" 
 -q false 
--s "./examples/specj/input/logFiles/sessions.dat"
+-s "./examples/specj/input/sessions.dat" 
+-t "./examples/specj/input/synoptic.properties"
 
 Starting the application with these parameters will produce corresponding output
 in the "output" folder.
