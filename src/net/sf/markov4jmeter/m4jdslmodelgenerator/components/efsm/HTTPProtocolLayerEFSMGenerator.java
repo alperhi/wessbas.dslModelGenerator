@@ -14,7 +14,6 @@
  * limitations under the License.
  ***************************************************************************/
 
-
 package net.sf.markov4jmeter.m4jdslmodelgenerator.components.efsm;
 
 import java.io.UnsupportedEncodingException;
@@ -263,5 +262,4 @@ public class HTTPProtocolLayerEFSMGenerator extends
 			parameterMap.put(key, valueString);
 		}
 	}
-
 }

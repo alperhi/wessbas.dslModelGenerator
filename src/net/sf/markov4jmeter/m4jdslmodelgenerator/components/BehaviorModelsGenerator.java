@@ -14,7 +14,6 @@
  * limitations under the License.
  ***************************************************************************/
 
-
 package net.sf.markov4jmeter.m4jdslmodelgenerator.components;
 
 import java.io.File;
