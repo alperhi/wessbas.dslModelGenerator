@@ -34,6 +34,7 @@ import synoptic.invariants.AlwaysPrecedesInvariant;
 import synoptic.invariants.BinaryInvariant;
 import synoptic.invariants.CntAlwaysEqualsGreaterInvariant;
 import synoptic.invariants.ITemporalInvariant;
+import synoptic.invariants.NeverFollowedInvariant;
 import synoptic.invariants.TemporalInvariantSet;
 import synoptic.main.AbstractMain;
 import synoptic.main.SynopticMain;
@@ -42,7 +43,7 @@ import synoptic.main.SynopticMain;
  * Identified invariants using synoptic and the translates these invariants to
  * guards and actions.
  * 
- * @author Christian V�gele (voegele@fortiss.org)
+ * @author Christian Voegele (voegele@fortiss.org)
  * @version 1.0
  */
 public class GuardsAndActionsGenerator {
@@ -150,12 +151,11 @@ public class GuardsAndActionsGenerator {
 										first, sessionLayerEFSM,
 										actionApplicationTransitions,
 										guardApplicationTransitions);
-								// } else if (binaryInvariant instanceof
-								// NeverFollowedInvariant) {
-								// installGuardsActionsNeverFollowedInvariant(
-								// first, second, sessionLayerEFSM,
-								// actionApplicationTransitions,
-								// guardApplicationTransitions);
+							} else if (binaryInvariant instanceof NeverFollowedInvariant) {
+								installGuardsActionsNeverFollowedInvariant(
+										first, second, sessionLayerEFSM,
+										actionApplicationTransitions,
+										guardApplicationTransitions);
 							} else if (binaryInvariant instanceof CntAlwaysEqualsGreaterInvariant) {
 								CntAlwaysEqualsGreaterInvariant cntAlwaysEqualsGreaterInvariant = (CntAlwaysEqualsGreaterInvariant) binaryInvariant;
 								installGuardsActionsCntAlwaysEqualsGreaterInvariant(
@@ -194,8 +194,8 @@ public class GuardsAndActionsGenerator {
 		args[6] = synopticProperties
 				.getProperty(GuardsAndActionsGenerator.PKEY_SYNOPTIC_LOGFILE);
 
-		SynopticMain.getInstance();
 		try {
+			AbstractMain.instance = null;
 			SynopticMain.main(args);
 			this.invariants = AbstractMain.getInvariants();
 			this.filterInvariants();

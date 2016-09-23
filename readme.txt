@@ -26,7 +26,7 @@ ACADEMIC LITERATURE
 ------------------  
   
 Automatic extraction of probabilistic workload specifications for 
-load testing session-based application systems  (Hoorn, Vögele, Schulz, Hasselbring, Krcmar)
+load testing session-based application systems  (Hoorn, V\"ogele, Schulz, Hasselbring, Krcmar)
 
 
 PROJECT CONTENT
