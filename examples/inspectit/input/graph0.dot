@@ -1,0 +1,7 @@
+digraph G {
+"INITIAL*" [label="INITIAL*",shape=none];
+"doFilter" [label="doFilter",shape=none];
+"INITIAL*"->"doFilter" [style=solid,label="1"];
+"doFilter"->"doFilter" [style=solid,label="0.9565; n(14606 24149)"];
+"doFilter"->"$" [style=solid,label="0.0435"];
+}

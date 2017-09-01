@@ -139,12 +139,12 @@ public abstract class AbstractSessionLayerEFSMGenerator {
     public SessionLayerEFSM generateSessionLayerEFSMAndWriteDotGraph ()
             throws GeneratorException {
 
-        this.flushDotGraph();
+        // this.flushDotGraph();
 
         final SessionLayerEFSM sessionLayerEFSM =
                 this.generateSessionLayerEFSM();
 
-        this.writeDotGraph(this.graphFilePath);
+        // this.writeDotGraph(this.graphFilePath);
 
         return sessionLayerEFSM;
     }

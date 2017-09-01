@@ -1,0 +1,13 @@
+@relation BehaviorModelAbsoluteInstanceSet
+
+@attribute INITIAL_INITIAL numeric
+@attribute INITIAL_doFilter numeric
+@attribute INITIAL_exit numeric
+@attribute doFilter_INITIAL numeric
+@attribute doFilter_doFilter numeric
+@attribute doFilter_exit numeric
+@attribute theClass {doBrowseVehicles-1,doManageInventory-1,doPurchaseVehicles-1,noSessionType}
+
+@data
+0,1,0,0,0,1,noSessionType
+0,1,0,0,22,1,noSessionType

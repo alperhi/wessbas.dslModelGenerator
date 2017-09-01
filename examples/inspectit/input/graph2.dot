@@ -1,0 +1,4 @@
+digraph G {
+"INITIAL*" [label="INITIAL*",shape=none];
+"doFilter" [label="doFilter",shape=none];
+}
