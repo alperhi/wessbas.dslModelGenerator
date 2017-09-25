@@ -71,7 +71,6 @@ might look as follows (in one row):
 -o "./examples/specj/output/workloadmodel.xmi" 
 -q false 
 -s "./examples/specj/input/sessions.dat" 
--t "./examples/specj/input/synoptic.properties"
 
 Starting the application with these parameters will produce corresponding output
 in the "output" folder.

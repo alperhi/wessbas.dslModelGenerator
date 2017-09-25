@@ -40,7 +40,6 @@ import net.sf.markov4jmeter.m4jdslmodelgenerator.components.BehaviorModelsGenera
 import net.sf.markov4jmeter.m4jdslmodelgenerator.components.WorkloadIntensityGenerator;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.components.efsm.AbstractProtocolLayerEFSMGenerator;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.components.efsm.AbstractSessionLayerEFSMGenerator;
-import net.sf.markov4jmeter.m4jdslmodelgenerator.components.efsm.GuardsAndActionsGenerator;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.components.efsm.HTTPProtocolLayerEFSMGenerator;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.components.efsm.SessionLayerEFSMGenerator;
 import net.sf.markov4jmeter.m4jdslmodelgenerator.util.IdGenerator;
@@ -67,22 +66,20 @@ public class M4jdslModelGenerator {
 
 	/** Usage information for this application. */
 	private final static String USAGE = "Usage: %s " // %s = application name;
-			+ "<workloadIntensity.properties> "
-			+ "<behaviorModels.properties> "
-			+ "<xmiOutputFile> "
+			+ "<workloadIntensity.properties> " + "<behaviorModels.properties> " + "<xmiOutputFile> "
 			+ "<graphOutputFile>";
 
 	/* -------------------------- error messages -------------------------- */
 
 	/**
-	 * Error message for the case that a parameter sequence for a Behavior Model
-	 * has too few parameters.
+	 * Error message for the case that a parameter sequence for a Behavior Model has
+	 * too few parameters.
 	 */
 	private final static String ERROR_PARAMETER_SEQUENCE_HAS_TOO_FEW_PARAMS = "Behavior Model parameter sequence \"%s\" has too few parameters";
 
 	/**
-	 * Error message for the case that no Behavior Model parameters are defined
-	 * in a properties file.
+	 * Error message for the case that no Behavior Model parameters are defined in a
+	 * properties file.
 	 */
 	private final static String ERROR_PARAMETERS_UNDEFINED = "Behavior Model parameters are undefined";
 
@@ -108,56 +105,50 @@ public class M4jdslModelGenerator {
 	/* ************************** public methods ************************** */
 
 	/**
-	 * Creates an M4J-DSL model which builds on Flow information; additionally,
-	 * a DOT graph which illustrates the states and transitions of the Session
-	 * Layer EFSM will be generated.
+	 * Creates an M4J-DSL model which builds on Flow information; additionally, a
+	 * DOT graph which illustrates the states and transitions of the Session Layer
+	 * EFSM will be generated.
 	 * 
 	 * @param workloadIntensityProperties
-	 *            properties file which includes the workload intensity
-	 *            definition.
+	 *            properties file which includes the workload intensity definition.
 	 * @param behaviorModelsProperties
-	 *            properties file which includes the Behavior Models
-	 *            definitions.
+	 *            properties file which includes the Behavior Models definitions.
 	 * @param flowsDirectoryPath
 	 *            path to the directory which contains the Flow files.
 	 * @param graphOutputPath
 	 *            path to the graph output file.
 	 * @param sessionsCanBeExitedAnytime
 	 *            <code>true</code> if and only if sessions can be exited at any
-	 *            time, which is generally given in Web applications; if this
-	 *            flag is set <code>true</code>, transitions to the exit state
-	 *            will be installed for all states of the Application Layer.
+	 *            time, which is generally given in Web applications; if this flag
+	 *            is set <code>true</code>, transitions to the exit state will be
+	 *            installed for all states of the Application Layer.
 	 * @param useFullyQualifiedNames
-	 *            <code>true</code> if and only if fully qualified state names
-	 *            shall be used; if this flag is <code>false</code>, plain Node
-	 *            names will be used as state names, without any related Flow
-	 *            names being added as prefixes.
+	 *            <code>true</code> if and only if fully qualified state names shall
+	 *            be used; if this flag is <code>false</code>, plain Node names will
+	 *            be used as state names, without any related Flow names being added
+	 *            as prefixes.
 	 * 
 	 * @return the newly created M4J-DSL model.
 	 * 
 	 * @throws GeneratorException
-	 *             if any error during the generation process occurs, e.g., if
-	 *             any property could not be read or information is
+	 *             if any error during the generation process occurs, e.g., if any
+	 *             property could not be read or information is
 	 *             invalid/insufficient.
 	 */
-	public WorkloadModel generateWorkloadModel(
-			final Properties workloadIntensityProperties,
-			final Properties behaviorModelsProperties,
-			final Properties synopticProperties, final String graphOutputPath,
-			final String sessionDatFile,
+	public WorkloadModel generateWorkloadModel(final Properties workloadIntensityProperties,
+			final Properties behaviorModelsProperties, final String graphOutputPath, final String sessionDatFile,
 			final boolean sessionsCanBeExitedAnytime) throws GeneratorException {
 
 		// to be returned;
-		final WorkloadModel workloadModel = this.m4jdslFactory
-				.createWorkloadModel();
+		final WorkloadModel workloadModel = this.m4jdslFactory.createWorkloadModel();
 
-		final ServiceRepository serviceRepository = new ServiceRepository(
-				this.m4jdslFactory);
+		final ServiceRepository serviceRepository = new ServiceRepository(this.m4jdslFactory);
 
 		final HashMap<String, Double> behaviorMixEntries = new HashMap<String, Double>();
 
 		// might throw a GeneratorException;
-		final LinkedList<BehaviorModelParameters> behaviorModelParametersList = readBehaviorModelParametersList(behaviorModelsProperties);
+		final LinkedList<BehaviorModelParameters> behaviorModelParametersList = readBehaviorModelParametersList(
+				behaviorModelsProperties);
 
 		final ArrayList<String> names = new ArrayList<String>();
 		final ArrayList<String> filenames = new ArrayList<String>();
@@ -178,26 +169,18 @@ public class M4jdslModelGenerator {
 		}
 
 		// might throw a GeneratorException;
-		this.installWorkloadIntensity(workloadModel,
-				workloadIntensityProperties);
+		this.installWorkloadIntensity(workloadModel, workloadIntensityProperties);
 
 		// might throw a GeneratorException;
-		this.installApplicationLayer(workloadModel, serviceRepository,
-				graphOutputPath, sessionDatFile, sessionsCanBeExitedAnytime,
-				behaviorFiles.toArray(new File[] {}));
+		this.installApplicationLayer(workloadModel, serviceRepository, graphOutputPath, sessionDatFile,
+				sessionsCanBeExitedAnytime, behaviorFiles.toArray(new File[] {}));
 
 		// might throw a GeneratorException;
-		this.installBehaviorModels(workloadModel, serviceRepository,
-				names.toArray(new String[] {}),
-				filenames.toArray(new String[] {}),
-				behaviorFiles.toArray(new File[] {}));
+		this.installBehaviorModels(workloadModel, serviceRepository, names.toArray(new String[] {}),
+				filenames.toArray(new String[] {}), behaviorFiles.toArray(new File[] {}));
 
 		// might throw a GeneratorException;
-		this.installBehaviorMix(workloadModel,
-				workloadModel.getBehaviorModels(), behaviorMixEntries);
-
-		// install guards and actions
-		this.installGuardsAndActions(workloadModel, synopticProperties);
+		this.installBehaviorMix(workloadModel, workloadModel.getBehaviorModels(), behaviorMixEntries);
 
 		// calculate conditional probabilities
 
@@ -212,21 +195,17 @@ public class M4jdslModelGenerator {
 	 * Installs the workload intensity in a given M4J-DSL model.
 	 * 
 	 * @param workloadModel
-	 *            M4J-DSL model in which the workload intensity shall be
-	 *            installed.
+	 *            M4J-DSL model in which the workload intensity shall be installed.
 	 * @param workloadIntensityProperties
-	 *            properties file which includes the workload intensity
-	 *            definition.
+	 *            properties file which includes the workload intensity definition.
 	 * 
 	 * @return M4J-DSL model with the installed workload intensity.
 	 * 
 	 * @throws GeneratorException
 	 *             if the workload intensity installation fails for any reason.
 	 */
-	private WorkloadModel installWorkloadIntensity(
-			final WorkloadModel workloadModel,
-			final Properties workloadIntensityProperties)
-			throws GeneratorException {
+	private WorkloadModel installWorkloadIntensity(final WorkloadModel workloadModel,
+			final Properties workloadIntensityProperties) throws GeneratorException {
 
 		final WorkloadIntensityGenerator workloadIntensityGenerator = new WorkloadIntensityGenerator(
 				this.m4jdslFactory);
@@ -243,8 +222,7 @@ public class M4jdslModelGenerator {
 	 * Installs the Application Layer in a given M4J-DSL model.
 	 * 
 	 * @param workloadModel
-	 *            M4J-DSL model in which the Application Layer shall be
-	 *            installed.
+	 *            M4J-DSL model in which the Application Layer shall be installed.
 	 * @param serviceRepository
 	 *            instance for handling all available services.
 	 * @param flowsDirectoryPath
@@ -253,14 +231,14 @@ public class M4jdslModelGenerator {
 	 *            path to the graph output file.
 	 * @param sessionsCanBeExitedAnytime
 	 *            <code>true</code> if and only if sessions can be exited at any
-	 *            time, which is generally given in Web applications; if this
-	 *            flag is set <code>true</code>, transitions to the exit state
-	 *            will be installed for all states of the Application Layer.
+	 *            time, which is generally given in Web applications; if this flag
+	 *            is set <code>true</code>, transitions to the exit state will be
+	 *            installed for all states of the Application Layer.
 	 * @param useFullyQualifiedNames
-	 *            <code>true</code> if and only if fully qualified state names
-	 *            shall be used; if this flag is <code>false</code>, plain Node
-	 *            names will be used as state names, without any related Flow
-	 *            names being added as prefixes.
+	 *            <code>true</code> if and only if fully qualified state names shall
+	 *            be used; if this flag is <code>false</code>, plain Node names will
+	 *            be used as state names, without any related Flow names being added
+	 *            as prefixes.
 	 * 
 	 * @return M4J-DSL model with the installed Application Layer.
 	 * 
@@ -270,38 +248,31 @@ public class M4jdslModelGenerator {
 	 * @throws ParseException
 	 * @throws IOException
 	 */
-	private WorkloadModel installApplicationLayer(
-			final WorkloadModel workloadModel,
-			final ServiceRepository serviceRepository,
-			final String graphOutputPath, final String sessionDatFile,
-			final boolean sessionsCanBeExitedAnytime, final File[] filenames)
-			throws GeneratorException {
+	private WorkloadModel installApplicationLayer(final WorkloadModel workloadModel,
+			final ServiceRepository serviceRepository, final String graphOutputPath, final String sessionDatFile,
+			final boolean sessionsCanBeExitedAnytime, final File[] filenames) throws GeneratorException {
 		/*
-		 * final AbstractProtocolLayerEFSMGenerator protocolLayerEFSMGenerator =
-		 * new JavaProtocolLayerEFSMGenerator( this.m4jdslFactory, new
-		 * IdGenerator("PS"), new IdGenerator("R"));
+		 * final AbstractProtocolLayerEFSMGenerator protocolLayerEFSMGenerator = new
+		 * JavaProtocolLayerEFSMGenerator( this.m4jdslFactory, new IdGenerator("PS"),
+		 * new IdGenerator("R"));
 		 */
 
 		try {
 
-			ArrayList<SessionData> sessions = Parser
-					.parseSessionsIntoSessionsRepository(sessionDatFile, null);
+			ArrayList<SessionData> sessions = Parser.parseSessionsIntoSessionsRepository(sessionDatFile, null);
 
 			final AbstractProtocolLayerEFSMGenerator protocolLayerEFSMGenerator = new HTTPProtocolLayerEFSMGenerator(
-					this.m4jdslFactory, new IdGenerator("PS"), new IdGenerator(
-							"R"), sessions);
+					this.m4jdslFactory, new IdGenerator("PS"), new IdGenerator("R"), sessions);
 
 			final AbstractSessionLayerEFSMGenerator sessionLayerEFSMGenerator = new SessionLayerEFSMGenerator(
-					this.m4jdslFactory, serviceRepository,
-					protocolLayerEFSMGenerator, new IdGenerator("ASId"),
+					this.m4jdslFactory, serviceRepository, protocolLayerEFSMGenerator, new IdGenerator("ASId"),
 					sessionsCanBeExitedAnytime, graphOutputPath, filenames);
 
 			final ApplicationModelGenerator applicationModelGenerator = new ApplicationModelGenerator(
 					this.m4jdslFactory, sessionLayerEFSMGenerator);
 
 			// might throw a GeneratorException;
-			final ApplicationModel applicationModel = applicationModelGenerator
-					.generateApplicationModel();
+			final ApplicationModel applicationModel = applicationModelGenerator.generateApplicationModel();
 
 			workloadModel.setApplicationModel(applicationModel);
 
@@ -328,29 +299,25 @@ public class M4jdslModelGenerator {
 	 * @param filenames
 	 *            filenames of the Behavior Models.
 	 * @param behaviorFiles
-	 *            files which provide the behavior information (probabilities
-	 *            and think times) to be included to the Behavior Models.
+	 *            files which provide the behavior information (probabilities and
+	 *            think times) to be included to the Behavior Models.
 	 * 
 	 * @return M4J-DSL model with the installed Behavior Models.
 	 * 
 	 * @throws GeneratorException
 	 *             if the Behavior Models installation fails for any reason.
 	 */
-	private WorkloadModel installBehaviorModels(
-			final WorkloadModel workloadModel,
-			final ServiceRepository serviceRepository, final String[] names,
-			final String[] filenames, final File[] behaviorFiles)
-			throws GeneratorException {
+	private WorkloadModel installBehaviorModels(final WorkloadModel workloadModel,
+			final ServiceRepository serviceRepository, final String[] names, final String[] filenames,
+			final File[] behaviorFiles) throws GeneratorException {
 
-		final BehaviorModelsGenerator behaviorModelGenerator = new BehaviorModelsGenerator(
-				this.m4jdslFactory, new IdGenerator("MSId"), serviceRepository);
+		final BehaviorModelsGenerator behaviorModelGenerator = new BehaviorModelsGenerator(this.m4jdslFactory,
+				new IdGenerator("MSId"), serviceRepository);
 
 		// might throw a GeneratorException;
-		final List<BehaviorModel> behaviorModels = behaviorModelGenerator
-				.generateBehaviorModels(names, filenames, behaviorFiles,
-						workloadModel.getApplicationModel()
-								.getSessionLayerEFSM().getInitialState()
-								.getService());
+		final List<BehaviorModel> behaviorModels = behaviorModelGenerator.generateBehaviorModels(names, filenames,
+				behaviorFiles,
+				workloadModel.getApplicationModel().getSessionLayerEFSM().getInitialState().getService());
 
 		for (final BehaviorModel behaviorModel : behaviorModels) {
 			workloadModel.getBehaviorModels().add(behaviorModel);
@@ -367,8 +334,8 @@ public class M4jdslModelGenerator {
 	 * @param behaviorModels
 	 *            Behavior Models to be referred by the Behavior Mix.
 	 * @param behaviorMixEntries
-	 *            Behavior Mix entry data, including the relative frequencies to
-	 *            be registered.
+	 *            Behavior Mix entry data, including the relative frequencies to be
+	 *            registered.
 	 * 
 	 * @return M4J-DSL model with the installed Behavior Mix.
 	 * 
@@ -376,32 +343,16 @@ public class M4jdslModelGenerator {
 	 *             if the Behavior Mix installation fails for any reason.
 	 */
 	private WorkloadModel installBehaviorMix(final WorkloadModel workloadModel,
-			final List<BehaviorModel> behaviorModels,
-			final HashMap<String, Double> behaviorMixEntries)
+			final List<BehaviorModel> behaviorModels, final HashMap<String, Double> behaviorMixEntries)
 			throws GeneratorException {
 
-		final BehaviorMixGenerator behaviorMixGenerator = new BehaviorMixGenerator(
-				this.m4jdslFactory);
+		final BehaviorMixGenerator behaviorMixGenerator = new BehaviorMixGenerator(this.m4jdslFactory);
 
 		// might throw a GeneratorException;
-		final BehaviorMix behaviorMix = behaviorMixGenerator
-				.generateBehaviorMix(behaviorMixEntries, behaviorModels);
+		final BehaviorMix behaviorMix = behaviorMixGenerator.generateBehaviorMix(behaviorMixEntries, behaviorModels);
 
 		workloadModel.setBehaviorMix(behaviorMix);
 		return workloadModel;
-	}
-
-	/**
-	 * Identify guards and actions.
-	 * 
-	 * @param workloadModel
-	 */
-	private void installGuardsAndActions(final WorkloadModel workloadModel,
-			final Properties synoticProperties) {
-		GuardsAndActionsGenerator guardsAndActionsGenerator = new GuardsAndActionsGenerator(
-				this.m4jdslFactory);
-		guardsAndActionsGenerator.installGuardsAndActions(workloadModel,
-				synoticProperties);
 	}
 
 	/* -------------------------- helping methods ------------------------- */
@@ -411,8 +362,7 @@ public class M4jdslModelGenerator {
 	 */
 	private static void printUsage() {
 
-		final String message = String.format(M4jdslModelGenerator.USAGE,
-				M4jdslModelGenerator.class.getSimpleName());
+		final String message = String.format(M4jdslModelGenerator.USAGE, M4jdslModelGenerator.class.getSimpleName());
 
 		System.out.println(message);
 	}
@@ -424,30 +374,27 @@ public class M4jdslModelGenerator {
 	 *            properties which contain the Behavior Models parameters to be
 	 *            read.
 	 * 
-	 * @return the list of Behavior Models parameters, ordered as they are found
-	 *         in the given properties set.
+	 * @return the list of Behavior Models parameters, ordered as they are found in
+	 *         the given properties set.
 	 * 
 	 * @throws GeneratorException
-	 *             if no Behavior Models parameters are provided by the
-	 *             properties set, or if any parameter sequence has insufficient
-	 *             information, or if any parsing error occurs.
+	 *             if no Behavior Models parameters are provided by the properties
+	 *             set, or if any parameter sequence has insufficient information,
+	 *             or if any parsing error occurs.
 	 */
-	private LinkedList<BehaviorModelParameters> readBehaviorModelParametersList(
-			final Properties properties) throws GeneratorException {
+	private LinkedList<BehaviorModelParameters> readBehaviorModelParametersList(final Properties properties)
+			throws GeneratorException {
 
 		final LinkedList<BehaviorModelParameters> behaviorModelParametersList = new LinkedList<BehaviorModelParameters>();
 
-		final String behaviorModelsParameters = properties
-				.getProperty(M4jdslModelGenerator.PKEY_BEHAVIOR_MODELS);
+		final String behaviorModelsParameters = properties.getProperty(M4jdslModelGenerator.PKEY_BEHAVIOR_MODELS);
 
 		if (behaviorModelsParameters == null) {
 
-			throw new GeneratorException(
-					M4jdslModelGenerator.ERROR_PARAMETERS_UNDEFINED);
+			throw new GeneratorException(M4jdslModelGenerator.ERROR_PARAMETERS_UNDEFINED);
 		}
 
-		final String[] parameterSequences = behaviorModelsParameters
-				.split("\\s*,\\s*");
+		final String[] parameterSequences = behaviorModelsParameters.split("\\s*,\\s*");
 
 		for (final String parameterSequence : parameterSequences) {
 
@@ -455,16 +402,14 @@ public class M4jdslModelGenerator {
 
 			if (parameters.length < 3) {
 
-				final String message = String
-						.format(M4jdslModelGenerator.ERROR_PARAMETER_SEQUENCE_HAS_TOO_FEW_PARAMS,
-								parameterSequence);
+				final String message = String.format(M4jdslModelGenerator.ERROR_PARAMETER_SEQUENCE_HAS_TOO_FEW_PARAMS,
+						parameterSequence);
 
 				throw new GeneratorException(message);
 			}
 
 			// might throw a GeneratorException;
-			final BehaviorModelParameters behaviorModelParameters = this
-					.extractBehaviorModelParameters(parameters);
+			final BehaviorModelParameters behaviorModelParameters = this.extractBehaviorModelParameters(parameters);
 
 			behaviorModelParametersList.add(behaviorModelParameters);
 		}
@@ -477,25 +422,24 @@ public class M4jdslModelGenerator {
 	 * <code>String</code>s.
 	 * 
 	 * @param parameters
-	 *            sequence of <code>String</code>s to be parsed; the sequence
-	 *            must provide the information for a Behavior Model in the
-	 *            following order: <i>name</i>, <i>filename</i>,
-	 *            <i>frequency</i>, <i>behaviorFilePath</i>.
+	 *            sequence of <code>String</code>s to be parsed; the sequence must
+	 *            provide the information for a Behavior Model in the following
+	 *            order: <i>name</i>, <i>filename</i>, <i>frequency</i>,
+	 *            <i>behaviorFilePath</i>.
 	 * 
 	 * @return the extracted parameter values.
 	 * 
 	 * @throws GeneratorException
 	 *             if any parsing error occurs.
 	 */
-	private BehaviorModelParameters extractBehaviorModelParameters(
-			final String[] parameters) throws GeneratorException {
+	private BehaviorModelParameters extractBehaviorModelParameters(final String[] parameters)
+			throws GeneratorException {
 
 		final String name = parameters[0];
 		final String filename = parameters[1];
 		final String frequencyStr = parameters[2];
 
-		final String behaviorFilePath = (parameters.length >= 4) ? parameters[3]
-				: null;
+		final String behaviorFilePath = (parameters.length >= 4) ? parameters[3] : null;
 
 		final double frequency;
 
@@ -506,19 +450,15 @@ public class M4jdslModelGenerator {
 
 		} catch (final Exception ex) {
 
-			final String message = String.format(
-					M4jdslModelGenerator.ERROR_INVALID_FREQUENCY, frequencyStr,
-					name);
+			final String message = String.format(M4jdslModelGenerator.ERROR_INVALID_FREQUENCY, frequencyStr, name);
 
 			throw new GeneratorException(message);
 		}
 
 		// might throw NullPointerException (should never happen here);
-		final File behaviorFile = (behaviorFilePath != null) ? new File(
-				behaviorFilePath) : null;
+		final File behaviorFile = (behaviorFilePath != null) ? new File(behaviorFilePath) : null;
 
-		return new BehaviorModelParameters(name, filename, frequency,
-				behaviorFile);
+		return new BehaviorModelParameters(name, filename, frequency, behaviorFile);
 	}
 
 	/* ************************* internal classes ************************* */
@@ -536,8 +476,7 @@ public class M4jdslModelGenerator {
 		final double frequency;
 		final File behaviorFile;
 
-		public BehaviorModelParameters(final String name,
-				final String filename, final double frequency,
+		public BehaviorModelParameters(final String name, final String filename, final double frequency,
 				final File behaviorFile) {
 
 			this.name = name;
@@ -549,8 +488,8 @@ public class M4jdslModelGenerator {
 		@Override
 		public String toString() {
 
-			return String.format("[name: \"%s\"; " + "filename: \"%s\"; "
-					+ "frequency: %f; " + "behavior file: \"%s\"]", name,
+			return String.format(
+					"[name: \"%s\"; " + "filename: \"%s\"; " + "frequency: %f; " + "behavior file: \"%s\"]", name,
 					filename, frequency, behaviorFile);
 		}
 	}
@@ -592,8 +531,8 @@ public class M4jdslModelGenerator {
 	}
 
 	/**
-	 * Starts the generation process with the arguments which have been passed
-	 * to command line.
+	 * Starts the generation process with the arguments which have been passed to
+	 * command line.
 	 * 
 	 * @throws IOException
 	 * @throws SecurityException
@@ -604,49 +543,34 @@ public class M4jdslModelGenerator {
 	 *             if any critical error in the transformation process occurs.
 	 */
 	private static void readArgumentsAndGenerate()
-			throws FileNotFoundException, SecurityException, IOException,
-			GeneratorException {
+			throws FileNotFoundException, SecurityException, IOException, GeneratorException {
 
 		final M4jdslModelGenerator m4jdslModelGenerator = new M4jdslModelGenerator();
 
-		final String sessionDatFilePath = CommandLineArgumentsHandler
-				.getSessionDatFilePath();
+		final String sessionDatFilePath = CommandLineArgumentsHandler.getSessionDatFilePath();
 
-		final String workloadIntensityPropertiesFile = CommandLineArgumentsHandler
-				.getWorkloadIntensityPropertiesFile();
+		final String workloadIntensityPropertiesFile = CommandLineArgumentsHandler.getWorkloadIntensityPropertiesFile();
 
-		final String xmiOutputFilePath = CommandLineArgumentsHandler
-				.getXmiOutputFilePath();
+		final String xmiOutputFilePath = CommandLineArgumentsHandler.getXmiOutputFilePath();
 
-		final String behaviorModelsPropertiesFile = CommandLineArgumentsHandler
-				.getBehaviorModelsPropertiesFile();
+		final String behaviorModelsPropertiesFile = CommandLineArgumentsHandler.getBehaviorModelsPropertiesFile();
 
-		final String synopticPropertiesFile = CommandLineArgumentsHandler
-				.getSynopticPropertiesFile();
+		final String graphOutputFilePath = CommandLineArgumentsHandler.getGraphOutputFilePath();
 
-		final String graphOutputFilePath = CommandLineArgumentsHandler
-				.getGraphOutputFilePath();
-
-		final boolean sessionsCanBeExitedAnytime = CommandLineArgumentsHandler
-				.getSessionsCanBeExitedAnytime();
+		final boolean sessionsCanBeExitedAnytime = CommandLineArgumentsHandler.getSessionsCanBeExitedAnytime();
 
 		// might throw a FileNotFound- or IOException;
 		final Properties workloadIntensityProperties = M4jdslModelGenerator
 				.loadProperties(workloadIntensityPropertiesFile);
 
 		// might throw a FileNotFound- or IOException;
-		final Properties behaviorModelsProperties = (behaviorModelsPropertiesFile != null) ? M4jdslModelGenerator
-				.loadProperties(behaviorModelsPropertiesFile) : null;
+		final Properties behaviorModelsProperties = (behaviorModelsPropertiesFile != null)
+				? M4jdslModelGenerator.loadProperties(behaviorModelsPropertiesFile)
+				: null;
 
-		// might throw a FileNotFound- or IOException;
-		final Properties synopticProperties = (synopticPropertiesFile != null) ? M4jdslModelGenerator
-				.loadProperties(synopticPropertiesFile) : null;
-
-		final WorkloadModel workloadModel = m4jdslModelGenerator
-				.generateWorkloadModel(workloadIntensityProperties,
-						behaviorModelsProperties, synopticProperties,
-						graphOutputFilePath, sessionDatFilePath,
-						sessionsCanBeExitedAnytime);
+		final WorkloadModel workloadModel = m4jdslModelGenerator.generateWorkloadModel(workloadIntensityProperties,
+				behaviorModelsProperties, graphOutputFilePath, sessionDatFilePath,
+				sessionsCanBeExitedAnytime);
 
 		// final String outputFile = generatorProperties.
 		// getProperty(M4jdslModelGenerator.PKEY_XMI_OUTPUT_FILE);
@@ -658,8 +582,7 @@ public class M4jdslModelGenerator {
 		}
 
 		// might throw an IOException;
-		XmiEcoreHandler.getInstance().ecoreToXMI(workloadModel,
-				xmiOutputFilePath);
+		XmiEcoreHandler.getInstance().ecoreToXMI(workloadModel, xmiOutputFilePath);
 	}
 
 	/**

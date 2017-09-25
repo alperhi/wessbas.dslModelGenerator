@@ -164,15 +164,6 @@ public class CommandLineArgumentsHandler {
 					"behaviorModels.properties", // argName;
 					false); // !hasOptionalArg;
 
-	/** Properties file which has synoptic properties. */
-	private final static Option SYNOPTIC_PROPERTIES_FILE = CmdlOptionFactory
-			.createOption("t", // opt;
-					"synopticProperties", // longOpt;
-					"(Optional) properties file for synoptic", // description;
-					false, // !isRequired;
-					"synoptic.properties", // argName;
-					false); // !hasOptionalArg;
-
 	/**
 	 * (Optional) output file for the DOT graph that represents the Session
 	 * Layer EFSM.
@@ -254,9 +245,6 @@ public class CommandLineArgumentsHandler {
 	 */
 	private static String behaviorModelsPropertiesFile;
 
-	/** Properties file which specifies the Synoptic properties. */
-	private static String synopticPropertiesFile;
-
 	/**
 	 * (Optional) output file for the DOT graph that represents the Session
 	 * Layer EFSM.
@@ -300,9 +288,6 @@ public class CommandLineArgumentsHandler {
 
 		CommandLineArgumentsHandler.options
 				.addOption(CommandLineArgumentsHandler.BEHAVIOR_MODELS_PROPERTIES_FILE);
-
-		CommandLineArgumentsHandler.options
-				.addOption(CommandLineArgumentsHandler.SYNOPTIC_PROPERTIES_FILE);
 
 		CommandLineArgumentsHandler.options
 				.addOption(CommandLineArgumentsHandler.GRAPH_OUTPUT_FILE_PATH);
@@ -370,17 +355,6 @@ public class CommandLineArgumentsHandler {
 	public static String getBehaviorModelsPropertiesFile() {
 
 		return CommandLineArgumentsHandler.behaviorModelsPropertiesFile;
-	}
-
-	/**
-	 * Returns the properties file which specifies the Behavior Mix and the user
-	 * behavior information to be included to the Behavior Models optionally.
-	 * 
-	 * @return a valid <code>String</code> which denotes a file path.
-	 */
-	public static String getSynopticPropertiesFile() {
-
-		return CommandLineArgumentsHandler.synopticPropertiesFile;
 	}
 
 	/**
@@ -485,10 +459,6 @@ public class CommandLineArgumentsHandler {
 				.readOptionValueAsString(
 						commandLine,
 						CommandLineArgumentsHandler.BEHAVIOR_MODELS_PROPERTIES_FILE);
-
-		CommandLineArgumentsHandler.synopticPropertiesFile = CommandLineArgumentsHandler
-				.readOptionValueAsString(commandLine,
-						CommandLineArgumentsHandler.SYNOPTIC_PROPERTIES_FILE);
 
 		CommandLineArgumentsHandler.graphOutputFilePath = CommandLineArgumentsHandler
 				.readOptionValueAsString(commandLine,

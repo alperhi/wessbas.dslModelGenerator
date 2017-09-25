@@ -1,6 +1,18 @@
 digraph G {
 "INITIAL*" [label="INITIAL*",shape=none];
-"doFilter" [label="doFilter",shape=none];
-"INITIAL*"->"doFilter" [style=solid,label="1"];
-"doFilter"->"$" [style=solid,label="1"];
+"ShopGET" [label="ShopGET",shape=none];
+"DVDGET" [label="DVDGET",shape=none];
+"LatestOrdersGET" [label="LatestOrdersGET",shape=none];
+"LatestOrdersPOST" [label="LatestOrdersPOST",shape=none];
+"CartGET" [label="CartGET",shape=none];
+"CartPOST" [label="CartPOST",shape=none];
+"ApplicationPerformanceSettingsGET" [label="ApplicationPerformanceSettingsGET",shape=none];
+"HomeGET" [label="HomeGET",shape=none];
+"ShopPOST" [label="ShopPOST",shape=none];
+"INITIAL*"->"ShopGET" [style=solid,label="1"];
+"ShopGET"->"DVDGET" [style=solid,label="1; n(1295 0)"];
+"DVDGET"->"LatestOrdersGET" [style=solid,label="1; n(40055 0)"];
+"LatestOrdersGET"->"LatestOrdersPOST" [style=solid,label="1; n(1601 0)"];
+"LatestOrdersPOST"->"LatestOrdersPOST" [style=solid,label="0.5; n(4145 0)"];
+"LatestOrdersPOST"->"$" [style=solid,label="0.5"];
 }

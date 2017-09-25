@@ -1,7 +1,28 @@
 digraph G {
 "INITIAL*" [label="INITIAL*",shape=none];
-"doFilter" [label="doFilter",shape=none];
-"INITIAL*"->"doFilter" [style=solid,label="1"];
-"doFilter"->"doFilter" [style=solid,label="0.9565; n(14606 24149)"];
-"doFilter"->"$" [style=solid,label="0.0435"];
+"ShopGET" [label="ShopGET",shape=none];
+"DVDGET" [label="DVDGET",shape=none];
+"LatestOrdersGET" [label="LatestOrdersGET",shape=none];
+"LatestOrdersPOST" [label="LatestOrdersPOST",shape=none];
+"CartGET" [label="CartGET",shape=none];
+"CartPOST" [label="CartPOST",shape=none];
+"ApplicationPerformanceSettingsGET" [label="ApplicationPerformanceSettingsGET",shape=none];
+"HomeGET" [label="HomeGET",shape=none];
+"ShopPOST" [label="ShopPOST",shape=none];
+"INITIAL*"->"ShopGET" [style=solid,label="1"];
+"ShopGET"->"DVDGET" [style=solid,label="0.75; n(1022 248)"];
+"ShopGET"->"ShopPOST" [style=solid,label="0.25; n(4931 0)"];
+"DVDGET"->"ShopGET" [style=solid,label="0.5; n(1318 336)"];
+"DVDGET"->"DVDGET" [style=solid,label="0.25; n(1154 0)"];
+"DVDGET"->"CartGET" [style=solid,label="0.25; n(1247 0)"];
+"LatestOrdersGET"->"CartGET" [style=solid,label="1; n(2095 0)"];
+"CartGET"->"CartPOST" [style=solid,label="0.5; n(2067 0)"];
+"CartGET"->"HomeGET" [style=solid,label="0.5; n(2157 0)"];
+"CartPOST"->"ApplicationPerformanceSettingsGET" [style=solid,label="1; n(1123 0)"];
+"ApplicationPerformanceSettingsGET"->"ApplicationPerformanceSettingsGET" [style=solid,label="0.6667; n(1175 269)"];
+"ApplicationPerformanceSettingsGET"->"HomeGET" [style=solid,label="0.3333; n(1241 0)"];
+"HomeGET"->"ShopGET" [style=solid,label="0.5; n(2244 0)"];
+"HomeGET"->"$" [style=solid,label="0.5"];
+"ShopPOST"->"LatestOrdersGET" [style=solid,label="0.5; n(1277 0)"];
+"ShopPOST"->"ShopPOST" [style=solid,label="0.5; n(5527 0)"];
 }

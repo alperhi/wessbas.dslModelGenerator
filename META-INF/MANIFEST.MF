@@ -6,7 +6,6 @@ Bundle-Version: 1.0.0
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Require-Bundle: wessbas.commons;bundle-version="1.0.0",
  wessbas.dsl;bundle-version="1.0.0",
- wessbas.synoptic;bundle-version="1.0.0",
  org.eclipse.emf.ecore;bundle-version="2.11.0"
 Bundle-ActivationPolicy: lazy
 Export-Package: net.sf.markov4jmeter.m4jdslmodelgenerator,
