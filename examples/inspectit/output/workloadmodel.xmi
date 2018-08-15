@@ -21,7 +21,6 @@
           </protocolStates>
           <exitState eId="PS1"/>
         </protocolDetails>
-        <outgoingTransitions targetState="$"/>
         <outgoingTransitions targetState="ASId2_ApplicationPerformanceSettingsGET"/>
         <outgoingTransitions targetState="ASId11_HomeGET"/>
       </applicationStates>
@@ -42,7 +41,6 @@
           </protocolStates>
           <exitState eId="PS7"/>
         </protocolDetails>
-        <outgoingTransitions targetState="$"/>
         <outgoingTransitions targetState="ASId8_CartPOST"/>
         <outgoingTransitions targetState="ASId11_HomeGET"/>
       </applicationStates>
@@ -66,7 +64,6 @@
           </protocolStates>
           <exitState eId="PS13"/>
         </protocolDetails>
-        <outgoingTransitions targetState="$"/>
         <outgoingTransitions targetState="ASId2_ApplicationPerformanceSettingsGET"/>
       </applicationStates>
       <applicationStates eId="ASId3_DVDGET">
@@ -87,7 +84,6 @@
           </protocolStates>
           <exitState eId="PS3"/>
         </protocolDetails>
-        <outgoingTransitions targetState="$"/>
         <outgoingTransitions targetState="ASId9_ShopGET"/>
         <outgoingTransitions targetState="ASId3_DVDGET"/>
         <outgoingTransitions targetState="ASId5_CartGET"/>
@@ -109,7 +105,6 @@
           </protocolStates>
           <exitState eId="PS19"/>
         </protocolDetails>
-        <outgoingTransitions targetState="$"/>
         <outgoingTransitions targetState="ASId9_ShopGET"/>
       </applicationStates>
       <applicationStates eId="ASId7_INITIAL">
@@ -128,7 +123,6 @@
           </protocolStates>
           <exitState eId="PS11"/>
         </protocolDetails>
-        <outgoingTransitions targetState="$"/>
         <outgoingTransitions targetState="ASId9_ShopGET"/>
       </applicationStates>
       <applicationStates eId="ASId4_LatestOrdersGET">
@@ -147,7 +141,6 @@
           </protocolStates>
           <exitState eId="PS5"/>
         </protocolDetails>
-        <outgoingTransitions targetState="$"/>
         <outgoingTransitions targetState="ASId5_CartGET"/>
         <outgoingTransitions targetState="ASId10_LatestOrdersPOST"/>
       </applicationStates>
@@ -174,7 +167,6 @@
           </protocolStates>
           <exitState eId="PS17"/>
         </protocolDetails>
-        <outgoingTransitions targetState="$"/>
         <outgoingTransitions targetState="ASId10_LatestOrdersPOST"/>
       </applicationStates>
       <applicationStates eId="ASId9_ShopGET">
@@ -194,7 +186,6 @@
           </protocolStates>
           <exitState eId="PS15"/>
         </protocolDetails>
-        <outgoingTransitions targetState="$"/>
         <outgoingTransitions targetState="ASId3_DVDGET"/>
         <outgoingTransitions targetState="ASId6_ShopPOST"/>
       </applicationStates>
@@ -219,7 +210,6 @@
           </protocolStates>
           <exitState eId="PS9"/>
         </protocolDetails>
-        <outgoingTransitions targetState="$"/>
         <outgoingTransitions targetState="ASId4_LatestOrdersGET"/>
         <outgoingTransitions targetState="ASId6_ShopPOST"/>
       </applicationStates>

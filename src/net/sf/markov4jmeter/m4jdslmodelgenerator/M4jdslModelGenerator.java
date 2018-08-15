@@ -513,10 +513,12 @@ public class M4jdslModelGenerator {
 			// initialize arguments handler for requesting the command line
 			// values afterwards via get() methods; might throw a
 			// NullPointer-, IllegalArgument- or ParseException;
-			CommandLineArgumentsHandler.init(argv);
+			// CommandLineArgumentsHandler.init(argv);
 
 			// might throw FileNotFound-, Security-, IO- or GeneratorException;
-			M4jdslModelGenerator.readArgumentsAndGenerate();
+			// M4jdslModelGenerator.readArgumentsAndGenerate();
+
+			// M4jdslModelGenerator.generate();
 
 			System.out.println("****************************");
 			System.out.println("END WESSBAS DSL Generation");
@@ -530,11 +532,72 @@ public class M4jdslModelGenerator {
 		}
 	}
 
+	// /**
+	// * Starts the generation process with the arguments which have been passed to
+	// * command line.
+	// *
+	// * @throws IOException
+	// * @throws SecurityException
+	// * @throws FileNotFoundException
+	// * @throws GeneratorException
+	// *
+	// * @throws TransformationException
+	// * if any critical error in the transformation process occurs.
+	// */
+	// private static void readArgumentsAndGenerate()
+	// throws FileNotFoundException, SecurityException, IOException,
+	// GeneratorException {
+	//
+	// final M4jdslModelGenerator m4jdslModelGenerator = new M4jdslModelGenerator();
+	//
+	// final String sessionDatFilePath =
+	// CommandLineArgumentsHandler.getSessionDatFilePath();
+	//
+	// final String workloadIntensityPropertiesFile =
+	// CommandLineArgumentsHandler.getWorkloadIntensityPropertiesFile();
+	//
+	// final String xmiOutputFilePath =
+	// CommandLineArgumentsHandler.getXmiOutputFilePath();
+	//
+	// final String behaviorModelsPropertiesFile =
+	// CommandLineArgumentsHandler.getBehaviorModelsPropertiesFile();
+	//
+	// final String graphOutputFilePath =
+	// CommandLineArgumentsHandler.getGraphOutputFilePath();
+	//
+	// final boolean sessionsCanBeExitedAnytime =
+	// CommandLineArgumentsHandler.getSessionsCanBeExitedAnytime();
+	//
+	// // might throw a FileNotFound- or IOException;
+	// final Properties workloadIntensityProperties = M4jdslModelGenerator
+	// .loadProperties(workloadIntensityPropertiesFile);
+	//
+	// // might throw a FileNotFound- or IOException;
+	// final Properties behaviorModelsProperties = (behaviorModelsPropertiesFile !=
+	// null)
+	// ? M4jdslModelGenerator.loadProperties(behaviorModelsPropertiesFile)
+	// : null;
+	//
+	// final WorkloadModel workloadModel =
+	// m4jdslModelGenerator.generateWorkloadModel(workloadIntensityProperties,
+	// behaviorModelsProperties, graphOutputFilePath, sessionDatFilePath,
+	// sessionsCanBeExitedAnytime);
+	//
+	// // final String outputFile = generatorProperties.
+	// // getProperty(M4jdslModelGenerator.PKEY_XMI_OUTPUT_FILE);
+	// final String outputFile = xmiOutputFilePath;
+	//
+	// if (outputFile == null) {
+	//
+	// throw new IOException("XMI output file is undefined");
+	// }
+	//
+	// // might throw an IOException;
+	// XmiEcoreHandler.getInstance().ecoreToXMI(workloadModel, xmiOutputFilePath);
+	// }
+	//
 	/**
-	 * Starts the generation process with the arguments which have been passed to
-	 * command line.
-	 * 
-	 * @throws IOException
+	 * Starts the generation process
 	 * @throws SecurityException
 	 * @throws FileNotFoundException
 	 * @throws GeneratorException
@@ -542,47 +605,53 @@ public class M4jdslModelGenerator {
 	 * @throws TransformationException
 	 *             if any critical error in the transformation process occurs.
 	 */
-	private static void readArgumentsAndGenerate()
-			throws FileNotFoundException, SecurityException, IOException, GeneratorException {
+	public void generate() throws FileNotFoundException, SecurityException, GeneratorException {
 
-		final M4jdslModelGenerator m4jdslModelGenerator = new M4jdslModelGenerator();
+		try {
 
-		final String sessionDatFilePath = CommandLineArgumentsHandler.getSessionDatFilePath();
+			System.out.println("****************************");
+			System.out.println("Start WESSBAS DSL Generation");
+			System.out.println("****************************");
 
-		final String workloadIntensityPropertiesFile = CommandLineArgumentsHandler.getWorkloadIntensityPropertiesFile();
+			final M4jdslModelGenerator m4jdslModelGenerator = new M4jdslModelGenerator();
 
-		final String xmiOutputFilePath = CommandLineArgumentsHandler.getXmiOutputFilePath();
+			final String sessionDatFilePath = "wessbas/sessions.dat";
 
-		final String behaviorModelsPropertiesFile = CommandLineArgumentsHandler.getBehaviorModelsPropertiesFile();
+			final String workloadIntensityPropertiesFile = "wessbas/workloadIntensity.properties";
 
-		final String graphOutputFilePath = CommandLineArgumentsHandler.getGraphOutputFilePath();
+			final String xmiOutputFilePath = "wessbas/modelgenerator/workloadmodel.xmi";
 
-		final boolean sessionsCanBeExitedAnytime = CommandLineArgumentsHandler.getSessionsCanBeExitedAnytime();
+			final String behaviorModelsPropertiesFile = "wessbas/behaviormodelextractor/behaviormix.txt";
 
-		// might throw a FileNotFound- or IOException;
-		final Properties workloadIntensityProperties = M4jdslModelGenerator
-				.loadProperties(workloadIntensityPropertiesFile);
+			final String graphOutputFilePath = null;
 
-		// might throw a FileNotFound- or IOException;
-		final Properties behaviorModelsProperties = (behaviorModelsPropertiesFile != null)
-				? M4jdslModelGenerator.loadProperties(behaviorModelsPropertiesFile)
-				: null;
+			final boolean sessionsCanBeExitedAnytime = false;
 
-		final WorkloadModel workloadModel = m4jdslModelGenerator.generateWorkloadModel(workloadIntensityProperties,
-				behaviorModelsProperties, graphOutputFilePath, sessionDatFilePath,
-				sessionsCanBeExitedAnytime);
+			// might throw a FileNotFound- or IOException;
+			final Properties workloadIntensityProperties = M4jdslModelGenerator
+					.loadProperties(workloadIntensityPropertiesFile);
 
-		// final String outputFile = generatorProperties.
-		// getProperty(M4jdslModelGenerator.PKEY_XMI_OUTPUT_FILE);
-		final String outputFile = xmiOutputFilePath;
+			// might throw a FileNotFound- or IOException;
+			final Properties behaviorModelsProperties = (behaviorModelsPropertiesFile != null)
+					? M4jdslModelGenerator.loadProperties(behaviorModelsPropertiesFile)
+					: null;
 
-		if (outputFile == null) {
+			final WorkloadModel workloadModel = m4jdslModelGenerator.generateWorkloadModel(workloadIntensityProperties,
+					behaviorModelsProperties, graphOutputFilePath, sessionDatFilePath, sessionsCanBeExitedAnytime);
 
-			throw new IOException("XMI output file is undefined");
+			// might throw an IOException;
+			XmiEcoreHandler.getInstance().ecoreToXMI(workloadModel, xmiOutputFilePath);
+
+			System.out.println("****************************");
+			System.out.println("END WESSBAS DSL Generation");
+			System.out.println("****************************");
+
+		} catch (final Exception ex) {
+
+			System.err.println(ex.getMessage() + ".\n");
+			M4jdslModelGenerator.printUsage();
+
 		}
-
-		// might throw an IOException;
-		XmiEcoreHandler.getInstance().ecoreToXMI(workloadModel, xmiOutputFilePath);
 	}
 
 	/**
